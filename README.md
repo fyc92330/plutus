@@ -1,6 +1,7 @@
 # plutus
 
-
+1. 寫入紀錄
+2. 查詢記錄
 
 ## Getting started
 
