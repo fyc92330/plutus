@@ -1,4 +1,4 @@
 package com.chun.plutus.api.controller;
 
-public class PersonalPaymentController {
+public class PaymentTagController {
 }

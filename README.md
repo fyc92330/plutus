@@ -1,8 +1,5 @@
 # plutus
 
-1. 寫入紀錄
-2. 查詢記錄
-
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
