@@ -27,6 +27,10 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
 
+    // mybatis
+    implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.1'
+    implementation group: 'com.github.jsqlparser', name: 'jsqlparser', version: '4.0'
+
     // undertow
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-undertow'
     implementation group: 'io.undertow', name: 'undertow-core', version:'2.0.19.Final'

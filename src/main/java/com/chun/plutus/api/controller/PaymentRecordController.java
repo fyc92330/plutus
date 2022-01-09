@@ -1,4 +1,41 @@
 package com.chun.plutus.api.controller;
 
+import com.chun.plutus.vo.PaymentTagGroupVo;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(value = "/api/record")
 public class PaymentRecordController {
+
+  @GetMapping("/init/{userNum}")
+  public Object init(@PathVariable Long userNum){
+//    List<PaymentTagGroupVo>
+    return null;
+  }
+
+  @PostMapping("/payment")
+  public void savePaymentRecord(){
+
+  }
+
+  @PutMapping("/payment")
+  public void editPaymentRecord(){
+
+  }
+
+  @DeleteMapping("/payment")
+  public void removePaymentRecord(){
+
+  }
+
 }
