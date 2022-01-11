@@ -1,6 +1,6 @@
 package com.chun.plutus.aop;
 
-import com.chun.plutus.ro.PlutusApiRo;
+import com.chun.plutus.common.ro.PlutusApiRo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,13 +1,11 @@
-package com.chun.plutus.vo;
+package com.chun.plutus.common.vo.base;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
-public class PaymentRecordVo {
+public class PaymentRecordBaseVo {
 
   /** 帳本紀錄流水號 */
   private Long paymentNum;

@@ -1,6 +1,6 @@
 package com.chun.plutus.aop;
 
-import com.chun.plutus.ro.PlutusApiRo;
+import com.chun.plutus.common.ro.PlutusApiRo;
 import com.chun.plutus.util.BeanUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.SneakyThrows;

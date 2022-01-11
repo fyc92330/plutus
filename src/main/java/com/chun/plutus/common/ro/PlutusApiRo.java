@@ -1,4 +1,4 @@
-package com.chun.plutus.ro;
+package com.chun.plutus.common.ro;
 
 import com.chun.plutus.util.MapUtil;
 import lombok.Getter;

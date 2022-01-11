@@ -1,15 +1,13 @@
-package com.chun.plutus.vo;
+package com.chun.plutus.common.vo.base;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
-@ToString
-public class UserFinancialVo {
+public class UserFinancialBaseVo {
 
   /** 使用者財務流水號 */
   private Long financeNum;
@@ -19,6 +17,4 @@ public class UserFinancialVo {
   private String incomeDate;
   /** 收入金額 */
   private BigDecimal income;
-  /** 發薪日詢問是否需要變更收入額度 */
-  private boolean changeIncome;
 }

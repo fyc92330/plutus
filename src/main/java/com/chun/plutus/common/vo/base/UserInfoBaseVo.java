@@ -1,13 +1,11 @@
-package com.chun.plutus.vo;
+package com.chun.plutus.common.vo.base;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
-public class UserInfoVo {
+public class UserInfoBaseVo {
 
   /** 使用者編號 */
   private Long userNum;
@@ -19,9 +17,4 @@ public class UserInfoVo {
   private String userMobile;
   /** 使用者憑證 */
   private String userToken;
-
-  /** =================================================== query item ================================================== */
-
-  /** 使用者財務狀況 */
-  private UserFinancialVo userFinancialVo;
 }

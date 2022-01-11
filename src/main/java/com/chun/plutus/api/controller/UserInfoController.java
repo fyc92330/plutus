@@ -1,6 +1,6 @@
 package com.chun.plutus.api.controller;
 
-import com.chun.plutus.vo.UserInfoVo;
+import com.chun.plutus.common.vo.UserInfoVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

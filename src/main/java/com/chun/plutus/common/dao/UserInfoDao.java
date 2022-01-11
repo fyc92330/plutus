@@ -1,4 +1,4 @@
-package com.chun.plutus.dao;
+package com.chun.plutus.common.dao;
 
 import org.apache.ibatis.annotations.Param;
 
