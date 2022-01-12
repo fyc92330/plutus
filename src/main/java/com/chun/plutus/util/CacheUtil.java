@@ -14,7 +14,6 @@ import java.util.Map;
 @Service
 public class CacheUtil implements InitializingBean {
 
-  private static final Map<String, String> CACHE_ENTRY_MAP = CacheEntryUtil.getCacheNameTtlMap();
   @Autowired
   private RedisCacheManager cacheManager;
   @Autowired
@@ -77,10 +76,10 @@ public class CacheUtil implements InitializingBean {
     cache.evict(cacheKey);
   }
 
-  public void removeCacheKey(String cacheName, String cacheKey) {
-    String key = StringUtil.concat(cacheName.split(Const.UNDERLINE_STR)[0], Const.COLON_STR, cacheKey);
-    redisTemplate.delete(key);
-  }
+//  public void removeCacheKey(String cacheName, String cacheKey) {
+//    String key = StringUtil.concat(cacheName.split(Const.UNDERLINE_STR)[0], Const.COLON_STR, cacheKey);
+//    redisTemplate.delete(key);
+//  }
 
   /**
    * 取得指定cacheName的cache

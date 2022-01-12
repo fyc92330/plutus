@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.2'
+    id 'org.springframework.boot' version '2.1.18.RELEASE'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -19,13 +19,21 @@ repositories {
 
 dependencies {
     // spring
-    implementation 'org.springframework.boot:spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
     implementation (group: 'org.springframework.boot', name: 'spring-boot-starter-web'){
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+
+    // security
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+    implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.1.3.RELEASE'
+    implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.1.3.RELEASE'
+
+    // postgresql
+    runtimeOnly group: 'org.postgresql', name: 'postgresql', version: '42.2.8'
 
     // mybatis
     implementation group: 'org.mybatis.spring.boot', name: 'mybatis-spring-boot-starter', version: '2.1.1'
@@ -40,22 +48,26 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
     implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.9'
 
-    // security
-    implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.1.3.RELEASE'
-    implementation group: 'org.springframework.security', name: 'spring-security-web', version: '5.1.3.RELEASE'
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
-
     // jwt
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+
+    // pac4j
+    implementation (group: 'org.pac4j', name: 'pac4j-oidc', version: '3.6.1'){
+        exclude group: 'org.slf4j'
+    }
+
+    // okhttp
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.10.0'
+
+    // apache
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.10'
 
     // lombok
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     testImplementation group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.20'
-
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-    implementation group: 'commons-codec', name: 'commons-codec', version: '1.10'
 
     // test
     testImplementation ('org.springframework.boot:spring-boot-starter-test'){
