@@ -1,8 +1,7 @@
-package com.chun.plutus.api.controller.unauth;
+package com.chun.plutus.api.controller.line;
 
 import com.chun.plutus.util.BeanUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
@@ -10,7 +9,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,12 +18,10 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/lineBot")
 public class LineBotController {
 
-  @PostMapping("/callback")
-  public void lineCallBack() {
-    log.info("webhook in");
-  }
+
 
   @GetMapping("/auth")
   public void getAccessToken() throws IOException {
