@@ -1,10 +1,15 @@
 package com.chun.line.client;
 
-import com.chun.plutus.common.dto.LineAccessTokenDto;
-import com.chun.plutus.common.dto.LineClientVerifyDto;
+import com.chun.line.model.LineApiClientIdResponseBody;
+import com.chun.line.model.LineApiProfileResponseBody;
+import com.chun.line.model.LineApiTokenRequestBody;
+import com.chun.line.model.LineApiTokenResponseBody;
 
 public interface ILineLoginService {
 
-  LineClientVerifyDto authorizationToken(LineAccessTokenDto accessTokenDto, String contentType);
+  LineApiTokenResponseBody authorizationToken(LineApiTokenRequestBody tokenRequestBody, String contentType);
 
+  LineApiClientIdResponseBody verify(String accessToken, String tokenType);
+
+  LineApiProfileResponseBody profile(String accessToken, String tokenType);
 }

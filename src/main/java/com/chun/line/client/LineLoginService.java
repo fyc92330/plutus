@@ -1,7 +1,12 @@
 package com.chun.line.client;
 
+import com.chun.line.model.LineApiClientIdResponseBody;
+import com.chun.line.model.LineApiProfileResponseBody;
+import com.chun.line.model.LineApiTokenRequestBody;
+import com.chun.line.model.LineApiTokenResponseBody;
 import com.chun.plutus.common.dto.LineAccessTokenDto;
 import com.chun.plutus.common.dto.LineClientVerifyDto;
+import com.chun.plutus.util.StringUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
@@ -28,11 +33,24 @@ public class LineLoginService implements ILineLoginService {
   }
 
   @Override
-  public LineClientVerifyDto authorizationToken(LineAccessTokenDto accessTokenDto, String contentType) {
+  public LineApiTokenResponseBody authorizationToken(LineApiTokenRequestBody tokenRequestBody, String contentType) {
     final String nonce = UUID.randomUUID().toString();
-    Call<ResponseBody> call = lineLoginApi.authorizationToken(accessTokenDto, contentType);
-    return convertResult(call, LineClientVerifyDto.class);
+    Call<ResponseBody> call = lineLoginApi.authorizationToken(tokenRequestBody, contentType);
+    return convertResult(call, LineApiTokenResponseBody.class);
   }
+
+  @Override
+  public LineApiClientIdResponseBody verify(String accessToken, String tokenType) {
+    final String token = StringUtil.concat(tokenType, " ", accessToken);
+    Call<ResponseBody> call = lineLoginApi.verify(token);
+    return convertResult(call, LineApiClientIdResponseBody.class);
+  }
+
+  @Override
+  public LineApiProfileResponseBody profile(String accessToken, String tokenType) {
+    final String token = StringUtil.concat(tokenType, " ", accessToken);
+    Call<ResponseBody> call = lineLoginApi.profile(token);
+    return convertResult(call, LineApiProfileResponseBody.class);  }
 
   private <T> T convertResult(Call<ResponseBody> call, Class<T> resultType) {
     Response<ResponseBody> response = execute(call);

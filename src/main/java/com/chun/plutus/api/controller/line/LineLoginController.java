@@ -1,6 +1,10 @@
 package com.chun.plutus.api.controller.line;
 
 import com.chun.line.client.ILineLoginService;
+import com.chun.line.model.LineApiClientIdResponseBody;
+import com.chun.line.model.LineApiProfileResponseBody;
+import com.chun.line.model.LineApiTokenRequestBody;
+import com.chun.line.model.LineApiTokenResponseBody;
 import com.chun.plutus.api.mod.LineLoginMod;
 import com.chun.plutus.common.dto.LineAccessTokenDto;
 import com.chun.plutus.common.dto.LineClientVerifyDto;
@@ -60,13 +64,16 @@ public class LineLoginController {
   @GetMapping("/login")
   public void lineOauthLogin(@RequestParam String code, @RequestParam String state) {
     log.info("code:{}, state:{}", code, state);
-    LineAccessTokenDto lineAccessTokenDto = lineLoginMod.getAccessToken(code);
-//
-//    final String accessToken = StringUtil.concat(lineAccessTokenDto.getTokenType(), " ", lineAccessTokenDto.getAccessToken());
-//    LineClientVerifyDto lineClientVerifyDto = lineLoginMod.getLineClientId(accessToken);
-//    LineUserProfileDto lineUserProfileDto = lineLoginMod.getLineUserProfile(accessToken);
 
-    LineClientVerifyDto lineClientVerifyDto = lineLoginService.authorizationToken(lineAccessTokenDto, "Content-Type");
+    LineApiTokenResponseBody tokenResponseBody = lineLoginMod.getAccessToken(code);
+
+    final String accessToken = tokenResponseBody.getAccessToken();
+    final String tokenType = tokenResponseBody.getTokenType();
+    LineApiClientIdResponseBody clientIdResponseBody =
+        lineLoginService.verify(accessToken, tokenType);
+    LineApiProfileResponseBody profileResponseBody =
+        lineLoginService.profile(accessToken, tokenType);
+
   }
 
 }

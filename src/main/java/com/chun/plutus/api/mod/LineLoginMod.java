@@ -1,5 +1,9 @@
 package com.chun.plutus.api.mod;
 
+import com.chun.line.client.ILineLoginService;
+import com.chun.line.client.LineLoginService;
+import com.chun.line.model.LineApiTokenRequestBody;
+import com.chun.line.model.LineApiTokenResponseBody;
 import com.chun.plutus.common.dto.LineAccessTokenDto;
 import com.chun.plutus.common.dto.LineClientVerifyDto;
 import com.chun.plutus.common.dto.LineUserProfileDto;
@@ -51,6 +55,8 @@ public class LineLoginMod {
 
   private String clientSecret;
 
+  private ILineLoginService lineLoginService;
+
   /**
    * 導轉登入器頁面
    *
@@ -78,43 +84,49 @@ public class LineLoginMod {
    *
    * @param code
    * @return
-   * @throws IOException
    */
-  public LineAccessTokenDto getAccessToken(String code) throws IOException {
+  public LineApiTokenResponseBody getAccessToken(String code) {
 
-    HttpUrl httpUrl = new HttpUrl.Builder()
-        .scheme("https")
-        .host("api.line.me")
-        .addPathSegment("oauth2")
-        .addPathSegment("v2.1")
-        .addPathSegment("token")
-        .build();
-
-    OkHttpClient okHttpClient = new OkHttpClient();
-
-    Map<String, String> params = MapUtil.newHashMap(
-        "grant_type", "authorization_code",
-        "code", code,
-        "redirect_uri", accessTokenBackUri,
-        "client_id", messageClientId,
-        "client_secret", clientSecret
+    LineApiTokenRequestBody tokenRequestBody = new LineApiTokenRequestBody(
+        "authorization_code", code, accessTokenBackUri, messageClientId, clientSecret
     );
 
-    RequestBody requestBody = RequestBody.create(jsonMediaType, BeanUtil.objectMapper().writeValueAsString(params));
+    return lineLoginService.authorizationToken(tokenRequestBody, "application/x-www-form-urlencoded");
 
-    Request request = new Request.Builder()
-        .addHeader(Headers.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded")
-        .url(httpUrl)
-        .post(requestBody)
-        .build();
 
-    LineAccessTokenDto lineAccessTokenDto;
-
-    try (Response response = okHttpClient.newCall(request).execute()) {
-      lineAccessTokenDto = BeanUtil.objectMapper().convertValue(response.body(), LineAccessTokenDto.class);
-    }
-
-    return lineAccessTokenDto;
+//    HttpUrl httpUrl = new HttpUrl.Builder()
+//        .scheme("https")
+//        .host("api.line.me")
+//        .addPathSegment("oauth2")
+//        .addPathSegment("v2.1")
+//        .addPathSegment("token")
+//        .build();
+//
+//    OkHttpClient okHttpClient = new OkHttpClient();
+//
+//    Map<String, String> params = MapUtil.newHashMap(
+//        "grant_type", "authorization_code",
+//        "code", code,
+//        "redirect_uri", accessTokenBackUri,
+//        "client_id", messageClientId,
+//        "client_secret", clientSecret
+//    );
+//
+//    RequestBody requestBody = RequestBody.create(jsonMediaType, BeanUtil.objectMapper().writeValueAsString(params));
+//
+//    Request request = new Request.Builder()
+//        .addHeader(Headers.CONTENT_TYPE_STRING, "application/x-www-form-urlencoded")
+//        .url(httpUrl)
+//        .post(requestBody)
+//        .build();
+//
+//    LineAccessTokenDto lineAccessTokenDto;
+//
+//    try (Response response = okHttpClient.newCall(request).execute()) {
+//      lineAccessTokenDto = BeanUtil.objectMapper().convertValue(response.body(), LineAccessTokenDto.class);
+//    }
+//
+//    return lineAccessTokenDto;
   }
 
   public LineClientVerifyDto getLineClientId(String accessToken) throws IOException {
@@ -134,7 +146,7 @@ public class LineLoginMod {
         .get().build();
 
     LineClientVerifyDto lineClientVerifyDto;
-    try(Response response = okHttpClient.newCall(request).execute()){
+    try (Response response = okHttpClient.newCall(request).execute()) {
       lineClientVerifyDto = BeanUtil.objectMapper().convertValue(response.body(), LineClientVerifyDto.class);
     }
 
@@ -156,7 +168,7 @@ public class LineLoginMod {
         .get().build();
 
     LineUserProfileDto lineUserProfileDto;
-    try(Response response = client.newCall(request).execute()){
+    try (Response response = client.newCall(request).execute()) {
       lineUserProfileDto = BeanUtil.objectMapper().convertValue(response.body(), LineUserProfileDto.class);
     }
     return lineUserProfileDto;
