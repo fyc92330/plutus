@@ -1,13 +1,13 @@
 package com.chun.plutus.api.controller.line;
 
+import com.chun.line.client.ILineLoginService;
 import com.chun.plutus.api.mod.LineLoginMod;
 import com.chun.plutus.common.dto.LineAccessTokenDto;
 import com.chun.plutus.common.dto.LineClientVerifyDto;
-import com.chun.plutus.common.dto.LineUserProfileDto;
-import com.chun.plutus.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 public class LineLoginController {
 
   private final LineLoginMod lineLoginMod;
+
+  @Qualifier("lineLoginService")
+  private ILineLoginService lineLoginService;
 
   @SneakyThrows
   @PostMapping("/callback")
@@ -58,10 +61,12 @@ public class LineLoginController {
   public void lineOauthLogin(@RequestParam String code, @RequestParam String state) {
     log.info("code:{}, state:{}", code, state);
     LineAccessTokenDto lineAccessTokenDto = lineLoginMod.getAccessToken(code);
+//
+//    final String accessToken = StringUtil.concat(lineAccessTokenDto.getTokenType(), " ", lineAccessTokenDto.getAccessToken());
+//    LineClientVerifyDto lineClientVerifyDto = lineLoginMod.getLineClientId(accessToken);
+//    LineUserProfileDto lineUserProfileDto = lineLoginMod.getLineUserProfile(accessToken);
 
-    final String accessToken = StringUtil.concat(lineAccessTokenDto.getTokenType(), " ", lineAccessTokenDto.getAccessToken());
-    LineClientVerifyDto lineClientVerifyDto = lineLoginMod.getLineClientId(accessToken);
-    LineUserProfileDto lineUserProfileDto = lineLoginMod.getLineUserProfile(accessToken);
+    LineClientVerifyDto lineClientVerifyDto = lineLoginService.authorizationToken(lineAccessTokenDto, "Content-Type");
   }
 
 }

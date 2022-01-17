@@ -33,16 +33,16 @@ public class LineLoginMod {
 
   private static final okhttp3.MediaType jsonMediaType = okhttp3.MediaType.parse(MediaType.APPLICATION_JSON_UTF8_VALUE);
 
-  @Value("${line.login.url}")
+  @Value("${line.login.login-page-uri}")
   private String redirectUrl;
 
   @Value("${line.login.client-id}")
   private String loginClientId;
 
-  @Value("${line.scope}")
+  @Value("${line.login.scope}")
   private String scope;
 
-  @Value("${line.test.uri}")
+  @Value("${line.login.redirect-uri}")
   private String codeBackUri;
 
   private String accessTokenBackUri;
