@@ -1,13 +1,11 @@
 package com.chun.plutus.api.controller.line;
 
 import com.chun.line.client.ILineLoginService;
-import com.chun.line.model.LineApiClientIdResponseBody;
-import com.chun.line.model.LineApiProfileResponseBody;
-import com.chun.line.model.LineApiTokenRequestBody;
-import com.chun.line.model.LineApiTokenResponseBody;
+import com.chun.line.model.LineApiClientIdResponse;
+import com.chun.line.model.LineApiProfileResponse;
+import com.chun.line.model.LineApiTokenResponse;
 import com.chun.plutus.api.mod.LineLoginMod;
-import com.chun.plutus.common.dto.LineAccessTokenDto;
-import com.chun.plutus.common.dto.LineClientVerifyDto;
+import com.chun.plutus.util.BeanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -30,18 +28,7 @@ public class LineLoginController {
   private final LineLoginMod lineLoginMod;
 
   @Qualifier("lineLoginService")
-  private ILineLoginService lineLoginService;
-
-  @SneakyThrows
-  @PostMapping("/callback")
-  public void lineCallBack() {
-    log.info("webhook in");
-  }
-
-  @SneakyThrows
-  @GetMapping("/call")
-  public void testCall(HttpServletRequest request) {
-  }
+  private final ILineLoginService lineLoginService;
 
   /**
    * 導轉登入器頁面
@@ -54,26 +41,18 @@ public class LineLoginController {
     response.sendRedirect(redirectUrl);
   }
 
-  /**
-   * 登入取得access token
-   *
-   * @param code
-   * @param state
-   */
-  @SneakyThrows
-  @GetMapping("/login")
-  public void lineOauthLogin(@RequestParam String code, @RequestParam String state) {
-    log.info("code:{}, state:{}", code, state);
-
-    LineApiTokenResponseBody tokenResponseBody = lineLoginMod.getAccessToken(code);
-
-    final String accessToken = tokenResponseBody.getAccessToken();
-    final String tokenType = tokenResponseBody.getTokenType();
-    LineApiClientIdResponseBody clientIdResponseBody =
+  @PostMapping("/user")
+  public void getUser(@RequestParam Map<String, String> params) {
+    LineApiTokenResponse tokenResponse = BeanUtil.Extra.objectMapper().convertValue(params, LineApiTokenResponse.class);
+    final String accessToken = tokenResponse.getAccessToken();
+    final String tokenType = tokenResponse.getTokenType();
+    LineApiClientIdResponse clientIdResponseBody =
         lineLoginService.verify(accessToken, tokenType);
-    LineApiProfileResponseBody profileResponseBody =
-        lineLoginService.profile(accessToken, tokenType);
+    log.info("CLIENT_ID_OBJECT:{}", clientIdResponseBody);
 
+    LineApiProfileResponse profileResponseBody =
+        lineLoginService.profile(accessToken, tokenType);
+    log.info("PROFILE_OBJECT:{}", profileResponseBody);
   }
 
 }

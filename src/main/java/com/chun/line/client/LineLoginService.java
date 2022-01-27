@@ -1,11 +1,7 @@
 package com.chun.line.client;
 
-import com.chun.line.model.LineApiClientIdResponseBody;
-import com.chun.line.model.LineApiProfileResponseBody;
-import com.chun.line.model.LineApiTokenRequestBody;
-import com.chun.line.model.LineApiTokenResponseBody;
-import com.chun.plutus.common.dto.LineAccessTokenDto;
-import com.chun.plutus.common.dto.LineClientVerifyDto;
+import com.chun.line.model.LineApiClientIdResponse;
+import com.chun.line.model.LineApiProfileResponse;
 import com.chun.plutus.util.StringUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +10,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
-
-import java.util.UUID;
 
 @Slf4j
 public class LineLoginService implements ILineLoginService {
@@ -33,30 +27,24 @@ public class LineLoginService implements ILineLoginService {
   }
 
   @Override
-  public LineApiTokenResponseBody authorizationToken(LineApiTokenRequestBody tokenRequestBody, String contentType) {
-    final String nonce = UUID.randomUUID().toString();
-    Call<ResponseBody> call = lineLoginApi.authorizationToken(tokenRequestBody, contentType);
-    return convertResult(call, LineApiTokenResponseBody.class);
-  }
-
-  @Override
-  public LineApiClientIdResponseBody verify(String accessToken, String tokenType) {
+  public LineApiClientIdResponse verify(String accessToken, String tokenType) {
     final String token = StringUtil.concat(tokenType, " ", accessToken);
     Call<ResponseBody> call = lineLoginApi.verify(token);
-    return convertResult(call, LineApiClientIdResponseBody.class);
+    return convertResult(call, LineApiClientIdResponse.class);
   }
 
   @Override
-  public LineApiProfileResponseBody profile(String accessToken, String tokenType) {
+  public LineApiProfileResponse profile(String accessToken, String tokenType) {
     final String token = StringUtil.concat(tokenType, " ", accessToken);
     Call<ResponseBody> call = lineLoginApi.profile(token);
-    return convertResult(call, LineApiProfileResponseBody.class);  }
+    return convertResult(call, LineApiProfileResponse.class);
+  }
+
+  /** =================================================== private ================================================== */
 
   private <T> T convertResult(Call<ResponseBody> call, Class<T> resultType) {
     Response<ResponseBody> response = execute(call);
-    log.info("response:{}", response);
     String json = readJsonString(response);
-    log.info("json:{}", json);
     return convertResult(json, resultType);
 
   }

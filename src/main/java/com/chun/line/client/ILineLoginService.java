@@ -1,15 +1,11 @@
 package com.chun.line.client;
 
-import com.chun.line.model.LineApiClientIdResponseBody;
-import com.chun.line.model.LineApiProfileResponseBody;
-import com.chun.line.model.LineApiTokenRequestBody;
-import com.chun.line.model.LineApiTokenResponseBody;
+import com.chun.line.model.LineApiClientIdResponse;
+import com.chun.line.model.LineApiProfileResponse;
 
 public interface ILineLoginService {
 
-  LineApiTokenResponseBody authorizationToken(LineApiTokenRequestBody tokenRequestBody, String contentType);
+  LineApiClientIdResponse verify(String accessToken, String tokenType);
 
-  LineApiClientIdResponseBody verify(String accessToken, String tokenType);
-
-  LineApiProfileResponseBody profile(String accessToken, String tokenType);
+  LineApiProfileResponse profile(String accessToken, String tokenType);
 }

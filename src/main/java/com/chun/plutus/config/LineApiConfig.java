@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties({LineLoginProperties.class, LineClientProperties.class})
-public class LineClientConfig {
+public class LineApiConfig {
 
   private final LineLoginProperties lineLoginProperties;
   private final LineClientProperties lineClientProperties;
