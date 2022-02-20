@@ -1,4 +1,4 @@
-package org.chun.plutus.common.vo1.base;
+package org.chun.plutus.common.vo_remove_after.base;
 
 import lombok.Getter;
 import lombok.Setter;

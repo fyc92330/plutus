@@ -1,6 +1,6 @@
 package org.chun.plutus.api.controller.unauth;
 
-import org.chun.plutus.util.BeanUtil;
+import org.chun.plutus.util.JsonBean;
 import io.undertow.util.Headers;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -40,7 +40,7 @@ public class AppInitController {
     if (obj == null) {
       log.info("miss session");
     } else {
-      log.info(BeanUtil.Extra.objectMapper().writeValueAsString(obj));
+      log.info(JsonBean.Extra.objectMapper().writeValueAsString(obj));
     }
 
     test();
@@ -59,7 +59,7 @@ public class AppInitController {
     Request req = new Request.Builder().url(httpUrl).post(formBody).build();
 
     Response res = client.newCall(req).execute();
-    log.info(BeanUtil.Extra.objectMapper().writeValueAsString(res.body()));
+    log.info(JsonBean.Extra.objectMapper().writeValueAsString(res.body()));
   }
 
 

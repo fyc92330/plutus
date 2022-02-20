@@ -5,13 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-public class BeanUtil {
+public class JsonBean {
 
   private final static ObjectMapper objectMapper = new ObjectMapper();
 
   private final static ObjectMapper extraObjectMapper = new ObjectMapper()
-//      .configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false)
-//      .enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME)
       .registerModule(new JavaTimeModule())
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
       .setSerializationInclusion(JsonInclude.Include.NON_NULL); // 內容值為null時，則該屬性不進行輸出

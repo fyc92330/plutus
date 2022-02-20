@@ -1,6 +1,6 @@
-package org.chun.plutus.common.vo1;
+package org.chun.plutus.common.vo_remove_after;
 
-import org.chun.plutus.common.vo1.base.UserFinancialBaseVo;
+import org.chun.plutus.common.vo_remove_after.base.UserFinancialBaseVo;
 import lombok.Getter;
 import lombok.Setter;
 

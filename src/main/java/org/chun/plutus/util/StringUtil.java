@@ -9,4 +9,6 @@ public class StringUtil {
     Arrays.stream(str).map(String::valueOf).forEach(sb::append);
     return sb.toString();
   }
+
+
 }

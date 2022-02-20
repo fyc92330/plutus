@@ -1,7 +1,7 @@
 package org.chun.plutus.aop;
 
-import org.chun.plutus.common.ro.PlutusApiRo;
-import org.chun.plutus.util.BeanUtil;
+import org.chun.plutus.common.rvo.ApiResponseRvo;
+import org.chun.plutus.util.JsonBean;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -25,35 +25,35 @@ public class PlutusControllerAspect {
   /**
    * 所有Controller, 不包括子資料夾
    */
-  @Pointcut("execution(* com.chun.plutus.api.controller.*.*(..))")
+  @Pointcut("execution(* org.chun.plutus.api.controller.*.*(..))")
   public void controllerPointcut() {
   }
 
   @Around("controllerPointcut()")
   @SneakyThrows
-  public ResponseEntity<PlutusApiRo> genPlutusReturnObject(ProceedingJoinPoint joinPoint) {
+  public ResponseEntity<ApiResponseRvo> genPlutusReturnObject(ProceedingJoinPoint joinPoint) {
     log.info("-- 進入Controller --");
     /** 回傳物件直接回傳 */
     Object result = joinPoint.proceed(joinPoint.getArgs());
-    if (result instanceof PlutusApiRo) {
-      return new ResponseEntity<>(BeanUtil.Extra.objectMapper().convertValue(result, PlutusApiRo.class), HttpStatus.OK);
+    if (result instanceof ApiResponseRvo) {
+      return new ResponseEntity<>(JsonBean.Extra.objectMapper().convertValue(result, ApiResponseRvo.class), HttpStatus.OK);
     }
 
 
     Map<String, Object> resultMap = new HashMap<>();
     if (result == null) {
-      return new ResponseEntity<>(new PlutusApiRo(), HttpStatus.OK);
+      return new ResponseEntity<>(new ApiResponseRvo(), HttpStatus.OK);
     } else if (result instanceof Collection) {
 
     } else {
-      resultMap = BeanUtil.objectMapper().readValue(
-          BeanUtil.Extra.objectMapper().writeValueAsString(result),
+      resultMap = JsonBean.objectMapper().readValue(
+          JsonBean.Extra.objectMapper().writeValueAsString(result),
           new TypeReference<Map<String, Object>>() {
           }
       );
     }
 
     log.info("-- 離開Controller --");
-    return new ResponseEntity<>(new PlutusApiRo(resultMap), HttpStatus.OK);
+    return new ResponseEntity<>(new ApiResponseRvo(resultMap), HttpStatus.OK);
   }
 }

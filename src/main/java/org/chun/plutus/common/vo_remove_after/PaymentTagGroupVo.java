@@ -1,6 +1,6 @@
-package org.chun.plutus.common.vo1;
+package org.chun.plutus.common.vo_remove_after;
 
-import org.chun.plutus.common.vo1.base.PaymentTagGroupBaseVo;
+import org.chun.plutus.common.vo_remove_after.base.PaymentTagGroupBaseVo;
 import lombok.Getter;
 import lombok.Setter;
 

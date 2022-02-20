@@ -5,7 +5,7 @@ import org.chun.line.model.LineApiClientIdResponse;
 import org.chun.line.model.LineApiProfileResponse;
 import org.chun.line.model.LineApiTokenResponse;
 import org.chun.plutus.api.mod.LineLoginMod;
-import org.chun.plutus.util.BeanUtil;
+import org.chun.plutus.util.JsonBean;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class LineLoginController {
 
   @PostMapping("/user")
   public void getUser(@RequestParam Map<String, String> params) {
-    LineApiTokenResponse tokenResponse = BeanUtil.Extra.objectMapper().convertValue(params, LineApiTokenResponse.class);
+    LineApiTokenResponse tokenResponse = JsonBean.Extra.objectMapper().convertValue(params, LineApiTokenResponse.class);
     final String accessToken = tokenResponse.getAccessToken();
     final String tokenType = tokenResponse.getTokenType();
     LineApiClientIdResponse clientIdResponseBody =

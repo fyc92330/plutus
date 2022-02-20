@@ -60,6 +60,9 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.10'
 
+    // jwt
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+
 
 //    // spring
 //    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
@@ -69,7 +72,7 @@ dependencies {
 //    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
 //    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
 //    annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
-//    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+//    implementation group: 'org.springframework.boot', name: 'ㄊ'
 //
 //    // security
 //    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
