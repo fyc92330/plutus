@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.chun.plutus.common.dao.base.PaymentRecordBaseDao">
+
+    <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentRecordVo">
+        <id property="paymentNum" column="PAYMENT_NUM"/>
+        <result property="userNum" column="USER_NUM"/>
+        <result property="paymentTitle" column="PAYMENT_TITLE"/>
+        <result property="paymentDesc" column="PAYMENT_DESC"/>
+        <result property="paymentCost" column="PAYMENT_COST"/>
+        <result property="recordType" column="RECORD_TYPE"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="updateDate" column="UPDATE_DATE"/>
+    </resultMap>
+
+    <sql id="columnsAlias">
+        ${alias}.payment_num                   as ${prefix}payment_num,
+        ${alias}.user_num                      as ${prefix}user_num,
+        ${alias}.payment_title                 as ${prefix}payment_title,
+        ${alias}.payment_desc                  as ${prefix}payment_desc,
+        ${alias}.payment_cost                  as ${prefix}payment_cost,
+        ${alias}.record_type                   as ${prefix}record_type,
+        ${alias}.create_date                   as ${prefix}create_date,
+        ${alias}.update_date                   as ${prefix}update_date
+    </sql>
+
+    <select id="query" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentRecord"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_record paymentRecord
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="paymentNum!=null">and payment_num=#{paymentNum}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
+            <if test="paymentTitle!=null">and payment_title=#{paymentTitle}</if>
+            <if test="paymentDesc!=null">and payment_desc=#{paymentDesc}</if>
+            <if test="paymentCost!=null">and payment_cost=#{paymentCost}</if>
+            <if test="recordType!=null">and record_type=#{recordType}</if>
+            <if test="createDate!=null">and create_date=#{createDate}</if>
+            <if test="updateDate!=null">and update_date=#{updateDate}</if>
+        </trim>
+    </select>
+
+    <select id="listAll" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentRecord"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_record paymentRecord
+    </select>
+
+    <select id="count" resultType="Integer">
+        select count(*)
+        from payment_record
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="paymentNum!=null">and payment_num=#{paymentNum}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
+            <if test="paymentTitle!=null">and payment_title=#{paymentTitle}</if>
+            <if test="paymentDesc!=null">and payment_desc=#{paymentDesc}</if>
+            <if test="paymentCost!=null">and payment_cost=#{paymentCost}</if>
+            <if test="recordType!=null">and record_type=#{recordType}</if>
+            <if test="createDate!=null">and create_date=#{createDate}</if>
+            <if test="updateDate!=null">and update_date=#{updateDate}</if>
+        </trim>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="user_num" keyProperty="userNum">
+        insert into payment_record (
+        <trim prefix="where" prefixOverrides=",">
+            <if test="paymentNum!=null">, payment_num=#{paymentNum}</if>
+            <if test="userNum!=null">, user_num=#{userNum}</if>
+            <if test="paymentTitle!=null">, payment_title=#{paymentTitle}</if>
+            <if test="paymentDesc!=null">, payment_desc=#{paymentDesc}</if>
+            <if test="paymentCost!=null">, payment_cost=#{paymentCost}</if>
+            <if test="recordType!=null">, record_type=#{recordType}</if>
+            <if test="createDate!=null">, create_date=#{createDate}</if>
+            <if test="updateDate!=null">, update_date=#{updateDate}</if>
+        </trim>
+        ) values (
+        <trim prefix="" prefixOverrides=",">
+            <if test="paymentNum!=null">, payment_num=#{paymentNum}</if>
+            <if test="userNum!=null">, user_num=#{userNum}</if>
+            <if test="paymentTitle!=null">, payment_title=#{paymentTitle}</if>
+            <if test="paymentDesc!=null">, payment_desc=#{paymentDesc}</if>
+            <if test="paymentCost!=null">, payment_cost=#{paymentCost}</if>
+            <if test="recordType!=null">, record_type=#{recordType}</if>
+            <if test="createDate!=null">, create_date=#{createDate}</if>
+            <if test="updateDate!=null">, update_date=#{updateDate}</if>
+        </trim>
+        )
+    </insert>
+
+    <delete id="delete">
+        delete from payment_record
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="paymentNum!=null">and payment_num=#{paymentNum}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
+            <if test="paymentTitle!=null">and payment_title=#{paymentTitle}</if>
+            <if test="paymentDesc!=null">and payment_desc=#{paymentDesc}</if>
+            <if test="paymentCost!=null">and payment_cost=#{paymentCost}</if>
+            <if test="recordType!=null">and record_type=#{recordType}</if>
+            <if test="createDate!=null">and create_date=#{createDate}</if>
+            <if test="updateDate!=null">and update_date=#{updateDate}</if>
+        </trim>
+    </delete>
+
+    <select id="getByPk" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentRecord"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_record paymentRecord
+        where payment_num=#{paymentNum}
+    </select>
+
+    <delete id="deleteByPk">
+        delete from payment_record
+        where payment_num=#{paymentNum}
+    </delete>
+
+    <update id="update">
+        update payment_record
+        <trim prefix="set" prefixOverrides=",">
+            <if test="paymentNum!=null">
+                <if test="paymentNum!=''">, payment_num=#{paymentNum}</if>
+                <if test="paymentNum==''">, payment_num=null</if>
+            </if>
+            <if test="userNum!=null">
+                <if test="userNum!=''">, user_num=#{userNum}</if>
+                <if test="userNum==''">, user_num=null</if>
+            </if>
+            <if test="paymentTitle!=null">
+                <if test="paymentTitle!=''">, payment_title=#{paymentTitle}</if>
+                <if test="paymentTitle==''">, payment_title=null</if>
+            </if>
+            <if test="paymentDesc!=null">
+                <if test="paymentDesc!=''">, payment_desc=#{paymentDesc}</if>
+                <if test="paymentDesc==''">, payment_desc=null</if>
+            </if>
+            <if test="paymentCost!=null">
+                <if test="paymentCost!=''">, payment_cost=#{paymentCost}</if>
+                <if test="paymentCost==''">, payment_cost=null</if>
+            </if>
+            <if test="recordType!=null">
+                <if test="recordType!=''">, record_type=#{recordType}</if>
+                <if test="recordType==''">, record_type=null</if>
+            </if>
+            <if test="createDate!=null">
+                <if test="createDate!=''">, create_date=#{createDate}</if>
+                <if test="createDate==''">, create_date=null</if>
+            </if>
+            <if test="updateDate!=null">
+                <if test="updateDate!=''">, update_date=#{updateDate}</if>
+                <if test="updateDate==''">, update_date=null</if>
+            </if>
+        </trim>
+        where
+        payment_num=#{paymentNum}
+    </update>
+
+    <update id="forceUpdate">
+        update payment_record
+        <trim prefix="set" prefixOverrides=",">
+                <if test="paymentNum!=''">, payment_num=#{paymentNum}</if>
+                <if test="paymentNum==''">, payment_num=null</if>
+
+                <if test="userNum!=''">, user_num=#{userNum}</if>
+                <if test="userNum==''">, user_num=null</if>
+
+                <if test="paymentTitle!=''">, payment_title=#{paymentTitle}</if>
+                <if test="paymentTitle==''">, payment_title=null</if>
+
+                <if test="paymentDesc!=''">, payment_desc=#{paymentDesc}</if>
+                <if test="paymentDesc==''">, payment_desc=null</if>
+
+                <if test="paymentCost!=''">, payment_cost=#{paymentCost}</if>
+                <if test="paymentCost==''">, payment_cost=null</if>
+
+                <if test="recordType!=''">, record_type=#{recordType}</if>
+                <if test="recordType==''">, record_type=null</if>
+
+                <if test="createDate!=''">, create_date=#{createDate}</if>
+                <if test="createDate==''">, create_date=null</if>
+
+                <if test="updateDate!=''">, update_date=#{updateDate}</if>
+                <if test="updateDate==''">, update_date=null</if>
+        </trim>
+        where
+        payment_num=#{paymentNum}
+    </update>
+
+</mapper>

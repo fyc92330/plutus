@@ -1,4 +1,4 @@
-package org.chun.plutus.common.vo_remove_after.base;
+package org.chun.plutus.common.vo.base;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,8 +11,6 @@ public class PaymentTagGroupBaseVo {
   private Long tagGroupNum;
   /** 標籤群名稱 */
   private String tagGroupName;
-  /** 建立日期 */
-  private String createDate;
-  /** 異動日期 */
-  private String updateDate;
+  /** 標籤群顏色 */
+  private String tagGroupColor;
 }

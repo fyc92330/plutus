@@ -10,7 +10,7 @@ public enum RecordTypeEnum {
   /** 收入 */
   INCOME("1", "\u6536\u5165"),
   /** 支出 */
-  PAY("2", "\u652f\u51fa");
+  PAYOUT("2", "\u652f\u51fa");
 
   private final String recordType;
 
@@ -20,7 +20,6 @@ public enum RecordTypeEnum {
     this.recordType = recordType;
     this.recordTypeName = recordTypeName;
   }
-
 
   public static RecordTypeEnum getEnum(String type) {
     return Arrays.stream(values())

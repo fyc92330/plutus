@@ -63,6 +63,10 @@ dependencies {
     // jwt
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 
+    // redis
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-redis'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.5.9'
+
 
 //    // spring
 //    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'

@@ -1,4 +1,4 @@
-package org.chun.plutus.common.vo_remove_after.base;
+package org.chun.plutus.common.vo.base;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +16,7 @@ public class PaymentRecordBaseVo {
   /** 紀錄標題 */
   private String paymentTitle;
   /** 紀錄內容 */
-  private String paymentContent;
+  private String paymentDesc;
   /** 紀錄金額 */
   private BigDecimal paymentCost;
   /** 紀錄類型(1:收入,2:支出) */

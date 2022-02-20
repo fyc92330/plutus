@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.chun.plutus.common.dao.base.PaymentTagBaseDao">
+
+    <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentTagVo">
+        <id property="tagNum" column="TAG_NUM"/>
+        <result property="tagGroupNum" column="TAG_GROUP_NUM"/>
+        <result property="tagName" column="TAG_NAME"/>
+        <result property="tagColor" column="TAG_COLOR"/>
+    </resultMap>
+
+    <sql id="columnsAlias">
+        ${alias}.tag_num                        as ${prefix}tag_num,
+        ${alias}.taggroupnum                    as ${prefix}taggroupnum,
+        ${alias}.tag_name                       as ${prefix}tag_name,
+        ${alias}.tag_color                      as ${prefix}tag_color
+    </sql>
+
+    <select id="query" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentTag"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_tag paymentTag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="tagNum!=null">and tag_num=#{tagNum}</if>
+            <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="tagName!=null">and tag_name=#{tagName}</if>
+            <if test="tagColor!=null">and tag_color=#{tagColor}</if>
+        </trim>
+    </select>
+
+    <select id="listAll" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentTag"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_tag paymentTag
+    </select>
+
+    <select id="count" resultType="Integer">
+        select count(*)
+        from payment_tag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="tagNum!=null">and tag_num=#{tagNum}</if>
+            <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="tagName!=null">and tag_name=#{tagName}</if>
+            <if test="tagColor!=null">and tag_color=#{tagColor}</if>
+        </trim>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="user_num" keyProperty="userNum">
+        insert into payment_tag (
+        <trim prefix="" prefixOverrides=",">
+            <if test="tagNum!=null">, tag_num=#{tagNum}</if>
+            <if test="tagGroupNum!=null">, tag_group_num=#{tagGroupNum}</if>
+            <if test="tagName!=null">, tag_name=#{tagName}</if>
+            <if test="tagColor!=null">, tag_color=#{tagColor}</if>
+        </trim>
+        ) values (
+        <trim prefix="" prefixOverrides=",">
+            <if test="tagNum!=null">, tag_num=#{tagNum}</if>
+            <if test="tagGroupNum!=null">, tag_group_num=#{tagGroupNum}</if>
+            <if test="tagName!=null">, tag_name=#{tagName}</if>
+            <if test="tagColor!=null">, tag_color=#{tagColor}</if>
+        </trim>
+        )
+    </insert>
+
+    <delete id="delete">
+        delete from payment_tag paymentTag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="tagNum!=null">and tag_num=#{tagNum}</if>
+            <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="tagName!=null">and tag_name=#{tagName}</if>
+            <if test="tagColor!=null">and tag_color=#{tagColor}</if>
+        </trim>
+    </delete>
+
+    <select id="getByPk" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentTag"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_tag paymentTag
+        where tag_num=#{tagNum}
+    </select>
+
+    <delete id="deleteByPk">
+        delete from payment_tag
+        where tag_num=#{tagNum}
+    </delete>
+
+    <update id="update">
+        update payment_user
+        <trim prefix="set" prefixOverrides=",">
+            <if test="tagNum!=null">
+                <if test="tagNum!=''">, tag_num=#{tagNum}</if>
+                <if test="tagNum==''">, tag_num=null</if>
+            </if>
+            <if test="tagGroupNum!=null">
+                <if test="tagGroupNum!=''">, tag_group_num=#{tagGroupNum}</if>
+                <if test="tagGroupNum==''">, tag_group_num=null</if>
+            </if>
+            <if test="tagName!=null">
+                <if test="tagName!=''">, tag_name=#{tagName}</if>
+                <if test="tagName==''">, tag_name=null</if>
+            </if>
+            <if test="tagColor!=null">
+                <if test="tagColor!=''">, tag_color=#{tagColor}</if>
+                <if test="tagColor==''">, tag_color=null</if>
+            </if>
+        </trim>
+        where
+        tag_num=#{tagNum}
+    </update>
+
+    <update id="forceUpdate">
+        update payment_user
+        <trim prefix="set" prefixOverrides=",">
+            <if test="tagNum!=''">, tag_num=#{tagNum}</if>
+            <if test="tagNum==''">, tag_num=null</if>
+
+            <if test="tagGroupNum!=''">, tag_group_num=#{tagGroupNum}</if>
+            <if test="tagGroupNum==''">, tag_group_num=null</if>
+
+            <if test="tagName!=''">, tag_name=#{tagName}</if>
+            <if test="tagName==''">, tag_name=null</if>
+
+            <if test="tagColor!=''">, tag_color=#{tagColor}</if>
+            <if test="tagColor==''">, tag_color=null</if>
+        </trim>
+        where
+        tag_num=#{tagNum}
+    </update>
+
+</mapper>

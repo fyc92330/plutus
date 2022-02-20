@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.chun.plutus.common.dao.base.PaymentRecordMTagBaseDao">
+
+    <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentRecordMTagVo">
+        <id property="prmtNum" column="PRMT_NUM"/>
+        <result property="paymentNum" column="PAYMENT_NUM"/>
+        <result property="tagGroupNum" column="TAG_GROUP_NUM"/>
+        <result property="tagNum" column="TAG_NUM"/>
+    </resultMap>
+
+    <sql id="columnsAlias">
+        ${alias}.prmt_num                      as ${prefix}prmt_num,
+        ${alias}.payment_num                   as ${prefix}payment_num,
+        ${alias}.tag_group_num                 as ${prefix}tag_group_num,
+        ${alias}.tag_num                       as ${prefix}tag_num
+    </sql>
+
+    <select id="query" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentRecordMTag"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_record_m_tag paymentRecordMTag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="prmtNum!=null">and prmt_num=#{prmtNum}</if>
+            <if test="paymentNum!=null">and payment_num=#{paymentNum}</if>
+            <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="tagNum!=null">and tag_num=#{tagNum}</if>
+        </trim>
+    </select>
+
+    <select id="listAll" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentRecordMTag"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_record_m_tag paymentRecordMTag
+    </select>
+
+    <select id="count" resultType="Integer">
+        select count(*)
+        from payment_record_m_tag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="prmtNum!=null">and prmt_num=#{prmtNum}</if>
+            <if test="paymentNum!=null">and payment_num=#{paymentNum}</if>
+            <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="tagNum!=null">and tag_num=#{tagNum}</if>
+        </trim>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyColumn="user_num" keyProperty="userNum">
+        insert into payment_record_m_tag (
+        <trim prefix="" prefixOverrides=",">
+            <if test="prmtNum!=null">, prmt_num=#{prmtNum}</if>
+            <if test="paymentNum!=null">, payment_num=#{paymentNum}</if>
+            <if test="tagGroupNum!=null">, tag_group_num=#{tagGroupNum}</if>
+            <if test="tagNum!=null">, tag_num=#{tagNum}</if>
+        </trim>
+        ) values (
+        <trim prefix="" prefixOverrides=",">
+            <if test="prmtNum!=null">, prmt_num=#{prmtNum}</if>
+            <if test="paymentNum!=null">, payment_num=#{paymentNum}</if>
+            <if test="tagGroupNum!=null">, tag_group_num=#{tagGroupNum}</if>
+            <if test="tagNum!=null">, tag_num=#{tagNum}</if>
+        </trim>
+        )
+    </insert>
+
+    <delete id="delete">
+        delete from payment_record_m_tag
+        <trim prefix="where" prefixOverrides="and | or">
+            <if test="prmtNum!=null">and prmt_num=#{prmtNum}</if>
+            <if test="paymentNum!=null">and payment_num=#{paymentNum}</if>
+            <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="tagNum!=null">and tag_num=#{tagNum}</if>
+        </trim>
+    </delete>
+
+    <select id="getByPk" resultMap="vo">
+        select
+        <include refid="columnsAlias">
+            <property name="alias" value="paymentRecordMTag"/>
+            <property name="prefix" value=""/>
+        </include>
+        from payment_record_m_tag paymentRecordMTag
+        where prmt_num=#{prmtNum}
+    </select>
+
+    <delete id="deleteByPk">
+        delete from payment_record_m_tag
+        where prmt_num=#{prmtNum}
+    </delete>
+
+    <update id="update">
+        update payment_record_m_tag
+        <trim prefix="set" prefixOverrides=",">
+            <if test="prmtNum!=null">
+                <if test="prmtNum!=''">, prmt_num=#{prmtNum}</if>
+                <if test="prmtNum==''">, prmt_num=null</if>
+            </if>
+            <if test="paymentNum!=null">
+                <if test="paymentNum!=''">, payment_num=#{paymentNum}</if>
+                <if test="paymentNum==''">, payment_num=null</if>
+            </if>
+            <if test="tagGroupNum!=null">
+                <if test="tagGroupNum!=''">, tag_group_num=#{tagGroupNum}</if>
+                <if test="tagGroupNum==''">, tag_group_num=null</if>
+            </if>
+            <if test="tagNum!=null">
+                <if test="tagNum!=''">, tag_num=#{tagNum}</if>
+                <if test="tagNum==''">, tag_num=null</if>
+            </if>
+        </trim>
+        where
+        prmt_num=#{prmtNum}
+    </update>
+
+    <update id="forceUpdate">
+        update payment_record_m_tag
+        <trim prefix="set" prefixOverrides=",">
+                <if test="prmtNum!=''">, prmt_num=#{prmtNum}</if>
+                <if test="prmtNum==''">, prmt_num=null</if>
+
+                <if test="paymentNum!=''">, payment_num=#{paymentNum}</if>
+                <if test="paymentNum==''">, payment_num=null</if>
+
+                <if test="tagGroupNum!=''">, tag_group_num=#{tagGroupNum}</if>
+                <if test="tagGroupNum==''">, tag_group_num=null</if>
+
+                <if test="tagNum!=''">, tag_num=#{tagNum}</if>
+                <if test="tagNum==''">, tag_num=null</if>
+        </trim>
+        where
+        prmt_num=#{prmtNum}
+    </update>
+
+</mapper>

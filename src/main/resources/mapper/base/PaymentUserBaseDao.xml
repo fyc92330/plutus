@@ -29,12 +29,12 @@
         </include>
         from payment_user paymentUser
         <trim prefix="where" prefixOverrides="and | or">
-            <if test="user_num!=null">and user_num=#{userNum}</if>
-            <if test="user_name!=null">and user_name=#{userName}</if>
-            <if test="user_gender!=null">and user_gender=#{userGender}</if>
-            <if test="user_mobile!=null">and user_mobile=#{userMobile}</if>
-            <if test="user_email!=null">and user_email=#{userEmail}</if>
-            <if test="line_user_id!=null">and line_user_id=#{lineUserId}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
+            <if test="userName!=null">and user_name=#{userName}</if>
+            <if test="userGender!=null">and user_gender=#{userGender}</if>
+            <if test="userMobile!=null">and user_mobile=#{userMobile}</if>
+            <if test="userEmail!=null">and user_email=#{userEmail}</if>
+            <if test="lineUserId!=null">and line_user_id=#{lineUserId}</if>
         </trim>
     </select>
 
@@ -51,46 +51,46 @@
         select count(*)
         from payment_user
         <trim prefix="where" prefixOverrides="and | or">
-            <if test="user_num!=null">and user_num=#{userNum}</if>
-            <if test="user_name!=null">and user_name=#{userName}</if>
-            <if test="user_gender!=null">and user_gender=#{userGender}</if>
-            <if test="user_mobile!=null">and user_mobile=#{userMobile}</if>
-            <if test="user_email!=null">and user_email=#{userEmail}</if>
-            <if test="line_user_id!=null">and line_user_id=#{lineUserId}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
+            <if test="userName!=null">and user_name=#{userName}</if>
+            <if test="userGender!=null">and user_gender=#{userGender}</if>
+            <if test="userMobile!=null">and user_mobile=#{userMobile}</if>
+            <if test="userEmail!=null">and user_email=#{userEmail}</if>
+            <if test="lineUserId!=null">and line_user_id=#{lineUserId}</if>
         </trim>
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="user_num" keyProperty="userNum">
         insert into payment_user (
         <trim prefix="" prefixOverrides=",">
-            <if test="user_num!=null">and user_num=#{userNum}</if>
-            <if test="user_name!=null">and user_name=#{userName}</if>
-            <if test="user_gender!=null">and user_gender=#{userGender}</if>
-            <if test="user_mobile!=null">and user_mobile=#{userMobile}</if>
-            <if test="user_email!=null">and user_email=#{userEmail}</if>
-            <if test="line_user_id!=null">and line_user_id=#{lineUserId}</if>
+            <if test="userNum!=null">, user_num=#{userNum}</if>
+            <if test="userName!=null">, user_name=#{userName}</if>
+            <if test="userGender!=null">, user_gender=#{userGender}</if>
+            <if test="userMobile!=null">, user_mobile=#{userMobile}</if>
+            <if test="userEmail!=null">, user_email=#{userEmail}</if>
+            <if test="lineUserId!=null">, line_user_id=#{lineUserId}</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-            <if test="user_num!=null">and user_num=#{userNum}</if>
-            <if test="user_name!=null">and user_name=#{userName}</if>
-            <if test="user_gender!=null">and user_gender=#{userGender}</if>
-            <if test="user_mobile!=null">and user_mobile=#{userMobile}</if>
-            <if test="user_email!=null">and user_email=#{userEmail}</if>
-            <if test="line_user_id!=null">and line_user_id=#{lineUserId}</if>
+            <if test="userNum!=null">, user_num=#{userNum}</if>
+            <if test="userName!=null">, user_name=#{userName}</if>
+            <if test="userGender!=null">, user_gender=#{userGender}</if>
+            <if test="userMobile!=null">, user_mobile=#{userMobile}</if>
+            <if test="userEmail!=null">, user_email=#{userEmail}</if>
+            <if test="lineUserId!=null">, line_user_id=#{lineUserId}</if>
         </trim>
         )
     </insert>
 
     <delete id="delete">
-        delete from payment_user paymentUser
+        delete from payment_user
         <trim prefix="where" prefixOverrides="and | or">
-            <if test="user_num!=null">and user_num=#{userNum}</if>
-            <if test="user_name!=null">and user_name=#{userName}</if>
-            <if test="user_gender!=null">and user_gender=#{userGender}</if>
-            <if test="user_mobile!=null">and user_mobile=#{userMobile}</if>
-            <if test="user_email!=null">and user_email=#{userEmail}</if>
-            <if test="line_user_id!=null">and line_user_id=#{lineUserId}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
+            <if test="userName!=null">and user_name=#{userName}</if>
+            <if test="userGender!=null">and user_gender=#{userGender}</if>
+            <if test="userMobile!=null">and user_mobile=#{userMobile}</if>
+            <if test="userEmail!=null">and user_email=#{userEmail}</if>
+            <if test="lineUserId!=null">and line_user_id=#{lineUserId}</if>
         </trim>
     </delete>
 

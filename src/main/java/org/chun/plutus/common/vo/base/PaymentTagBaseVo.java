@@ -1,4 +1,4 @@
-package org.chun.plutus.common.vo_remove_after.base;
+package org.chun.plutus.common.vo.base;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,8 +15,5 @@ public class PaymentTagBaseVo {
   private String tagName;
   /** 標籤顏色 */
   private String tagColor;
-  /** 建立日期 */
-  private String createDate;
-  /** 異動日期 */
-  private String updateDate;
+
 }

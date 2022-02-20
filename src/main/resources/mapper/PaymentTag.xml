@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.chun.dbc.common.dao.PaymentTagDao">
+    <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentTagVo" extends="org.chun.plutus.common.dao.base.PaymentTagBaseDao.vo"/>
+
+</mapper>
