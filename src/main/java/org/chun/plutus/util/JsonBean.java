@@ -12,6 +12,7 @@ public class JsonBean {
   private final static ObjectMapper extraObjectMapper = new ObjectMapper()
       .registerModule(new JavaTimeModule())
       .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+      .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
       .setSerializationInclusion(JsonInclude.Include.NON_NULL); // 內容值為null時，則該屬性不進行輸出
 
   public static ObjectMapper objectMapper() {
