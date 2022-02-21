@@ -23,6 +23,8 @@ public class PaymentRecordMo {
   private BigDecimal paymentCost;
   /** 紀錄類型(1:收入,2:支出) */
   private String recordType;
+  /** 紀錄日期 */
+  private String recordDate;
   /** 紀錄標籤組 -> 標籤 */
   private List<PaymentTagGroupVo> paymentTagGroupVoList;
 

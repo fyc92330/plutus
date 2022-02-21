@@ -11,10 +11,10 @@
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.tag_num                        as ${prefix}tag_num,
-        ${alias}.taggroupnum                    as ${prefix}taggroupnum,
-        ${alias}.tag_name                       as ${prefix}tag_name,
-        ${alias}.tag_color                      as ${prefix}tag_color
+        ${alias}.tag_num                          as ${prefix}tag_num,
+        ${alias}.tag_group_num                    as ${prefix}tag_group_num,
+        ${alias}.tag_name                         as ${prefix}tag_name,
+        ${alias}.tag_color                        as ${prefix}tag_color
     </sql>
 
     <select id="query" resultMap="vo">

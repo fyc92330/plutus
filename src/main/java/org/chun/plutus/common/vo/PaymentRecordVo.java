@@ -18,5 +18,6 @@ public class PaymentRecordVo extends PaymentRecordBaseVo {
     super.setPaymentDesc(paymentRecordMo.getPaymentDesc());
     super.setPaymentCost(paymentRecordMo.getPaymentCost());
     super.setRecordType(paymentRecordMo.getRecordType());
+    super.setRecordDate(paymentRecordMo.getRecordDate());
   }
 }

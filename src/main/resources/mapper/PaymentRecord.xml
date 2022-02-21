@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="org.chun.dbc.common.dao.PaymentRecordDao">
+<mapper namespace="org.chun.plutus.common.dao.PaymentRecordDao">
     <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentRecordVo" extends="org.chun.plutus.common.dao.base.PaymentRecordBaseDao.vo"/>
 
+    <select id="listByQueryCondition" resultMap="vo">
+        SELECT
+        <include refid="org.chun.plutus.common.dao.base.PaymentRecordBaseDao.columnsAlias">
+            <property name="alias" value="PR"/>
+            <property name="prefix" value=""/>
+        </include>
+        FROM PAYMENT_RECORD PR
+        <trim prefix="where" prefixOverrides="and">
+            <if test="userNum!=null">AND PR.USER_NUM = #{userNum}</if>
+            <if test="recordType!=null">AND PR.RECORD_TYPE = #{recordType}</if>
+            <if test="startDate!=null">AND PR.RECORD_DATE >= #{startDate}</if>
+            <if test="endDate!=null">AND PR.RECORD_DATE <![CDATA[=<]]> #{endDate}</if>
+        </trim>
+    </select>
 </mapper>

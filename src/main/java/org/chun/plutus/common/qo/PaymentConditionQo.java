@@ -7,12 +7,13 @@ import lombok.Setter;
 @Setter
 public class PaymentConditionQo {
 
+  /** 使用者流水號 */
   private Long userNum;
-
+  /** 查詢期間起 */
   private String startDate;
-
+  /** 查詢期間迄 */
   private String endDate;
-
+  /** 紀錄類型 */
   private String recordType;
 
 }

@@ -21,6 +21,8 @@ public class PaymentRecordBaseVo {
   private BigDecimal paymentCost;
   /** 紀錄類型(1:收入,2:支出) */
   private String recordType;
+  /** 紀錄日期 */
+  private String recordDate;
   /** 建立日期 */
   private String createDate;
   /** 異動日期 */

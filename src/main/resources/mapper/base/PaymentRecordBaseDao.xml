@@ -10,6 +10,7 @@
         <result property="paymentDesc" column="PAYMENT_DESC"/>
         <result property="paymentCost" column="PAYMENT_COST"/>
         <result property="recordType" column="RECORD_TYPE"/>
+        <result property="recordDate" column="RECORD_DATE"/>
         <result property="createDate" column="CREATE_DATE"/>
         <result property="updateDate" column="UPDATE_DATE"/>
     </resultMap>
@@ -21,6 +22,7 @@
         ${alias}.payment_desc                  as ${prefix}payment_desc,
         ${alias}.payment_cost                  as ${prefix}payment_cost,
         ${alias}.record_type                   as ${prefix}record_type,
+        ${alias}.record_date                   as ${prefix}record_date,
         ${alias}.create_date                   as ${prefix}create_date,
         ${alias}.update_date                   as ${prefix}update_date
     </sql>
@@ -39,6 +41,7 @@
             <if test="paymentDesc!=null">and payment_desc=#{paymentDesc}</if>
             <if test="paymentCost!=null">and payment_cost=#{paymentCost}</if>
             <if test="recordType!=null">and record_type=#{recordType}</if>
+            <if test="recordDate!=null">and record_date=#{recordDate}</if>
             <if test="createDate!=null">and create_date=#{createDate}</if>
             <if test="updateDate!=null">and update_date=#{updateDate}</if>
         </trim>
@@ -63,6 +66,7 @@
             <if test="paymentDesc!=null">and payment_desc=#{paymentDesc}</if>
             <if test="paymentCost!=null">and payment_cost=#{paymentCost}</if>
             <if test="recordType!=null">and record_type=#{recordType}</if>
+            <if test="recordDate!=null">and record_date=#{recordDate}</if>
             <if test="createDate!=null">and create_date=#{createDate}</if>
             <if test="updateDate!=null">and update_date=#{updateDate}</if>
         </trim>
@@ -77,6 +81,7 @@
             <if test="paymentDesc!=null">, payment_desc=#{paymentDesc}</if>
             <if test="paymentCost!=null">, payment_cost=#{paymentCost}</if>
             <if test="recordType!=null">, record_type=#{recordType}</if>
+            <if test="recordDate!=null">, record_date=#{recordDate}</if>
             <if test="createDate!=null">, create_date=#{createDate}</if>
             <if test="updateDate!=null">, update_date=#{updateDate}</if>
         </trim>
@@ -88,6 +93,7 @@
             <if test="paymentDesc!=null">, payment_desc=#{paymentDesc}</if>
             <if test="paymentCost!=null">, payment_cost=#{paymentCost}</if>
             <if test="recordType!=null">, record_type=#{recordType}</if>
+            <if test="recordDate!=null">, record_date=#{recordDate}</if>
             <if test="createDate!=null">, create_date=#{createDate}</if>
             <if test="updateDate!=null">, update_date=#{updateDate}</if>
         </trim>
@@ -103,6 +109,7 @@
             <if test="paymentDesc!=null">and payment_desc=#{paymentDesc}</if>
             <if test="paymentCost!=null">and payment_cost=#{paymentCost}</if>
             <if test="recordType!=null">and record_type=#{recordType}</if>
+            <if test="recordDate!=null">and record_date=#{recordDate}</if>
             <if test="createDate!=null">and create_date=#{createDate}</if>
             <if test="updateDate!=null">and update_date=#{updateDate}</if>
         </trim>
@@ -150,6 +157,10 @@
                 <if test="recordType!=''">, record_type=#{recordType}</if>
                 <if test="recordType==''">, record_type=null</if>
             </if>
+            <if test="recordDate!=null">
+                <if test="recordDate!=''">, record_date=#{recordDate}</if>
+                <if test="recordDate==''">, record_date=null</if>
+            </if>
             <if test="createDate!=null">
                 <if test="createDate!=''">, create_date=#{createDate}</if>
                 <if test="createDate==''">, create_date=null</if>
@@ -183,6 +194,9 @@
 
                 <if test="recordType!=''">, record_type=#{recordType}</if>
                 <if test="recordType==''">, record_type=null</if>
+
+                <if test="recordDate!=''">, record_date=#{recordDate}</if>
+                <if test="recordDate==''">, record_date=null</if>
 
                 <if test="createDate!=''">, create_date=#{createDate}</if>
                 <if test="createDate==''">, create_date=null</if>

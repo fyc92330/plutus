@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="org.chun.dbc.common.dao.PaymentTagGroupDao">
+<mapper namespace="org.chun.plutus.common.dao.PaymentTagGroupDao">
     <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentTagGroupVo" extends="org.chun.plutus.common.dao.base.PaymentTagGroupBaseDao.vo"/>
 
+    <resultMap id="groupWithTag" type="org.chun.plutus.common.vo.PaymentTagGroupVo" extends="org.chun.plutus.common.dao.base.PaymentTagGroupBaseDao.vo">
+        <collection property="paymentTagVoList" columnPrefix="T_" ofType="org.chun.plutus.common.vo.PaymentTagVo"
+                    resultMap="org.chun.plutus.common.dao.base.PaymentTagBaseDao.vo" javaType="ArrayList"/>
+    </resultMap>
+
+    <select id="listGroupListWithTagsByUser" resultMap="groupWithTag">
+        SELECT
+            G.TAG_GROUP_NUM,
+            G.TAG_GROUP_NAME,
+            G.TAG_GROUP_COLOR,
+            T.TAG_NUM AS T_TAG_NUM,
+            T.TAG_NAME AS T_TAG_NAME,
+            T.TAG_COLOR AS T_TAG_COLOR
+        FROM PAYMENT_TAG_GROUP G
+        LEFT JOIN PAYMENT_TAG T ON G.TAG_GROUP_NUM = T.TAG_GROUP_NUM
+        WHERE G.USER_NUM = #{userNum}
+    </select>
 </mapper>

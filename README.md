@@ -1,6 +1,7 @@
 # plutus
 
 ## Getting started
+https://phayao.medium.com/use-line-login-with-spring-security-fbaf59453c46
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
 
