@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import retrofit2.http.Path;
 
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -24,23 +23,44 @@ public class PaymentController {
 
   private final PaymentMod paymentMod;
 
+  /**
+   * 查詢紀錄
+   *
+   * @param paymentConditionQo
+   * @return
+   */
   @RequestMapping(value = "/list", method = {GET, POST})
   public Object queryPayments(@RequestBody PaymentConditionQo paymentConditionQo) {
     return paymentMod.query(paymentConditionQo);
   }
 
+  /**
+   * 新增紀錄
+   *
+   * @param paymentRecordMo
+   */
   @RequestMapping(value = "/record", method = {GET, POST})
-  public void insertPayment(@RequestBody PaymentRecordMo paymentRecordMo) {
+  public void createPayment(@RequestBody PaymentRecordMo paymentRecordMo) {
     paymentMod.createPaymentRecord(paymentRecordMo);
   }
 
+  /**
+   * 編輯紀錄
+   *
+   * @param paymentRecordMo
+   */
   @RequestMapping(value = "/record", method = {PUT})
   public void editPayment(@RequestBody PaymentRecordMo paymentRecordMo) {
     paymentMod.editPaymentRecord(paymentRecordMo);
   }
 
+  /**
+   * 刪除紀錄
+   *
+   * @param paymentNum
+   */
   @RequestMapping(value = "/record/{paymentNum}", method = {DELETE})
-  public void removePayment(@PathVariable Long paymentNum){
+  public void removePayment(@PathVariable Long paymentNum) {
     paymentMod.removePaymentRecord(paymentNum);
   }
 

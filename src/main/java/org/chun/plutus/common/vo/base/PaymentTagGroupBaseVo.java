@@ -13,4 +13,6 @@ public class PaymentTagGroupBaseVo {
   private String tagGroupName;
   /** 標籤群顏色 */
   private String tagGroupColor;
+  /** 使用者編號 */
+  private Long userNum;
 }

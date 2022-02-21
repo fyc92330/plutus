@@ -5,12 +5,14 @@
 
     <resultMap id="vo" type="org.chun.plutus.common.vo.PaymentTagGroupVo">
         <id property="tagGroupNum" column="TAG_GROUP_NUM"/>
+        <result property="userNum" column="USER_NUM"/>
         <result property="tagGroupName" column="TAG_GROUP_NAME"/>
         <result property="tagGroupColor" column="TAG_GROUP_COLOR"/>
     </resultMap>
 
     <sql id="columnsAlias">
         ${alias}.tag_group_num                    as ${prefix}tag_group_num,
+        ${alias}.user_num                         as ${prefix}user_num,
         ${alias}.tag_group_name                   as ${prefix}tag_group_name,
         ${alias}.tag_group_color                  as ${prefix}tag_group_color
     </sql>
@@ -24,6 +26,7 @@
         from payment_tag_group paymentTagGroup
         <trim prefix="where" prefixOverrides="and | or">
             <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
             <if test="tagGroupName!=null">and tag_group_name=#{tagGroupName}</if>
             <if test="tagGroupColor!=null">and tag_group_color=#{tagGroupColor}</if>
         </trim>
@@ -43,6 +46,7 @@
         from payment_tag_group
         <trim prefix="where" prefixOverrides="and | or">
             <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
             <if test="tagGroupName!=null">and tag_group_name=#{tagGroupName}</if>
             <if test="tagGroupColor!=null">and tag_group_color=#{tagGroupColor}</if>
         </trim>
@@ -52,12 +56,14 @@
         insert into payment_tag_group (
         <trim prefix="" prefixOverrides=",">
             <if test="tagGroupNum!=null">, tag_group_num=#{tagGroupNum}</if>
+            <if test="userNum!=null">, user_num=#{userNum}</if>
             <if test="tagGroupName!=null">, tag_group_name=#{tagGroupName}</if>
             <if test="tagGroupColor!=null">, tag_group_color=#{tagGroupColor}</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
             <if test="tagGroupNum!=null">, tag_group_num=#{tagGroupNum}</if>
+            <if test="userNum!=null">, user_num=#{userNum}</if>
             <if test="tagGroupName!=null">, tag_group_name=#{tagGroupName}</if>
             <if test="tagGroupColor!=null">, tag_group_color=#{tagGroupColor}</if>
         </trim>
@@ -68,6 +74,7 @@
         delete from payment_tag_group
         <trim prefix="where" prefixOverrides="and | or">
             <if test="tagGroupNum!=null">and tag_group_num=#{tagGroupNum}</if>
+            <if test="userNum!=null">and user_num=#{userNum}</if>
             <if test="tagGroupName!=null">and tag_group_name=#{tagGroupName}</if>
             <if test="tagGroupColor!=null">and tag_group_color=#{tagGroupColor}</if>
         </trim>
@@ -95,6 +102,10 @@
                 <if test="tagGroupNum!=''">, tag_group_num=#{tagGroupNum}</if>
                 <if test="tagGroupNum==''">, tag_group_num=null</if>
             </if>
+            <if test="userNum!=null">
+                <if test="userNum!=''">and user_num=#{userNum}</if>
+                <if test="userNum==''">and user_num=null</if>
+            </if>
             <if test="tagGroupName!=null">
                 <if test="tagGroupName!=''">, tag_group_name=#{tagGroupName}</if>
                 <if test="tagGroupName==''">, tag_group_name=null</if>
@@ -113,6 +124,9 @@
         <trim prefix="set" prefixOverrides=",">
             <if test="tagGroupNum!=''">, tag_group_num=#{tagGroupNum}</if>
             <if test="tagGroupNum==''">, tag_group_num=null</if>
+
+            <if test="userNum!=''">and user_num=#{userNum}</if>
+            <if test="userNum==''">and user_num=null</if>
 
             <if test="tagGroupName!=''">, tag_group_name=#{tagGroupName}</if>
             <if test="tagGroupName==''">, tag_group_name=null</if>

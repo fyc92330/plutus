@@ -31,11 +31,21 @@ public class PaymentMod {
   private final PaymentTagDao paymentTagDao;
   private final PaymentRecordMTagDao paymentRecordMTagDao;
 
-  //  @Cacheable(cacheNames = CacheConst.PaymentRecordCache, key = "'PAYMENT_RECORD_'+#paymentConditionQo.userNum")
+  /**
+   * 查詢紀錄
+   *
+   * @param paymentConditionQo
+   * @return
+   */
   public List<PaymentRecordVo> query(PaymentConditionQo paymentConditionQo) {
     return paymentRecordDao.listByQueryCondition(paymentConditionQo);
   }
 
+  /**
+   * 建立帳務紀錄
+   *
+   * @param paymentRecordMo
+   */
   public void createPaymentRecord(PaymentRecordMo paymentRecordMo) {
     // 建立紀錄主檔
     PaymentRecordVo paymentRecordVo = new PaymentRecordVo(paymentRecordMo);
@@ -45,6 +55,11 @@ public class PaymentMod {
         .ifPresent(list -> this.saveRecordTags(list, paymentRecordVo.getPaymentNum()));
   }
 
+  /**
+   * 編輯帳務紀錄
+   *
+   * @param paymentRecordMo
+   */
   public void editPaymentRecord(PaymentRecordMo paymentRecordMo) {
     // 編輯紀錄主檔
     PaymentRecordVo paymentRecordVo = new PaymentRecordVo(paymentRecordMo);
@@ -58,6 +73,11 @@ public class PaymentMod {
         .ifPresent(list -> this.saveRecordTags(list, paymentNum));
   }
 
+  /**
+   * 移除帳務紀錄
+   *
+   * @param paymentNum
+   */
   public void removePaymentRecord(Long paymentNum) {
     // 先清除所有的標籤
     this.removeRecordTagRelation(paymentNum);
@@ -68,6 +88,12 @@ public class PaymentMod {
 
   /** =================================================== private ================================================== */
 
+  /**
+   * 儲存記錄對應的標籤
+   *
+   * @param paymentTagGroupVoList
+   * @param paymentNum
+   */
   private void saveRecordTags(List<PaymentTagGroupVo> paymentTagGroupVoList, Long paymentNum) {
     for (PaymentTagGroupVo tagGroupVo : paymentTagGroupVoList) {
       final Long tagGroupNum = tagGroupVo.getTagGroupNum();
@@ -90,6 +116,11 @@ public class PaymentMod {
     }
   }
 
+  /**
+   * 移除紀錄時移除所有標籤關聯
+   *
+   * @param paymentNum
+   */
   private void removeRecordTagRelation(Long paymentNum) {
     paymentRecordMTagDao.query(MapUtil.newHashMap("paymentNum", paymentNum)).stream()
         .findAny()
