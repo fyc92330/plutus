@@ -1,23 +1,28 @@
 package org.chun.plutus.aop;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.plutus.common.constant.CommonConst;
 import org.chun.plutus.common.rvo.ApiResponseRvo;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 
-import java.lang.reflect.Method;
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 @Slf4j
 @RestControllerAdvice
@@ -28,50 +33,68 @@ public class GlobalExceptionHandler {
   public ApiResponseRvo handleException(Exception e, HandlerMethod handlerMethod) {
     ApiResponseRvo apiResponseRvo = new ApiResponseRvo();
     try {
-      Method method = handlerMethod.getMethod();
-      RequestMapping requestMappingAnnotation = method.getAnnotation(RequestMapping.class);
-      List<RequestMethod> requestMappingList = Arrays.stream(requestMappingAnnotation.method())
-          .filter(requestMethod -> !requestMethod.equals(RequestMethod.OPTIONS))
-          .collect(Collectors.toList());
+      final RequestMethod requestMethod = Arrays.stream(handlerMethod.getMethod().getAnnotations())
+          .peek(System.out::println)
+          .map(Annotation::annotationType)
+          .peek(System.out::println)
+          .map(RequestMethodEnum::getEnum)
+          .peek(System.out::println)
+          .filter(Objects::nonNull)
+          .findAny()
+          .map(RequestMethodEnum::getMethod)
+          .get();
+
       String errorMsg;
-      ;
-      if (requestMappingList.size() == 1) {
-        switch (requestMappingList.get(0)) {
-          case GET:
-            errorMsg = CommonConst.COMMON_QUERY_ERROR;
-            break;
-          case POST:
-            errorMsg = CommonConst.COMMON_INSERT_ERROR;
-            break;
-          case PUT:
-            errorMsg = CommonConst.COMMON_UPDATE_ERROR;
-            break;
-          case DELETE:
-            errorMsg = CommonConst.COMMON_DELETE_ERROR;
-            break;
-          default:
-            errorMsg = CommonConst.COMMON_OTHER_ERROR;
-            break;
-        }
-        // 處理GET POST
-      } else if (requestMappingList.containsAll(Arrays.asList(GET, POST))) {
-        errorMsg = CommonConst.COMMON_QUERY_ERROR;
-      } else {
-        errorMsg = CommonConst.COMMON_OTHER_ERROR;
+      switch (requestMethod) {
+        case GET:
+          errorMsg = CommonConst.COMMON_QUERY_ERROR;
+          break;
+        case POST:
+          errorMsg = CommonConst.COMMON_INSERT_ERROR;
+          break;
+        case PUT:
+          errorMsg = CommonConst.COMMON_UPDATE_ERROR;
+          break;
+        case DELETE:
+          errorMsg = CommonConst.COMMON_DELETE_ERROR;
+          break;
+        default:
+          errorMsg = CommonConst.COMMON_OTHER_ERROR;
       }
 
       log.error("", e);
-      apiResponseRvo.getErrors().add(errorMsg);
-
+      apiResponseRvo = new ApiResponseRvo(errorMsg);
     } catch (Exception ex) {
-      log.error("ExceptionHandler Error: {}", ex.getMessage());
+      log.error("", ex);
     } finally {
       apiResponseRvo.setHttpStatus(HttpStatus.BAD_REQUEST.getReasonPhrase());
       apiResponseRvo.setHttpStatusCode(HttpStatus.BAD_REQUEST.value());
     }
-
     return apiResponseRvo;
   }
 
+  @Getter
+  enum RequestMethodEnum {
+
+    M_GET(GetMapping.class, GET),
+    M_POST(PostMapping.class, POST),
+    M_PUT(PutMapping.class, PUT),
+    M_DELETE(DeleteMapping.class, DELETE);
+
+    private final Class clazz;
+    private final RequestMethod method;
+
+    RequestMethodEnum(Class clazz, RequestMethod method) {
+      this.clazz = clazz;
+      this.method = method;
+    }
+
+    public static RequestMethodEnum getEnum(Class clazz) {
+      return Arrays.stream(values())
+          .filter(e -> e.clazz.equals(clazz))
+          .findAny()
+          .orElse(null);
+    }
+  }
 
 }

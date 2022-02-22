@@ -1,6 +1,7 @@
 package org.chun.plutus.common.rvo;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class ApiResponseRvo {
 
   /** 回傳結果 */
@@ -23,12 +25,13 @@ public class ApiResponseRvo {
   /** 狀態碼 */
   private String httpStatus;
 
-  public ApiResponseRvo() {
-
-  }
-
   public ApiResponseRvo(Map<String, Object> result) {
     Optional.ofNullable(results).orElseGet(ArrayList::new).add(result);
+  }
+
+  public ApiResponseRvo(String errorMsg) {
+    this.errors = new ArrayList<>();
+    errors.add(errorMsg);
   }
 
 }
