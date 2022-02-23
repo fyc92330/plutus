@@ -30,8 +30,7 @@ public class ApiResponseRvo {
   }
 
   public ApiResponseRvo(String errorMsg) {
-    this.errors = new ArrayList<>();
-    errors.add(errorMsg);
+    Optional.ofNullable(errors).orElseGet(ArrayList::new).add(errorMsg);
   }
 
 }
