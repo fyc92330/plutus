@@ -3,6 +3,7 @@ package org.chun.plutus.aop;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.chun.annotation.QueryMapping;
 import org.chun.plutus.common.constant.CommonConst;
 import org.chun.plutus.common.rvo.ApiResponseRvo;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.Objects;
 
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
@@ -34,15 +36,12 @@ public class GlobalExceptionHandler {
     ApiResponseRvo apiResponseRvo = new ApiResponseRvo();
     try {
       final RequestMethod requestMethod = Arrays.stream(handlerMethod.getMethod().getAnnotations())
-          .peek(System.out::println)
           .map(Annotation::annotationType)
-          .peek(System.out::println)
           .map(RequestMethodEnum::getEnum)
-          .peek(System.out::println)
           .filter(Objects::nonNull)
           .findAny()
           .map(RequestMethodEnum::getMethod)
-          .get();
+          .orElse(OPTIONS);
 
       String errorMsg;
       switch (requestMethod) {
@@ -79,7 +78,8 @@ public class GlobalExceptionHandler {
     M_GET(GetMapping.class, GET),
     M_POST(PostMapping.class, POST),
     M_PUT(PutMapping.class, PUT),
-    M_DELETE(DeleteMapping.class, DELETE);
+    M_DELETE(DeleteMapping.class, DELETE),
+    M_GET_POST(QueryMapping.class, GET);
 
     private final Class clazz;
     private final RequestMethod method;
