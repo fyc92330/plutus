@@ -24,4 +24,6 @@ public class AppUserBaseVo extends BaseVo {
   /** 使用者密碼 */
   private String userPwd;
 
+  private String userPicUrl;
+
 }

@@ -1,11 +1,12 @@
-package org.chun.line.client;
+package org.chun.message.client;
 
-import org.chun.line.model.LineApiClientIdResponse;
-import org.chun.line.model.LineApiProfileResponse;
-import org.chun.plutus.util.StringUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
+import org.chun.line.client.LineBotConfig;
+import org.chun.line.model.LineApiClientIdResponse;
+import org.chun.line.model.LineApiProfileResponse;
+import org.chun.plutus.util.StringUtil;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -15,7 +16,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class LineLoginService implements ILineLoginService {
 
   private static final String CONTENT_TYPE = "application/json";
-  private static final ObjectMapper OBJECT_MAPPER = LineClientConfig.OBJECT_MAPPER;
+  private static final ObjectMapper OBJECT_MAPPER = LineBotConfig.OBJECT_MAPPER;
   private final LineLoginApi lineLoginApi;
 
   public LineLoginService(String baseUrl) {
@@ -37,6 +38,13 @@ public class LineLoginService implements ILineLoginService {
   public LineApiProfileResponse profile(String accessToken, String tokenType) {
     final String token = StringUtil.concat(tokenType, " ", accessToken);
     Call<ResponseBody> call = lineLoginApi.profile(token);
+    return convertResult(call, LineApiProfileResponse.class);
+  }
+
+  @Override
+  public LineApiProfileResponse profile(String userId, String clientAccessToken, String tokenType) {
+    final String token = StringUtil.concat(tokenType, " ", clientAccessToken);
+    Call<ResponseBody> call = lineLoginApi.profile(token, userId);
     return convertResult(call, LineApiProfileResponse.class);
   }
 

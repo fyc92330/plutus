@@ -1,4 +1,4 @@
-package org.chun.line.client;
+package org.chun.message.client;
 
 import okhttp3.ResponseBody;
 import org.springframework.http.HttpHeaders;
@@ -16,4 +16,6 @@ public interface LineLoginApi {
   @GET("/v2/profile")
   Call<ResponseBody> profile(@Header(HttpHeaders.AUTHORIZATION) String accessToken);
 
+  @GET("/v2/bot/profile")
+  Call<ResponseBody> profile(@Header(HttpHeaders.AUTHORIZATION) String accessToken, @Path("userId") String userId);
 }

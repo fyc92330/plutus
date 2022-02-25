@@ -11,12 +11,17 @@ import javax.validation.constraints.NotEmpty;
 @AllArgsConstructor
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "line.client")
-public class LineClientProperties {
+public class LineBotClientProperties {
 
   @NotEmpty
   private String id;
 
   @NotEmpty
   private String secret;
+
+  @NotEmpty
+  private String accessToken;
+
+  private String apiUrl;
 
 }

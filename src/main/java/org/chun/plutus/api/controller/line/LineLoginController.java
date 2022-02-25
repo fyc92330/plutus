@@ -3,7 +3,7 @@ package org.chun.plutus.api.controller.line;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.chun.line.client.ILineLoginService;
+import org.chun.message.client.ILineLoginService;
 import org.chun.line.model.LineApiClientIdResponse;
 import org.chun.line.model.LineApiProfileResponse;
 import org.chun.line.model.LineApiTokenResponse;

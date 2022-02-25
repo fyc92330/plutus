@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-public class LineClientConfig {
+public class LineBotConfig {
   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
       .configure(MapperFeature.DEFAULT_VIEW_INCLUSION, false)
       .enable(MapperFeature.USE_WRAPPER_NAME_AS_PROPERTY_NAME)
