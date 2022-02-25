@@ -1,14 +1,14 @@
 package org.chun.plutus.api.controller.line;
 
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.chun.line.client.ILineLoginService;
 import org.chun.line.model.LineApiClientIdResponse;
 import org.chun.line.model.LineApiProfileResponse;
 import org.chun.line.model.LineApiTokenResponse;
 import org.chun.plutus.api.mod.LineLoginMod;
 import org.chun.plutus.util.JsonBean;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +29,12 @@ public class LineLoginController {
 
   @Qualifier("lineLoginService")
   private final ILineLoginService lineLoginService;
+
+  @GetMapping("/gate")
+  public void test(@RequestParam String code, @RequestParam String state) {
+    log.info("==============================GET IN!!!!!!!!");
+    log.info("code:{}, state:{}", code, state);
+  }
 
   /**
    * 導轉登入器頁面

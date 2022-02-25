@@ -1,5 +1,8 @@
 package org.chun.plutus.aop;
 
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Before;
+import org.chun.plutus.common.constant.RequestScopeConst;
 import org.chun.plutus.common.rvo.ApiResponseRvo;
 import org.chun.plutus.util.JsonBean;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -9,13 +12,20 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.web.context.request.RequestAttributes.SCOPE_REQUEST;
 
 @Slf4j
 @Aspect
@@ -56,4 +66,18 @@ public class PlutusControllerAspect {
     log.info("-- 離開Controller --");
     return new ResponseEntity<>(new ApiResponseRvo(resultMap), HttpStatus.OK);
   }
+
+  @Before(value = "controllerPointcut()")
+  protected void beforeAdvice(JoinPoint joinPoint){
+
+    HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
+    final String authorizationToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+    // 解開jwt取得userNum
+    final Long userNum=0L;
+
+    RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+    assert requestAttributes != null;
+    requestAttributes.setAttribute(RequestScopeConst.USER_NUM_STR, userNum, SCOPE_REQUEST);
+  }
+
 }

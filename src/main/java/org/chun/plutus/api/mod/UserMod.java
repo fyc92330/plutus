@@ -43,7 +43,6 @@ public class UserMod {
     return TokenUtil.genJwtToken(jsonStr, appUserVo.getUserNum());
   }
 
-
   /** =================================================== private ================================================== */
 
 

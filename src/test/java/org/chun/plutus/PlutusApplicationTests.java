@@ -1,50 +1,44 @@
 package org.chun.plutus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import org.chun.plutus.util.JsonBean;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class PlutusApplicationTests {
 
   @Test
-  void contextLoads() throws IOException {
+  @DisplayName("內部測試")
+  void contextLoads() {
+    int[] arr = new int[]{1, 1, 2};
+    System.out.printf("answer:(%d)", q26(arr));
+    System.out.println(RandomStringUtils.random(6,true,true));
+  }
 
-    HttpUrl httpUrl = new HttpUrl.Builder()
-        .scheme("https")
-        .host("develop.land.moi.gov.tw")
-        .addPathSegment("DcDl_dlZeApr")
-        .addQueryParameter("pjId", "WEH2244710113")
-        .addQueryParameter("autoId", "18")
-        .build();
-
-    OkHttpClient client = new OkHttpClient().newBuilder().build();
-    Request request = new Request.Builder()
-        .url(httpUrl)
-        .get().build();
-    System.out.println(0);
-    Response response = client.newCall(request).execute();
-
-    try {
-      System.out.println("------------>" + response.body().string());
-    } catch (Exception e) {
-      System.out.println(123);
-      System.out.println("------------>" + response.body().string());
-    } finally {
-      response.close();
+  private int q26(int[] nums) {
+    int len = nums.length;
+    List<Integer> numList = new ArrayList<>();
+    for( int i : nums){
+      if(!numList.contains(i)){
+        numList.add(i);
+      }
     }
+
+    for(int j = 0 ; j < numList.size(); j++){
+      nums[j] = numList.get(j);
+    }
+
+    for(int k = numList.size(); k<len; k++){
+      nums[k] = 0;
+    }
+
+    return numList.size();
   }
 
 }
