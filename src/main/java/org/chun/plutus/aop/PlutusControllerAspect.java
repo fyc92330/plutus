@@ -12,6 +12,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.chun.plutus.util.MapUtil;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +55,7 @@ public class PlutusControllerAspect {
     if (result == null) {
       return new ResponseEntity<>(new ApiResponseRvo(), HttpStatus.OK);
     } else if (result instanceof Collection) {
-
+      resultMap = MapUtil.newHashMap("result", result);
     } else {
       resultMap = JsonBean.objectMapper().readValue(
           JsonBean.Extra.objectMapper().writeValueAsString(result),

@@ -8,4 +8,7 @@ import org.chun.plutus.common.vo.base.ActivitySetBaseVo;
 @Setter
 public class ActivitySetVo extends ActivitySetBaseVo {
 
+  private String actTitle;
+
+  private String hostUserName;
 }

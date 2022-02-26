@@ -2,7 +2,27 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.chun.plutus.common.dao.ActivitySetDao">
-    <resultMap id="vo" type="org.chun.plutus.common.vo.ActivitySetVo" extends="org.chun.plutus.common.dao.base.ActivitySetBaseDao.vo">
+    <resultMap id="vo" type="org.chun.plutus.common.vo.ActivitySetVo"
+               extends="org.chun.plutus.common.dao.base.ActivitySetBaseDao.vo"/>
 
+    <resultMap id="inProgressAct" type="org.chun.plutus.common.vo.ActivitySetVo"
+               extends="org.chun.plutus.common.dao.base.ActivitySetBaseDao.vo">
+        <result property="actTitle" column="ACT_TITLE"/>
+        <result property="hostUserName" column="USER_NAME"/>
     </resultMap>
+
+    <select id="getInProgressActivity" resultMap="inProgressAct">
+        SELECT
+            ACTS.ACS_NUM,
+            AB.ACT_TITLE,
+            CASE
+                WHEN AU.USER_NAME IS NULL
+                THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+            END AS USER_NAME
+        FROM ACTIVITY_SET ACTS
+        JOIN ACTIVITY_BASIC AB ON ACTS.ACT_NUM = AB.ACT_NUM
+        JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
+        WHERE ACTS.USER_NUM = #{userNum}
+          AND ACTS.STATUS = #{status}
+    </select>
 </mapper>
