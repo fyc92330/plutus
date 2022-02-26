@@ -49,8 +49,8 @@ public class LineMessageService {
           UserProfileResponse userProfileResponse = lineBotService.profile(userId);
           AppUserVo appUserVo = new AppUserVo();
           appUserVo.setUserName(userProfileResponse.getDisplayName());
-          appUserVo.setLineUserId(userId);
-          appUserVo.setUserPicUrl(userProfileResponse.getPictureUrl().toString());
+          appUserVo.setUserLineId(userId);
+          appUserVo.setUserLinePic(userProfileResponse.getPictureUrl().toString());
           appUserDao.insert(appUserVo);
           return appUserVo;
         });

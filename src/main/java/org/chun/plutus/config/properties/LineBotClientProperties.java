@@ -22,6 +22,7 @@ public class LineBotClientProperties {
   @NotEmpty
   private String accessToken;
 
+
   private String apiUrl;
 
 }

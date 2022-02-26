@@ -2,7 +2,14 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.chun.plutus.common.dao.AppUserDao">
-    <resultMap id="vo" type="org.chun.plutus.common.vo.AppUserVo" extends="org.chun.plutus.common.dao.base.AppUserBaseDao.vo">
-
-    </resultMap>
+    <resultMap id="vo" type="org.chun.plutus.common.vo.AppUserVo" extends="org.chun.plutus.common.dao.base.AppUserBaseDao.vo"/>
+    <select id="getByUserId" resultMap="vo">
+        SElECT
+        <include refid="org.chun.plutus.common.dao.base.AppUserBaseDao.columnsAlias">
+            <property name="alias" value="AU"/>
+            <property name="prefix" value=""/>
+        </include>
+        FROM APP_USER AU
+        WHERE AU.USER_LINE_ID = #{userId}
+    </select>
 </mapper>
