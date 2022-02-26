@@ -1,4 +1,4 @@
-package org.chun.line.client;
+package org.chun.lineBot;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linecorp.bot.model.PushMessage;

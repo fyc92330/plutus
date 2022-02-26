@@ -1,4 +1,4 @@
-package org.chun.line.client;
+package org.chun.lineBot;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MapperFeature;

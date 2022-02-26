@@ -2,8 +2,8 @@ package org.chun.plutus.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.chun.line.client.ILineBotService;
-import org.chun.line.client.LineBotService;
+import org.chun.lineBot.ILineBotService;
+import org.chun.lineBot.LineBotService;
 import org.chun.plutus.config.properties.LineBotClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

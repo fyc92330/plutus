@@ -7,7 +7,7 @@ import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.profile.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.chun.line.client.ILineBotService;
+import org.chun.lineBot.ILineBotService;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;

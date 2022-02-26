@@ -1,4 +1,4 @@
-package org.chun.line.client;
+package org.chun.lineBot;
 
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
