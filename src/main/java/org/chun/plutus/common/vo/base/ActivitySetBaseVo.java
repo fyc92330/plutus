@@ -1,23 +1,81 @@
 package org.chun.plutus.common.vo.base;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.io.Serializable;
 
-@Getter
-@Setter
-public class ActivitySetBaseVo {
+/**
+ * Do not modify this file!
+ * For extending functions, edit the ActivitySetVo file please.
+ */
+public class ActivitySetBaseVo extends BaseVo implements Serializable, Cloneable {
 
-  /** 活動群組流水號 */
+  public ActivitySetBaseVo() {
+  }
+
+  /** 活動分群編號 */
   private Long acsNum;
-  /** 對應活動流水號 */
+
+  /** 活動主檔編號 */
   private Long actNum;
-  /** 活動參與使用者流水號 */
+
+  /** 使用者編號 */
   private Long userNum;
-  /** 活動群組狀態(1:參與中,9:已離開) */
+
+  /** 使用者狀態(1:參加中,9:已離開) */
   private String status;
-  /** 活動群組開始時間 */
+
+  /** 開始時間 */
   private String startDate;
-  /** 活動群組結束時間 */
+
+  /** 結束時間 */
   private String endDate;
+
+  public Long getAcsNum() {
+    return this.acsNum;
+  }
+
+  public void setAcsNum(Long acsNum) {
+    this.acsNum = acsNum;
+  }
+
+  public Long getActNum() {
+    return this.actNum;
+  }
+
+  public void setActNum(Long actNum) {
+    this.actNum = actNum;
+  }
+
+  public Long getUserNum() {
+    return this.userNum;
+  }
+
+  public void setUserNum(Long userNum) {
+    this.userNum = userNum;
+  }
+
+  public String getStatus() {
+    return this.status;
+  }
+
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  public String getStartDate() {
+    return this.startDate;
+  }
+
+  public void setStartDate(String startDate) {
+    this.startDate = startDate;
+  }
+
+  public String getEndDate() {
+    return this.endDate;
+  }
+
+  public void setEndDate(String endDate) {
+    this.endDate = endDate;
+  }
+
 
 }
