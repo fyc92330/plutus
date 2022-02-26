@@ -21,14 +21,20 @@ public class ActivityService {
    *
    * @param activityBasicVo
    */
-  public Long createActivity(ActivityBasicVo activityBasicVo){
+  public Long createActivity(ActivityBasicVo activityBasicVo) {
     activityMod.validActivityInProgress(RequestScopeUtil.getUserNum(), false);
     return activityMod.saveActivity(activityBasicVo);
   }
 
-  public ActivityViewRvo getActivityView(){
+  /**
+   * 取得當前活動資訊
+   *
+   * @return
+   */
+  public ActivityViewRvo getActivityView() {
     final Long userNum = RequestScopeUtil.getUserNum();
     activityMod.validActivityInProgress(userNum, true);
+    return activityMod.getCurrentActivity(userNum);
   }
 
 }

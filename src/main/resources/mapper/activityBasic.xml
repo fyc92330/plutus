@@ -2,7 +2,52 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.chun.plutus.common.dao.ActivityBasicDao">
-    <resultMap id="vo" type="org.chun.plutus.common.vo.ActivityBasicVo" extends="org.chun.plutus.common.dao.base.ActivityBasicBaseDao.vo">
+    <resultMap id="vo" type="org.chun.plutus.common.vo.ActivityBasicVo"
+               extends="org.chun.plutus.common.dao.base.ActivityBasicBaseDao.vo"/>
 
+    <resultMap id="activityView" type="org.chun.plutus.common.rvo.ActivityViewRvo">
+        <id property="actNum" column="ACT_NUM"/>
+        <result property="actTitle" column="ACT_TITLE"/>
+        <result property="actDesc" column="ACT_DESC"/>
+        <result property="hostUserName" column="USER_NAME"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="userCount" column="USER_COUNT"/>
+        <result property="currentCost" column="CURRENT_COST"/>
+        <collection property="activityDtVoList" ofType="org.chun.plutus.common.vo.ActivityDtVo" javaType="ArrayList"
+                    resultMap="org.chun.plutus.common.dao.ActivityDtDao.vo" columnPrefix="AD_"/>
     </resultMap>
+
+    <select id="getCurrentActivityView" resultMap="activityView">
+        WITH MAIN_ACT_NUM(NUM) AS (
+            SELECT ACT_NUM
+            FROM ACTIVITY_SET
+            WHERE USER_NUM = #{userNum}
+              AND STATUS = '1'
+        ), ACT_TOTLE_COST(COST) AS (
+            SELECT sum(COST)
+            FROM ACTIVITY_DT, MAIN_ACT_NUM
+            WHERE ACT_NUM = NUM
+        ), PARTNER_COUNT(COUNT) AS (
+            SELECT sum(USER_NUM)
+            FROM ACTIVITY_SET, MAIN_ACT_NUM
+            WHERE ACT_NUM = NUM
+              AND STATUS = '1'
+        )
+        SELECT
+            AB.ACT_NUM,
+            AB.ACT_TITLE,
+            AB.ACT_DESC,
+            CASE
+                WHEN AU.USER_NAME IS NULL
+                    THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+                END AS USER_NAME,
+            AB.START_DATE,
+            COST AS CURRENT_COST,
+            COUNT AS USER_COUNT
+        FROM MAIN_ACT_NUM
+        JOIN ACTIVITY_BASIC AB ON NUM = AB.ACT_NUM
+        JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
+        LEFT JOIN ACTIVITY_DT AD ON AB.ACT_NUM = AD.ACT_NUM,
+             ACT_TOTLE_COST,PARTNER_COUNT
+    </select>
 </mapper>

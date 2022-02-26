@@ -8,6 +8,7 @@ import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.exceptions.ActivityInProgressException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.rvo.ActivityViewRvo;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.ActivitySetVo;
 import org.chun.plutus.util.RequestScopeUtil;
@@ -45,6 +46,16 @@ public class ActivityMod {
     final Long actNum = activityBasicVo.getActNum();
     saveFirstActSet(userNum, actNum, nowDate);
     return actNum;
+  }
+
+  /**
+   * 取得當前活動的資料
+   *
+   * @param userNum
+   * @return
+   */
+  public ActivityViewRvo getCurrentActivity(Long userNum){
+    return activityBasicDao.getCurrentActivityView(userNum);
   }
 
   /** ================================================= validation ================================================= */
