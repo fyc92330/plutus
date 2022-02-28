@@ -25,7 +25,11 @@ public class ActivityEnum {
   public enum SetStatus {
 
     /** 參加中 */
+    INVITE("0"),
+    /** 參加中 */
     JOIN("1"),
+    /** 參加中 */
+    CANCEL("2"),
     /** 已離開 */
     LEAVE("9");
 

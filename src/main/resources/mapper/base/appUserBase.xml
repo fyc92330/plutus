@@ -6,7 +6,7 @@
 <!-- Genertion Time : 2022-02-26 16:00:54 -->
 <mapper namespace="org.chun.plutus.common.dao.base.AppUserBaseDao">
 
-    <resultMap id="vo" type="appUserVo">
+    <resultMap id="vo" type="org.chun.plutus.common.vo.AppUserVo">
         <id column="user_num" property="userNum" />
         <result column="user_name" property="userName" />
         <result column="user_gender" property="userGender" />

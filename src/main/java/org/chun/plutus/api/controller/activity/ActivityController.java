@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -42,6 +45,26 @@ public class ActivityController {
   @GetMapping("/view")
   public ActivityViewRvo viewCurrentActivity(){
     return activityService.getActivityView();
+  }
+
+  /**
+   * 初始化邀請頁面
+   *
+   * @return
+   */
+  @GetMapping("/invite")
+  public Map<String,Object> initInviteUserList(){
+    return activityService.getHistoryUserPartnerList();
+  }
+
+  /**
+   * 邀請申請,發送邀請碼
+   *
+   * @param userNumList
+   */
+  @PostMapping("/invite")
+  public void inviteUser(@RequestBody List<Long> userNumList){
+    activityService.sendInviteCode(userNumList);
   }
 
 }

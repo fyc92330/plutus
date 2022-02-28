@@ -8,13 +8,21 @@ import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.exceptions.ActivityInProgressException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.UserNotFoundException;
+import org.chun.plutus.common.mo.InviteJoinCodeMo;
 import org.chun.plutus.common.rvo.ActivityViewRvo;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.ActivitySetVo;
+import org.chun.plutus.common.vo.AppUserVo;
+import org.chun.plutus.util.DaoValidationUtil;
+import org.chun.plutus.util.MapUtil;
 import org.chun.plutus.util.RequestScopeUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 
@@ -54,8 +62,46 @@ public class ActivityMod {
    * @param userNum
    * @return
    */
-  public ActivityViewRvo getCurrentActivity(Long userNum){
+  public ActivityViewRvo getCurrentActivity(Long userNum) {
     return activityBasicDao.getCurrentActivityView(userNum);
+  }
+
+  /**
+   * 取得邀請名單
+   *
+   * @param userNum
+   * @return
+   */
+  public List<AppUserVo> getUserListToInviteList(Long userNum) {
+    return activitySetDao.listUserListByActivityHistory(userNum).stream()
+        .filter(user -> !userNum.equals(user.getUserNum()))
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * 取得現有的活動邀請碼
+   *
+   * @param userNumList
+   * @return
+   */
+  public InviteJoinCodeMo getJoinCodeByCurrentActivity(List<Long> userNumList) {
+    ActivityBasicVo activityBasicVo = activityBasicDao.getOwnerActivityInfo(RequestScopeUtil.getUserNum());
+    final Long actNum = activityBasicVo.getActNum();
+    // 邀請名單建立邀請物件
+    userNumList.stream()
+        .filter(num -> !Objects.equals(RequestScopeUtil.getUserNum(), num))
+        .map(num -> {
+          ActivitySetVo activitySetVo = new ActivitySetVo();
+          activitySetVo.setUserNum(num);
+          activitySetVo.setStatus(ActivityEnum.SetStatus.INVITE.val());
+          activitySetVo.setStartDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+          activitySetVo.setActNum(actNum);
+          return activitySetVo;
+        })
+        .forEach(activitySetDao::insert);
+    // 回傳參加邀請碼
+    return new InviteJoinCodeMo(
+        activityBasicVo.getJoinCode(), activityBasicVo.getActTitle(), activityBasicVo.getHostUserName(), userNumList);
   }
 
   /** ================================================= validation ================================================= */
@@ -70,8 +116,22 @@ public class ActivityMod {
     final boolean isUserJoinActivity = activitySetVo.getAcsNum() != null;
     if (!needExists && isUserJoinActivity) {
       throw new ActivityInProgressException(activitySetVo.getActTitle(), activitySetVo.getHostUserName());
-    } else if(needExists && !isUserJoinActivity){
+    } else if (needExists && !isUserJoinActivity) {
       throw new ActivityNotFoundException();
+    }
+  }
+
+  /**
+   * 檢核過去有沒有一同參與活動的使用者
+   *
+   * @param userNum
+   */
+  public void validHistoryActivitySetUserList(Long userNum) {
+    final long userNumCount = activitySetDao.listUserNumByActivityHistory(userNum).stream()
+        .filter(num -> !num.equals(userNum))
+        .count();
+    if (userNumCount == 0) {
+      throw new UserNotFoundException();
     }
   }
 
@@ -91,6 +151,15 @@ public class ActivityMod {
     activitySetVo.setStartDate(startDate);
     activitySetVo.setStatus(ActivityEnum.SetStatus.JOIN.val());
     activitySetDao.insert(activitySetVo);
+
+    // 將所有被邀請的群狀態都壓成拒絕
+    activitySetDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
+        .filter(set -> ActivityEnum.SetStatus.INVITE.val().equals(set.getStatus()))
+        .map(set -> {
+          set.setStatus(ActivityEnum.SetStatus.CANCEL.val());
+          return set;
+        })
+        .forEach(set -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(set), set));
   }
 
 }

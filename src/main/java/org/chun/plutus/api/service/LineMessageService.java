@@ -8,6 +8,7 @@ import com.linecorp.bot.model.profile.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.lineBot.ILineBotService;
+import org.chun.plutus.api.mod.LineMessageMod;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,8 @@ import java.util.Optional;
 @Service
 public class LineMessageService {
 
+  private final LineMessageMod lineMessageMod;
   private final ILineBotService lineBotService;
-
   private final AppUserDao appUserDao;
 
   public void handleLineCallbackRequest(CallbackRequest request) {
@@ -28,13 +29,15 @@ public class LineMessageService {
     for (Event lineEvent : request.getEvents()) {
 
       final AppUserVo appUserVo = this.getAppUser(lineEvent.getSource().getUserId());
+      final String userId = appUserVo.getUserLineId();
 
       if (lineEvent instanceof MessageEvent) {
         System.out.println("MESSAGE");
 
       } else if (lineEvent instanceof FollowEvent) {
         System.out.println("FOLLOW event.");
-
+        final String replyToken = ((FollowEvent) lineEvent).getReplyToken();
+        lineMessageMod.sendFirstWelcomeMessage(replyToken, userId);
       }
 
     }
@@ -48,7 +51,7 @@ public class LineMessageService {
         .orElseGet(() -> {
           UserProfileResponse userProfileResponse = lineBotService.profile(userId);
           AppUserVo appUserVo = new AppUserVo();
-          appUserVo.setUserName(userProfileResponse.getDisplayName());
+          appUserVo.setUserLineName(userProfileResponse.getDisplayName());
           appUserVo.setUserLineId(userId);
           appUserVo.setUserLinePic(userProfileResponse.getPictureUrl().toString());
           appUserDao.insert(appUserVo);

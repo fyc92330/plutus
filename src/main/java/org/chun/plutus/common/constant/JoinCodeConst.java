@@ -12,4 +12,7 @@ public class JoinCodeConst {
 
   public static final String LEAVE_PREFIX = "$leave-";
 
+  public static final String INVITE_JOIN_PREFIX = "$invite-";
+
+  public static final String CANCEL_PREFIX = "$cancel-";
 }

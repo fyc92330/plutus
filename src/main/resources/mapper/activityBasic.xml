@@ -17,6 +17,10 @@
                     resultMap="org.chun.plutus.common.dao.ActivityDtDao.vo" columnPrefix="AD_"/>
     </resultMap>
 
+    <resultMap id="ownerAct" type="org.chun.plutus.common.vo.ActivityBasicVo">
+        <result property="hostUserName" column="USER_NAME"/>
+    </resultMap>
+
     <select id="getCurrentActivityView" resultMap="activityView">
         WITH MAIN_ACT_NUM(NUM) AS (
             SELECT ACT_NUM
@@ -49,5 +53,22 @@
         JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
         LEFT JOIN ACTIVITY_DT AD ON AB.ACT_NUM = AD.ACT_NUM,
              ACT_TOTLE_COST,PARTNER_COUNT
+    </select>
+
+    <select id="getOwnerActivityInfo" resultMap="ownerAct">
+        SELECT
+            AB.ACT_NUM,
+            AB.USER_NUM,
+            AB.JOIN_CODE,
+            AB.ACT_TITLE,
+            CASE
+                WHEN AU.USER_NAME IS NULL
+                THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+            END AS USER_NAME
+        FROM ACTIVITY_BASIC AB
+        JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
+        WHERE AB.USER_NUM = #{userNum}
+          AND AB.END_DATE IS NULL
+          AND AB.ACT_STATUS <![CDATA[<>]]> '9'
     </select>
 </mapper>
