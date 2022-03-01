@@ -1,4 +1,4 @@
-package org.chun.plutus.api.mod;
+package org.chun.plutus.api.helper;
 
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
@@ -17,12 +17,15 @@ import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.JoinCodeUtil;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
+
+import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class LineMessageMod {
+public class LineMessageHelper {
 
   private static final String WELCOME_MESSAGE = "歡迎使用本app";
 
@@ -58,6 +61,18 @@ public class LineMessageMod {
   public void sendFirstWelcomeMessage(String replyToken, String userId) {
     TextMessage textMessage = new TextMessage(WELCOME_MESSAGE);
     replyMessage(textMessage, replyToken, userId);
+  }
+
+  /**
+   * 回傳加入活動訊息
+   *
+   * @param actTitle
+   * @param replyToken
+   * @param userId
+   */
+  public void sendJoinNotify(String actTitle, String replyToken, String userId) {
+    final String msg = String.format("您已加入活動:%s,\n加入時間:%s", actTitle, yyyy_MM_dd_HH_mm.format(LocalDateTime.now()));
+    replyMessage(new TextMessage(msg), replyToken, userId);
   }
 
   /** =================================================== private ================================================== */

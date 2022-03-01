@@ -5,12 +5,18 @@ import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.UnfollowEvent;
+import com.linecorp.bot.model.event.message.MessageContent;
+import com.linecorp.bot.model.event.message.TextMessageContent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.chun.plutus.api.mod.LineMessageMod;
+import org.chun.plutus.api.helper.LineMessageHelper;
+import org.chun.plutus.api.mod.ActivityMod;
 import org.chun.plutus.api.mod.UserMod;
+import org.chun.plutus.common.enums.JoinCodePrefixEnum;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,7 +24,8 @@ import org.springframework.stereotype.Service;
 public class LineMessageService {
 
   private final UserMod userMod;
-  private final LineMessageMod lineMessageMod;
+  private final ActivityMod activityMod;
+  private final LineMessageHelper lineMessageHelper;
 
   public void handleLineCallbackRequest(CallbackRequest request) {
 
@@ -29,12 +36,10 @@ public class LineMessageService {
       final String userId = appUserVo.getUserLineId();
 
       if (lineEvent instanceof MessageEvent) {
-        System.out.println("MESSAGE");
-
+        handleMessageEvent((MessageEvent) lineEvent, appUserVo);
       } else if (lineEvent instanceof FollowEvent) {
-        System.out.println("FOLLOW event.");
         final String replyToken = ((FollowEvent) lineEvent).getReplyToken();
-        lineMessageMod.sendFirstWelcomeMessage(replyToken, userId);
+        lineMessageHelper.sendFirstWelcomeMessage(replyToken, userId);
         userMod.handleFollowEvent(userNum);
       } else if (lineEvent instanceof UnfollowEvent) {
         userMod.handleUnFollowEvent(userNum);
@@ -43,5 +48,20 @@ public class LineMessageService {
     }
   }
 
+
+  private void handleMessageEvent(MessageEvent event, AppUserVo appUserVo) {
+    MessageContent message = event.getMessage();
+    if (message instanceof TextMessageContent) {
+      handleTextMessage(event, appUserVo.getUserNum());
+    }
+  }
+
+  private void handleTextMessage(MessageEvent<TextMessageContent> event, Long userNum) {
+    final String text = event.getMessage().getText();
+    Arrays.stream(JoinCodePrefixEnum.values())
+        .map(JoinCodePrefixEnum::val)
+        .filter(text::startsWith)
+        .forEach(prefix -> activityMod.handleJoinCodeText(event, userNum, prefix));
+  }
 
 }

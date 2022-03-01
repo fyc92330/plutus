@@ -1,11 +1,16 @@
 package org.chun.plutus.api.mod;
 
+import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.message.TextMessageContent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.logging.log4j.util.Strings;
+import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.enums.ActivityEnum;
+import org.chun.plutus.common.enums.JoinCodePrefixEnum;
 import org.chun.plutus.common.exceptions.ActivityInProgressException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
 import org.chun.plutus.common.exceptions.UserNotFoundException;
@@ -33,6 +38,7 @@ public class ActivityMod {
 
   private final ActivityBasicDao activityBasicDao;
   private final ActivitySetDao activitySetDao;
+  private final LineMessageHelper lineMessageHelper;
 
   /**
    * 建立一筆活動
@@ -104,6 +110,26 @@ public class ActivityMod {
         activityBasicVo.getJoinCode(), activityBasicVo.getActTitle(), activityBasicVo.getHostUserName(), userNumList);
   }
 
+  /**
+   * 處理純文字訊息打進來的邀請碼
+   *
+   * @param event
+   * @param userNum
+   * @param prefix
+   */
+  public void handleJoinCodeText(MessageEvent<TextMessageContent> event, Long userNum, String prefix) {
+    final JoinCodePrefixEnum joinCodePrefixEnum = JoinCodePrefixEnum.getEnum(prefix);
+    final String joinCode = event.getMessage().getText().replaceFirst(prefix, Strings.EMPTY);
+    switch (joinCodePrefixEnum) {
+      case JOIN:
+        joinActivitySetByJoinCode(joinCode, userNum, event);
+        break;
+      case LEAVE:
+      case INVITE:
+      case CANCEL:
+    }
+  }
+
   /** ================================================= validation ================================================= */
 
   /**
@@ -162,4 +188,30 @@ public class ActivityMod {
         .forEach(set -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(set), set));
   }
 
+  private void joinActivitySetByJoinCode(String joinCode, Long userNum, MessageEvent<TextMessageContent> event) {
+    final ActivityBasicVo activityBasicVo = activityBasicDao.query(MapUtil.newHashMap("joinCode", joinCode)).stream()
+        .findAny()
+        .orElseThrow(ActivityNotFoundException::new);
+    final Long actNum = activityBasicVo.getActNum();
+    final String actTitle = activityBasicVo.getActTitle();
+    ActivitySetVo activitySetVo = new ActivitySetVo();
+    activitySetVo.setActNum(actNum);
+    activitySetVo.setUserNum(userNum);
+    List<ActivitySetVo> activitySetVoList = activitySetDao.query(activitySetVo);
+    if (activitySetVoList.isEmpty()) {
+      activitySetVo.setStatus(ActivityEnum.SetStatus.JOIN.val());
+      activitySetVo.setStartDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+      activitySetDao.insert(activitySetVo);
+    } else {
+      activitySetVoList.stream()
+          .findAny()
+          .map(vo -> {
+            vo.setStatus(ActivityEnum.SetStatus.JOIN.val());
+            return vo;
+          })
+          .ifPresent(vo -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(vo), vo));
+    }
+
+    lineMessageHelper.sendJoinNotify(actTitle, event.getReplyToken(), event.getSource().getUserId());
+  }
 }

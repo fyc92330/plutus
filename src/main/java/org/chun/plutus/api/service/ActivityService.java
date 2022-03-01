@@ -3,12 +3,11 @@ package org.chun.plutus.api.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.plutus.api.mod.ActivityMod;
-import org.chun.plutus.api.mod.LineMessageMod;
+import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.UserMod;
 import org.chun.plutus.common.mo.InviteJoinCodeMo;
 import org.chun.plutus.common.rvo.ActivityViewRvo;
 import org.chun.plutus.common.vo.ActivityBasicVo;
-import org.chun.plutus.util.JoinCodeUtil;
 import org.chun.plutus.util.MapUtil;
 import org.chun.plutus.util.RequestScopeUtil;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ public class ActivityService {
 
   private final ActivityMod activityMod;
   private final UserMod userMod;
-  private final LineMessageMod lineMessageMod;
+  private final LineMessageHelper lineMessageHelper;
 
   /**
    * 建立新活動流程
@@ -64,7 +63,7 @@ public class ActivityService {
     // 建立邀請群, 取得活動邀請碼
     final InviteJoinCodeMo inviteJoinCodeMo = activityMod.getJoinCodeByCurrentActivity(userNumList);
     // 發送邀請訊息
-    lineMessageMod.pushInviteTemplateMessage(inviteJoinCodeMo);
+    lineMessageHelper.pushInviteTemplateMessage(inviteJoinCodeMo);
   }
 
 }
