@@ -4,31 +4,28 @@ import com.linecorp.bot.model.event.CallbackRequest;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
-import com.linecorp.bot.model.profile.UserProfileResponse;
+import com.linecorp.bot.model.event.UnfollowEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.chun.lineBot.ILineBotService;
 import org.chun.plutus.api.mod.LineMessageMod;
-import org.chun.plutus.common.dao.AppUserDao;
+import org.chun.plutus.api.mod.UserMod;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class LineMessageService {
 
+  private final UserMod userMod;
   private final LineMessageMod lineMessageMod;
-  private final ILineBotService lineBotService;
-  private final AppUserDao appUserDao;
 
   public void handleLineCallbackRequest(CallbackRequest request) {
 
     for (Event lineEvent : request.getEvents()) {
 
-      final AppUserVo appUserVo = this.getAppUser(lineEvent.getSource().getUserId());
+      final AppUserVo appUserVo = userMod.saveAppUser(lineEvent.getSource().getUserId());
+      final Long userNum = appUserVo.getUserNum();
       final String userId = appUserVo.getUserLineId();
 
       if (lineEvent instanceof MessageEvent) {
@@ -38,25 +35,13 @@ public class LineMessageService {
         System.out.println("FOLLOW event.");
         final String replyToken = ((FollowEvent) lineEvent).getReplyToken();
         lineMessageMod.sendFirstWelcomeMessage(replyToken, userId);
+        userMod.handleFollowEvent(userNum);
+      } else if (lineEvent instanceof UnfollowEvent) {
+        userMod.handleUnFollowEvent(userNum);
       }
 
     }
   }
 
-  /** =================================================== private ================================================== */
-
-
-  private AppUserVo getAppUser(String userId) {
-    return Optional.ofNullable(appUserDao.getByUserId(userId))
-        .orElseGet(() -> {
-          UserProfileResponse userProfileResponse = lineBotService.profile(userId);
-          AppUserVo appUserVo = new AppUserVo();
-          appUserVo.setUserLineName(userProfileResponse.getDisplayName());
-          appUserVo.setUserLineId(userId);
-          appUserVo.setUserLinePic(userProfileResponse.getPictureUrl().toString());
-          appUserDao.insert(appUserVo);
-          return appUserVo;
-        });
-  }
 
 }
