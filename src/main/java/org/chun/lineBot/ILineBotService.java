@@ -9,7 +9,7 @@ public interface ILineBotService {
 
   UserProfileResponse profile(String userId);
 
-  ErrorResponse reply(ReplyMessage replyMessage, String userId);
+  void reply(ReplyMessage replyMessage, String userId);
 
-  ErrorResponse push(PushMessage pushMessage);
+  void push(PushMessage pushMessage);
 }

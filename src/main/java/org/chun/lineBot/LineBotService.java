@@ -6,14 +6,18 @@ import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.error.ErrorResponse;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.profile.UserProfileResponse;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
+import org.chun.plutus.common.constant.LineApiResponseMessageConst;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 public class LineBotService implements ILineBotService {
 
   private static final String CONTENT_TYPE = "application/json";
@@ -38,51 +42,62 @@ public class LineBotService implements ILineBotService {
   }
 
   @Override
-  public ErrorResponse reply(ReplyMessage replyMessage, String userId) {
+  public void reply(ReplyMessage replyMessage, String userId) {
     Call<ResponseBody> call = lineBotApi.reply(replyMessage, CONTENT_TYPE, channelAccessToken);
-    ErrorResponse error = convertResult(call, ErrorResponse.class);
-    return error.getMessage() != null
-        ? convertPushMessage(userId, replyMessage.getMessages())
-        : null;
+    sendMessage(call, replyMessage.getMessages(), userId);
   }
 
   @Override
-  public ErrorResponse push(PushMessage pushMessage) {
+  public void push(PushMessage pushMessage) {
     Call<ResponseBody> call = lineBotApi.push(pushMessage, CONTENT_TYPE, channelAccessToken);
-    ErrorResponse error = convertResult(call, ErrorResponse.class);
-    return error.getMessage() != null
-        ? error
-        : null;
+    sendMessage(call);
   }
 
   /** =================================================== private ================================================== */
 
-  private ErrorResponse convertPushMessage(String userId, List<Message> messageList) {
-    PushMessage pushMessage = new PushMessage(userId, messageList);
-    return this.push(pushMessage);
+  public void sendMessage(Call<ResponseBody> call, List<Message> messages, String userId) {
+    if (sendMessage(call)) {
+      log.info("reply message is sending success.");
+    } else {
+      PushMessage pushMessage = new PushMessage(userId, messages);
+      push(pushMessage);
+    }
+  }
+
+
+  private boolean sendMessage(Call<ResponseBody> call) {
+    ErrorResponse error;
+    try {
+      Response<ResponseBody> response = call.execute();
+      assert response.body() != null;
+      String responseBody = response.body().string();
+      if (LineApiResponseMessageConst.SUCCESS_RESPONSE_BODY.equals(responseBody)) return true;
+      error = convertResult(responseBody, ErrorResponse.class);
+    } catch (Exception e) {
+      throw new RuntimeException();
+    }
+
+    assert error != null;
+    final String errorMessage = error.getMessage();
+    if (LineApiResponseMessageConst.INVALID_REPLY_TOKEN.equals(errorMessage)) {
+      return false;
+    } else if (LineApiResponseMessageConst.FAILED_TO_SEND_MESSAGES.equals(errorMessage)) {
+      throw new RuntimeException(errorMessage);
+    } else {
+      throw new RuntimeException();
+    }
+
   }
 
   private <T> T convertResult(Call<ResponseBody> call, Class<T> resultType) {
-    Response<ResponseBody> response = execute(call);
-    String json = readJsonString(response);
-    return convertResult(json, resultType);
-
-  }
-
-  private Response<ResponseBody> execute(Call<ResponseBody> call) {
+    String responseBody;
     try {
-      return call.execute();
-    } catch (Exception e) {
+      Response<ResponseBody> response = call.execute();
+      responseBody = response.body().string();
+    } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private String readJsonString(Response<ResponseBody> response) {
-    try {
-      return response.body().string();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return convertResult(responseBody, resultType);
   }
 
   private <T> T convertResult(String json, Class<T> resultType) {
