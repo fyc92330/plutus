@@ -24,12 +24,14 @@ public class ActivityEnum {
 
   public enum SetStatus {
 
-    /** 參加中 */
+    /** 邀請中 */
     INVITE("0"),
     /** 參加中 */
     JOIN("1"),
-    /** 參加中 */
-    CANCEL("2"),
+    /** 已拒絕 */
+    REJECT("2"),
+    /** 已取消 */
+    CANCEL("8"),
     /** 已離開 */
     LEAVE("9");
 

@@ -20,7 +20,7 @@ public class ActivitySetBaseVo extends BaseVo implements Serializable, Cloneable
   /** 使用者編號 */
   private Long userNum;
 
-  /** 使用者狀態(1:參加中,9:已離開) */
+  /** 使用者狀態(0:邀請中,1:參加中,2:拒絕邀請,8:已取消,9:已離開) */
   private String status;
 
   /** 開始時間 */

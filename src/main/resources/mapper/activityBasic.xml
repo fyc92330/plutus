@@ -21,6 +21,14 @@
         <result property="hostUserName" column="USER_NAME"/>
     </resultMap>
 
+    <resultMap id="cancelActivity" type="org.chun.plutus.common.rvo.CancelActivityRvo">
+        <id property="actNum" column="ACT_NUM"/>
+        <result property="actTitle" column="ACT_TITLE"/>
+        <result property="hostUserNum" column="HOST_USER_NUM"/>
+        <collection property="activitySetVoList" ofType="org.chun.plutus.common.vo.ActivitySetVo" columnPrefix="S_" javaType="ArrayList"
+                    resultMap="org.chun.plutus.common.dao.ActivitySetDao.vo"/>
+    </resultMap>
+
     <select id="getCurrentActivityView" resultMap="activityView">
         WITH MAIN_ACT_NUM(NUM) AS (
             SELECT ACT_NUM
@@ -70,5 +78,20 @@
         WHERE AB.USER_NUM = #{userNum}
           AND AB.END_DATE IS NULL
           AND AB.ACT_STATUS <![CDATA[<>]]> '9'
+    </select>
+
+    <select id="getAndCancelAllActivitySet" resultMap="cancelActivity">
+        SELECT
+            AB.ACT_NUM,
+            AB.ACT_TITLE,
+            AB.USER_NUM AS HOST_USER_NUM,
+            ACS.ACS_NUM AS S_ACS_NUM,
+            AU.USER_NUM AS S_USER_NUM,
+            AU.USER_LINE_ID AS S_USER_LINE_ID
+        FROM ACTIVITY_BASIC AB
+        JOIN ACTIVITY_SET ACS ON AB.ACT_NUM = ACS.ACT_NUM
+        JOIN APP_USER AU ON ACS.USER_NUM = AU.USER_NUM
+        WHERE AB.JOIN_CODE = #{joinCode}
+          AND ACS.STATUS <![CDATA[<>]]> '9'
     </select>
 </mapper>

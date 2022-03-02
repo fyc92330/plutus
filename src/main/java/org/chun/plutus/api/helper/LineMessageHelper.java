@@ -75,6 +75,40 @@ public class LineMessageHelper {
     replyMessage(new TextMessage(msg), replyToken, userId);
   }
 
+  /**
+   * 回傳離開活動訊息
+   *
+   * @param actTitle
+   * @param replyToken
+   * @param userId
+   */
+  public void sendLeaveNotify(String actTitle, String replyToken, String userId) {
+    final String msg = String.format("您已離開活動:%s,\n離開時間:%s", actTitle, yyyy_MM_dd_HH_mm.format(LocalDateTime.now()));
+    replyMessage(new TextMessage(msg), replyToken, userId);
+  }
+
+  /**
+   * 回傳取消活動訊息
+   *
+   * @param actTitle
+   * @param userId
+   */
+  public void sendCancelNotify(String actTitle, String userId) {
+    final String msg = String.format("活動:%s已被取消,\n取消時間:%s", actTitle, yyyy_MM_dd_HH_mm.format(LocalDateTime.now()));
+    pushMessage(new TextMessage(msg), userId);
+  }
+
+  /**
+   * 回傳拒絕活動訊息
+   *
+   * @param actTitle
+   * @param userId
+   */
+  public void sendRejectNotify(String actTitle, String userId) {
+    final String msg = String.format("您已拒絕活動:%s,\n拒絕時間:%s", actTitle, yyyy_MM_dd_HH_mm.format(LocalDateTime.now()));
+    pushMessage(new TextMessage(msg), userId);
+  }
+
   /** =================================================== private ================================================== */
 
   /**

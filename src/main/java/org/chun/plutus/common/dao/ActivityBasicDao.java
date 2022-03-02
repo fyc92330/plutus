@@ -3,6 +3,7 @@ package org.chun.plutus.common.dao;
 import org.apache.ibatis.annotations.Param;
 import org.chun.plutus.common.dao.base.ActivityBasicBaseDao;
 import org.chun.plutus.common.rvo.ActivityViewRvo;
+import org.chun.plutus.common.rvo.CancelActivityRvo;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 
 /**
@@ -13,4 +14,6 @@ public interface ActivityBasicDao extends ActivityBasicBaseDao {
   ActivityViewRvo getCurrentActivityView(@Param("userNum") Long userNum);
 
   ActivityBasicVo getOwnerActivityInfo(@Param("userNum") Long userNum);
+
+  CancelActivityRvo getAndCancelAllActivitySet(@Param("joinCode") String joinCode);
 }

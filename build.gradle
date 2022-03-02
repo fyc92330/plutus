@@ -70,6 +70,10 @@ dependencies {
     // line model
     implementation group: 'com.linecorp.bot', name: 'line-bot-model', version: '4.3.0'
 
+    // google zxing
+    implementation group: 'com.google.zxing', name: 'core', version: '3.3.2'
+    implementation group: 'com.google.zxing', name: 'javase', version: '3.3.2'
+
 //    // spring
 //    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
 //    implementation (group: 'org.springframework.boot', name: 'spring-boot-starter-web'){
