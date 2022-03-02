@@ -9,11 +9,11 @@ import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
-import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.enums.JoinCodePrefixEnum;
 import org.chun.plutus.common.exceptions.ActivityInProgressException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.QrcodeUploadException;
 import org.chun.plutus.common.exceptions.UserNotFoundException;
 import org.chun.plutus.common.mo.InviteJoinCodeMo;
 import org.chun.plutus.common.rvo.ActivityViewRvo;
@@ -22,10 +22,16 @@ import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.ActivitySetVo;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.DaoValidationUtil;
+import org.chun.plutus.util.JoinCodeUtil;
 import org.chun.plutus.util.MapUtil;
+import org.chun.plutus.util.QrcodeUtil;
 import org.chun.plutus.util.RequestScopeUtil;
+import org.chun.uploadcc.IUploadCcService;
+import org.chun.uploadcc.UploadImageRequestBody;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -38,10 +44,11 @@ import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 @Service
 public class ActivityMod {
 
+  private static final String URL = "https://line.me/R/oaMessage/@530vubeg/?";
   private final ActivityBasicDao activityBasicDao;
   private final ActivitySetDao activitySetDao;
-  private final AppUserDao appUserDao;
   private final LineMessageHelper lineMessageHelper;
+  private final IUploadCcService uploadCcService;
 
   /**
    * 建立一筆活動
@@ -137,6 +144,32 @@ public class ActivityMod {
         cancelActivityByCancelCode(joinCode, userNum);
         break;
     }
+  }
+
+  /**
+   * 上傳暫存圖片,發送圖片訊息
+   *
+   * @param event
+   * @param userNum
+   */
+  public void replyQrcode(MessageEvent<TextMessageContent> event, Long userNum) {
+    final String replyToken = event.getReplyToken();
+    final String userId = event.getSource().getUserId();
+    // 製作QRcode上傳
+    final URI imagePath = activityBasicDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
+        .filter(act -> act.getEndDate() == null && !ActivityEnum.Status.FINISH.val().equals(act.getActStatus()))
+        .findAny()
+        .map(ActivityBasicVo::getJoinCode)
+        .map(JoinCodeUtil::genJoinCode)
+        .map(URL::concat)
+        .map(QrcodeUtil::generateQrcode)
+        .map(ByteArrayOutputStream::toByteArray)
+        .map(UploadImageRequestBody::new)
+        .map(uploadCcService::upload)
+        .map(URI::create)
+        .orElseThrow(QrcodeUploadException::new);
+
+    lineMessageHelper.replyQrcode(imagePath, replyToken, userId);
   }
 
   /** ================================================= validation ================================================= */

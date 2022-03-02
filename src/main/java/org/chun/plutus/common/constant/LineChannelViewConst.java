@@ -6,4 +6,6 @@ public class LineChannelViewConst {
 
   public static final String CANCEL_RESPONSE_STR = "取消";
 
+  public static final String SHOW_QRCODE_SYMBOL = "$[qrcode]";
+
 }

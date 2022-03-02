@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.ActivityMod;
 import org.chun.plutus.api.mod.UserMod;
+import org.chun.plutus.common.constant.LineChannelViewConst;
 import org.chun.plutus.common.enums.JoinCodePrefixEnum;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,8 @@ public class LineMessageService {
         .map(JoinCodePrefixEnum::val)
         .filter(text::startsWith)
         .forEach(prefix -> activityMod.handleJoinCodeText(event, userNum, prefix));
+
+    if(text.equals(LineChannelViewConst.SHOW_QRCODE_SYMBOL)) activityMod.replyQrcode(event, userNum);
   }
 
 }

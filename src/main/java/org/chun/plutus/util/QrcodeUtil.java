@@ -4,6 +4,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import lombok.SneakyThrows;
 
 import java.io.ByteArrayOutputStream;
 
@@ -16,7 +17,8 @@ public class QrcodeUtil {
    * @return barcode ByteArrayOutputStream
    * @throws Exception
    */
-  public static ByteArrayOutputStream generateQrcode(String code) throws Exception {
+  @SneakyThrows
+  public static ByteArrayOutputStream generateQrcode(String code) {
 
     try (ByteArrayOutputStream bout = new ByteArrayOutputStream(4096)) {
 

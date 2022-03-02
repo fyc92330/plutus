@@ -3,6 +3,7 @@ package org.chun.plutus.api.helper;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.MessageAction;
+import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
@@ -17,6 +18,7 @@ import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.JoinCodeUtil;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -107,6 +109,17 @@ public class LineMessageHelper {
   public void sendRejectNotify(String actTitle, String userId) {
     final String msg = String.format("您已拒絕活動:%s,\n拒絕時間:%s", actTitle, yyyy_MM_dd_HH_mm.format(LocalDateTime.now()));
     pushMessage(new TextMessage(msg), userId);
+  }
+
+  /**
+   * 回傳qrcode
+   *
+   * @param imagePath
+   * @param replyToken
+   * @param userId
+   */
+  public void replyQrcode(URI imagePath, String replyToken, String userId) {
+    replyMessage(new ImageMessage(imagePath, imagePath), replyToken, userId);
   }
 
   /** =================================================== private ================================================== */

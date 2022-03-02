@@ -1,6 +1,5 @@
 package org.chun.lineBot;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.error.ErrorResponse;
@@ -17,11 +16,12 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 import java.io.IOException;
 import java.util.List;
 
+import static org.chun.lineBot.LineBotConfig.OBJECT_MAPPER;
+
 @Slf4j
 public class LineBotService implements ILineBotService {
 
   private static final String CONTENT_TYPE = "application/json";
-  private static final ObjectMapper OBJECT_MAPPER = LineBotConfig.OBJECT_MAPPER;
   private static final String TOKEN_PREFIX = "Bearer ";
   private final LineBotApi lineBotApi;
   private final String channelAccessToken;
