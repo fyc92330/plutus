@@ -125,6 +125,8 @@ public class ActivityMod {
         joinActivitySetByJoinCode(joinCode, userNum, event);
         break;
       case LEAVE:
+        leaveActivitySetByLeaveCode(joinCode, userNum, event);
+        break;
       case INVITE:
       case CANCEL:
     }
@@ -213,5 +215,20 @@ public class ActivityMod {
     }
 
     lineMessageHelper.sendJoinNotify(actTitle, event.getReplyToken(), event.getSource().getUserId());
+  }
+
+  private void leaveActivitySetByLeaveCode(String joinCode, Long userNum, MessageEvent<TextMessageContent> event) {
+    final Long actNum = activityBasicDao.query(MapUtil.newHashMap("joinCode", joinCode)).stream()
+        .findAny()
+        .map(ActivityBasicVo::getActNum)
+        .orElseThrow(ActivityNotFoundException::new);
+    activitySetDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
+        .filter(vo -> vo.getEndDate() == null && actNum.equals(vo.getActNum()))
+        .findAny()
+        .ifPresent(vo -> {
+          vo.setStatus(ActivityEnum.SetStatus.LEAVE.val());
+          vo.setEndDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+          DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(vo), vo);
+        });
   }
 }
