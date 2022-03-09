@@ -27,7 +27,9 @@ public enum JoinCodeEnum {
   /** 設定先付款的人 */
   SUB_PAYER("$sub_payer-"),//todo v2移除
   /** 檢視 */
-  VIEW("$view-");//todo v2移除
+  VIEW("$view-"),
+  /** 直接建立 */
+  FORCE_CREATE("$force_create-");//todo v2移除
 
   private final String prefix;
 

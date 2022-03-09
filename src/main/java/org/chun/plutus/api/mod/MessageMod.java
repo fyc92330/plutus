@@ -11,8 +11,8 @@ import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.lineBot.ILineBotService;
-import org.chun.plutus.common.constant.LineAutoReplyMessageConst;
 import org.chun.plutus.common.constant.LineChannelViewConst;
+import org.chun.plutus.common.constant.LineCommonMessageConst;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.mo.InviteJoinCodeMo;
 import org.chun.plutus.common.vo.AppUserVo;
@@ -23,6 +23,8 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static org.chun.plutus.common.constant.LineChannelViewConst.APP_VERSION;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.WELCOME_MESSAGE;
 import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm;
 
 @Slf4j
@@ -30,10 +32,18 @@ import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm;
 @Service
 public class MessageMod {
 
-  private static final String WELCOME_MESSAGE = "歡迎使用本app";
-
   private final ILineBotService lineBotService;
   private final AppUserDao appUserDao;
+
+
+
+
+
+
+
+
+
+
 
   /**
    * 活動建立成功訊息
@@ -43,11 +53,11 @@ public class MessageMod {
    * @param joinCode
    */
   public void createSuccessMessage(String replyToken, String userId, String joinCode) {
-    final TextMessage textMessage = new TextMessage(String.format(LineAutoReplyMessageConst.CREATE_SUCCESS, joinCode));
+    final TextMessage textMessage = new TextMessage(String.format(LineCommonMessageConst.CREATE_SUCCESS, joinCode));
     replyMessage(textMessage, replyToken, userId);
   }
 
-  public void joinSuccessMessage(){
+  public void joinSuccessMessage() {
 
   }
 
@@ -75,16 +85,7 @@ public class MessageMod {
         .forEach(userId -> this.pushMessage(templateMessage, userId));
   }
 
-  /**
-   * 歡迎訊息
-   *
-   * @param replyToken
-   * @param userId
-   */
-  public void sendFirstWelcomeMessage(String replyToken, String userId) {
-    TextMessage textMessage = new TextMessage(WELCOME_MESSAGE);
-    replyMessage(textMessage, replyToken, userId);
-  }
+
 
   /**
    * 回傳加入活動訊息

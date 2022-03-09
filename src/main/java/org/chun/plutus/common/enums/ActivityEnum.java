@@ -1,5 +1,7 @@
 package org.chun.plutus.common.enums;
 
+import java.util.Arrays;
+
 public class ActivityEnum {
 
   public enum Status {
@@ -19,6 +21,13 @@ public class ActivityEnum {
 
     public String val() {
       return this.status;
+    }
+
+    public static Status getEnum(String status) {
+      return Arrays.stream(values())
+          .filter(e -> e.val().equals(status))
+          .findAny()
+          .orElseThrow(() -> new EnumConstantNotPresentException(Status.class, status));
     }
   }
 

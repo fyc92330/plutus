@@ -9,7 +9,7 @@ import com.linecorp.bot.model.event.UnfollowEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.plutus.api.facade.MessageFacade;
-import org.chun.plutus.api.mod.MessageMod;
+import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.UserMod;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.JsonBean;
@@ -27,7 +27,7 @@ public class LineMessageController {
 
   private final UserMod userMod;
   private final MessageFacade messageFacade;
-  private final MessageMod messageMod;
+  private final LineMessageHelper lineMessageHelper;
 
   /**
    * LINE訊息入口
@@ -62,7 +62,7 @@ public class LineMessageController {
         messageFacade.handleMessageEvent((MessageEvent) lineEvent, appUserVo);
       } else if (lineEvent instanceof FollowEvent) {
         final String replyToken = ((FollowEvent) lineEvent).getReplyToken();
-        messageMod.sendFirstWelcomeMessage(replyToken, userId);
+        lineMessageHelper.sendFirstWelcomeMessage(replyToken, userId);
         userMod.handleFollowEvent(userNum);
       } else if (lineEvent instanceof UnfollowEvent) {
         userMod.handleUnFollowEvent(userNum);
@@ -70,7 +70,6 @@ public class LineMessageController {
 
     }
   }
-
 
 
 }

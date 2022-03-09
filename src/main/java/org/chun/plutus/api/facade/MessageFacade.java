@@ -6,19 +6,19 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.ActivityMod;
 import org.chun.plutus.api.mod.JoinCodeActionMod;
 import org.chun.plutus.api.mod.MessageMod;
 import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.dao.AppUserDao;
+import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.enums.JoinCodeEnum;
-import org.chun.plutus.common.exceptions.ActivityInProgressException;
-import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.MultiActivityException;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.AppUserVo;
-import org.chun.plutus.util.MapUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -33,11 +33,11 @@ import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 public class MessageFacade {
 
   private final MessageMod messageMod;
-  private final JoinCodeActionMod joinCodeActionMod;
   private final ActivityMod activityMod;
   private final AppUserDao appUserDao;
   private final ActivityBasicDao activityBasicDao;
   private final ActivitySetDao activitySetDao;
+  private final LineMessageHelper lineMessageHelper;
 
   /**
    * 處理訊息事件
@@ -66,8 +66,7 @@ public class MessageFacade {
         .findAny()
         .ifPresent(prefix -> handleJoinCodeText(event, userNum, prefix));
 
-    //todo version2 上線qrcode相關邏輯
-//    if (text.equals(LineChannelViewConst.SHOW_QRCODE_SYMBOL)) activityMod.replyQrcode(event, userNum);
+    //todo v1.5 qrcode相關邏輯
   }
 
   /**
@@ -85,11 +84,10 @@ public class MessageFacade {
         .map(TextMessageContent::getText)
         .map(text -> text.replaceFirst(prefix, Strings.EMPTY))
         .orElse(Strings.EMPTY);
-    final String replyToken = event.getReplyToken();
-    final String recipient = event.getSource().getUserId();
+    final JoinCodeDto joinCodeDto = new JoinCodeDto(event.getReplyToken(), event.getSource().getUserId(), joinCode, userNum);
     switch (joinCodeEnum) {
       case CREATE:
-        messageMod.createSuccessMessage(replyToken, recipient, joinCode);
+        this.createEvent(joinCodeDto);
         break;
       case VIEW:
         break;
@@ -113,8 +111,38 @@ public class MessageFacade {
         break;
       case SUB_PAYER:
         break;
+      case FORCE_CREATE:
+        this.forceCreateEvent(joinCodeDto);
+        break;
     }
   }
+
+  /** =================================================== private ================================================== */
+
+  /**
+   * 主辦人建立活動
+   *
+   * @param joinCodeDto
+   */
+  private void createEvent(JoinCodeDto joinCodeDto) {
+    try{
+      activityMod.validMultiActivity(joinCodeDto.getUserNum());
+    }catch (MultiActivityException e){
+      lineMessageHelper.sendConfirmCreateMessage(joinCodeDto);
+    }
+    this.forceCreateEvent(joinCodeDto);
+  }
+
+  /**
+   * 主辦人直接建立活動
+   *
+   * @param joinCodeDto
+   */
+  private void forceCreateEvent(JoinCodeDto joinCodeDto){
+    activityMod.forceCreateActivity(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+    lineMessageHelper.sendCreateSuccessMessage(joinCodeDto);
+  }
+
 
   /**
    * 組裝活動並建立
@@ -134,15 +162,5 @@ public class MessageFacade {
     activityBasicVo.setCreateDate(now);
     activityBasicVo.setActTitle(String.format("%s所發起的活動", userName));
     return activityMod.saveActivityFirstVersion(activityBasicVo);
-  }
-
-  private void validActivityExists(Long userNum, String joinCode) {
-    final Long actNum = activityBasicDao.query(MapUtil.newHashMap("joinCode", joinCode)).stream()
-        .findAny()
-        .map(ActivityBasicVo::getActNum)
-        .orElseThrow(ActivityNotFoundException::new);
-    if (activitySetDao.count(MapUtil.newHashMap("userNum", userNum, "joinCode", joinCode)) > 0) {
-      throw new ActivityInProgressException(userNum, actNum);
-    }
   }
 }
