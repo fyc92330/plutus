@@ -1,9 +1,9 @@
-package org.chun.plutus.api.service;
+package org.chun.plutus.api.facade;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.plutus.api.mod.ActivityMod;
-import org.chun.plutus.api.helper.LineMessageHelper;
+import org.chun.plutus.api.mod.MessageMod;
 import org.chun.plutus.api.mod.UserMod;
 import org.chun.plutus.common.mo.InviteJoinCodeMo;
 import org.chun.plutus.common.rvo.ActivityViewRvo;
@@ -18,11 +18,11 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class ActivityService {
+public class ActivityFacade {
 
   private final ActivityMod activityMod;
   private final UserMod userMod;
-  private final LineMessageHelper lineMessageHelper;
+  private final MessageMod messageMod;
 
   /**
    * 建立新活動流程
@@ -63,7 +63,11 @@ public class ActivityService {
     // 建立邀請群, 取得活動邀請碼
     final InviteJoinCodeMo inviteJoinCodeMo = activityMod.getJoinCodeByCurrentActivity(userNumList);
     // 發送邀請訊息
-    lineMessageHelper.pushInviteTemplateMessage(inviteJoinCodeMo);
+    messageMod.pushInviteTemplateMessage(inviteJoinCodeMo);
   }
+
+  /** ================================================= LINE CREATE ================================================ */
+
+
 
 }

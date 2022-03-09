@@ -1,4 +1,4 @@
-package org.chun.plutus.api.helper;
+package org.chun.plutus.api.mod;
 
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
@@ -11,6 +11,7 @@ import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.lineBot.ILineBotService;
+import org.chun.plutus.common.constant.LineAutoReplyMessageConst;
 import org.chun.plutus.common.constant.LineChannelViewConst;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.mo.InviteJoinCodeMo;
@@ -27,12 +28,32 @@ import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class LineMessageHelper {
+public class MessageMod {
 
   private static final String WELCOME_MESSAGE = "歡迎使用本app";
 
   private final ILineBotService lineBotService;
   private final AppUserDao appUserDao;
+
+  /**
+   * 活動建立成功訊息
+   *
+   * @param replyToken
+   * @param userId
+   * @param joinCode
+   */
+  public void createSuccessMessage(String replyToken, String userId, String joinCode) {
+    final TextMessage textMessage = new TextMessage(String.format(LineAutoReplyMessageConst.CREATE_SUCCESS, joinCode));
+    replyMessage(textMessage, replyToken, userId);
+  }
+
+  public void joinSuccessMessage(){
+
+  }
+
+
+  /** =================================================== version2 ================================================== */
+
 
   /**
    * 發送詢問是否加入活動的模板訊息

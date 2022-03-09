@@ -1,4 +1,4 @@
-package org.chun.plutus.api.controller.payment;
+package org.chun.plutus.api.controller.v2;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
