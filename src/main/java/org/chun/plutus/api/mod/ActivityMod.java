@@ -2,19 +2,30 @@ package org.chun.plutus.api.mod;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
+import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.enums.ActivityEnum;
+import org.chun.plutus.common.exceptions.ActivityClosedException;
+import org.chun.plutus.common.exceptions.ActivityDifferentException;
+import org.chun.plutus.common.exceptions.ActivityNotFoundException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
+import org.chun.plutus.common.exceptions.UserNotHostException;
+import org.chun.plutus.common.exceptions.UserWithoutActivityException;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.ActivitySetVo;
 import org.chun.plutus.util.DaoValidationUtil;
 import org.chun.plutus.util.MapUtil;
-import org.chun.plutus.util.MomentUtil;
 import org.chun.uploadcc.IUploadCcService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.chun.plutus.util.MomentUtil.Date.yyyyMMdd;
+import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,6 +37,70 @@ public class ActivityMod {
   private final ActivitySetDao activitySetDao;
   private final MessageMod messageMod;
   private final IUploadCcService uploadCcService;
+
+  /**
+   * 直接建立活動
+   *
+   * @param userNum
+   */
+  public String forceCreateActivity(Long userNum) {
+    final String now = yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now());
+    activityBasicDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
+        .map(vo -> {
+          vo.setActStatus(ActivityEnum.Status.FINISH.val());
+          return vo;
+        })
+        .forEach(vo -> DaoValidationUtil.validateResultIsOne(() -> activityBasicDao.update(vo), vo));
+
+    final String joinCode = RandomStringUtils.random(8, true, true);
+    ActivityBasicVo activityBasicVo = new ActivityBasicVo();
+    activityBasicVo.setActTitle(String.format("%s的活動", yyyyMMdd.format(LocalDate.now())));
+    activityBasicVo.setActDesc("");
+    activityBasicVo.setUserNum(userNum);
+    activityBasicVo.setJoinCode(joinCode.toLowerCase());
+    activityBasicVo.setActStatus(ActivityEnum.Status.PREPARE.val());
+    activityBasicVo.setCreateDate(now);
+    activityBasicVo.setStartDate(now);
+    activityBasicDao.insert(activityBasicVo);
+
+    // 主持人為第一個參與者
+    this.saveHostActivitySet(userNum, activityBasicVo.getActNum(), now);
+    return joinCode;
+  }
+
+  /**
+   * 參加活動
+   *
+   * @param userNum
+   * @param joinCode
+   * @return
+   */
+  public ActivityBasicVo joinActivityByJoinCode(Long userNum, String joinCode) {
+    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
+
+    ActivitySetVo activitySetVo = new ActivitySetVo();
+    activitySetVo.setActNum(activityBasicVo.getActNum());
+    activitySetVo.setUserNum(userNum);
+    activitySetVo.setStatus(ActivityEnum.SetStatus.JOIN.val());
+    activitySetVo.setStartDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+    activitySetDao.insert(activitySetVo);
+
+    return activityBasicVo;
+  }
+
+  /**
+   * 離開活動 狀態壓成離開
+   *
+   * @param joinCodeDto
+   */
+  public void leaveActivityByJoinCode(JoinCodeDto joinCodeDto) {
+    ActivitySetVo activitySetVo = activitySetDao.getByUserNumAndJoinCode(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+    activitySetVo.setStatus(ActivityEnum.SetStatus.LEAVE.val());
+    activitySetVo.setEndDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+    DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(activitySetVo), activitySetVo);
+  }
+
+  /** ================================================= validation ================================================= */
 
   /**
    * 檢核主辦人有沒有尚未結束的活動
@@ -41,29 +116,43 @@ public class ActivityMod {
   }
 
   /**
-   * 直接建立活動
+   * 檢核是否有此活動
+   *
+   * @param joinCode
+   */
+  public void validActivityExists(String joinCode) {
+    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
+    if (activityBasicVo == null) throw new ActivityNotFoundException();
+    if (ActivityEnum.Status.getEnum(activityBasicVo.getActStatus()) == ActivityEnum.Status.FINISH)
+      throw new ActivityClosedException();
+  }
+
+  /**
+   * 檢核參與者所屬的活動是否正確
+   *
+   * @param joinCode
+   * @param userNum
+   */
+  public void validActivitySetExists(String joinCode, Long userNum) {
+    ActivitySetVo activitySetVo = activitySetDao.getInProgressActivity(userNum, ActivityEnum.SetStatus.JOIN.val());
+    if (activitySetVo == null) throw new UserWithoutActivityException();
+    if (!joinCode.equals(activitySetVo.getJoinCode())) throw new ActivityDifferentException();
+  }
+
+  /**
+   * 檢核是否為主持人
    *
    * @param userNum
    * @param joinCode
    */
-  public void forceCreateActivity(Long userNum, String joinCode) {
-    Long actNum = null;
-    final String now = MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now());
-    for (ActivityBasicVo activityBasicVo : activityBasicDao.query(MapUtil.newHashMap("userNum", userNum))) {
-      ActivityEnum.Status statusEnum;
-      if (joinCode.equals(activityBasicVo.getJoinCode())) {
-        statusEnum = ActivityEnum.Status.PROGRESS;
-        actNum = activityBasicVo.getActNum();
-      } else {
-        statusEnum = ActivityEnum.Status.FINISH;
-      }
-      activityBasicVo.setActStatus(statusEnum.val());
-      activityBasicVo.setStartDate(now);
-      DaoValidationUtil.validateResultIsOne(() -> activityBasicDao.update(activityBasicVo), activityBasicVo);
-    }
-
-    this.saveFirstActSet(userNum, actNum, now);
+  public void validUserIsHost(Long userNum, String joinCode){
+    Optional.ofNullable(activityBasicDao.getByJoinCode(joinCode))
+        .map(ActivityBasicVo::getUserNum)
+        .filter(userNum::equals)
+        .orElseThrow(UserNotHostException::new);
   }
+
+  /** =================================================== private ================================================== */
 
 
   /**
@@ -73,7 +162,7 @@ public class ActivityMod {
    * @param actNum
    * @param startDate
    */
-  private void saveFirstActSet(Long userNum, Long actNum, String startDate) {
+  private void saveHostActivitySet(Long userNum, Long actNum, String startDate) {
     ActivitySetVo activitySetVo = new ActivitySetVo();
     activitySetVo.setUserNum(userNum);
     activitySetVo.setActNum(actNum);
@@ -90,6 +179,7 @@ public class ActivityMod {
         })
         .forEach(set -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(set), set));
   }
+
 
 //  /**
 //   * 建立活動並回傳邀請碼v1

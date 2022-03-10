@@ -29,6 +29,21 @@
                     resultMap="org.chun.plutus.common.dao.ActivitySetDao.vo"/>
     </resultMap>
 
+    <select id="getByJoinCode" resultMap="ownerAct">
+        SELECT
+        <include refid="org.chun.plutus.common.dao.base.ActivityBasicBaseDao.columnsAlias">
+            <property name="alias" value="activityBasic"/>
+            <property name="prefix" value=""/>
+        </include>,
+        CASE
+            WHEN AU.USER_NAME IS NULL
+            THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+        END AS USER_NAME
+        FROM ACTIVITY_BASIC activityBasic
+        JOIN APP_USER AU ON activityBasic.USER_NUM = AU.USER_NUM
+        WHERE activityBasic.JOIN_CODE = #{joinCode}
+    </select>
+
     <select id="getCurrentActivityView" resultMap="activityView">
         WITH MAIN_ACT_NUM(NUM) AS (
             SELECT ACT_NUM

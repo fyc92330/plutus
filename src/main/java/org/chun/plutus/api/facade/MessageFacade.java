@@ -8,24 +8,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.ActivityMod;
-import org.chun.plutus.api.mod.JoinCodeActionMod;
 import org.chun.plutus.api.mod.MessageMod;
 import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.dto.JoinCodeDto;
-import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.enums.JoinCodeEnum;
+import org.chun.plutus.common.exceptions.ActivityClosedException;
+import org.chun.plutus.common.exceptions.ActivityDifferentException;
+import org.chun.plutus.common.exceptions.ActivityNotFoundException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
+import org.chun.plutus.common.exceptions.UserNotHostException;
+import org.chun.plutus.common.exceptions.UserWithoutActivityException;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_CLOSED;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DIFFERENT;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.USER_NOT_HOST;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.WITHOUT_ACTIVITY;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -78,42 +84,56 @@ public class MessageFacade {
    */
   public void handleJoinCodeText(MessageEvent<TextMessageContent> event, Long userNum, String prefix) {
     final JoinCodeEnum joinCodeEnum = JoinCodeEnum.getEnum(prefix);
-    final String joinCode = joinCodeEnum == JoinCodeEnum.CREATE
-        ? genActivity(userNum)
-        : Optional.ofNullable(event.getMessage())
+    final String joinCode = Optional.ofNullable(event.getMessage())
         .map(TextMessageContent::getText)
         .map(text -> text.replaceFirst(prefix, Strings.EMPTY))
         .orElse(Strings.EMPTY);
     final JoinCodeDto joinCodeDto = new JoinCodeDto(event.getReplyToken(), event.getSource().getUserId(), joinCode, userNum);
-    switch (joinCodeEnum) {
-      case CREATE:
-        this.createEvent(joinCodeDto);
-        break;
-      case VIEW:
-        break;
-      case INVITE:// v2實作
-        break;
-      case JOIN:
-        break;
-      case LEAVE:
-        break;
-      case CANCEL:// v2實作
-        break;
-      case CLOSE:
-        break;
-      case SUB_CREATE:
-        break;
-      case SUB_CLOSE:
-        break;
-      case SUB_TYPE:
-        break;
-      case SUB_COST:
-        break;
-      case SUB_PAYER:
-        break;
-      case FORCE_CREATE:
-        this.forceCreateEvent(joinCodeDto);
-        break;
+    String errorMsg = null;
+    try {
+      switch (joinCodeEnum) {
+        case CREATE:
+          createEvent(joinCodeDto);
+          break;
+        case VIEW:
+          break;
+        case INVITE:// v2實作
+          break;
+        case JOIN:
+          joinEvent(joinCodeDto);
+          break;
+        case LEAVE:
+          leaveEvent(joinCodeDto);
+          break;
+        case CANCEL:// v2實作
+          break;
+        case CLOSE:
+          closeEvent(joinCodeDto);
+          break;
+        case NODE:
+          break;
+        case SUB_TYPE:
+          break;
+        case SUB_COST:
+          break;
+        case SUB_PAYER:
+          break;
+        case FORCE_CREATE:
+          forceCreateEvent(joinCodeDto);
+          break;
+      }
+    } catch (ActivityNotFoundException ae) {
+      errorMsg = ACTIVITY_NOT_FOUND;
+    } catch (ActivityClosedException ace) {
+      errorMsg = ACTIVITY_CLOSED;
+    } catch (ActivityDifferentException ad) {
+      errorMsg = ACTIVITY_DIFFERENT;
+    } catch (UserWithoutActivityException ua) {
+      errorMsg = WITHOUT_ACTIVITY;
+    } catch (UserNotHostException uh) {
+      errorMsg = USER_NOT_HOST;
+    } finally {
+      if (errorMsg != null) lineMessageHelper.sendErrorMessage(joinCodeDto, errorMsg);
     }
   }
 
@@ -125,9 +145,10 @@ public class MessageFacade {
    * @param joinCodeDto
    */
   private void createEvent(JoinCodeDto joinCodeDto) {
-    try{
+    try {
       activityMod.validMultiActivity(joinCodeDto.getUserNum());
-    }catch (MultiActivityException e){
+    } catch (MultiActivityException e) {
+      log.info("too many activity exists.");
       lineMessageHelper.sendConfirmCreateMessage(joinCodeDto);
     }
     this.forceCreateEvent(joinCodeDto);
@@ -138,29 +159,43 @@ public class MessageFacade {
    *
    * @param joinCodeDto
    */
-  private void forceCreateEvent(JoinCodeDto joinCodeDto){
-    activityMod.forceCreateActivity(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+  private void forceCreateEvent(JoinCodeDto joinCodeDto) {
+    final String joinCode = activityMod.forceCreateActivity(joinCodeDto.getUserNum());
+    joinCodeDto.setJoinCode(joinCode);
     lineMessageHelper.sendCreateSuccessMessage(joinCodeDto);
   }
 
+  /**
+   * 加入活動
+   *
+   * @param joinCodeDto
+   */
+  private void joinEvent(JoinCodeDto joinCodeDto) {
+    final String joinCode = joinCodeDto.getJoinCode();
+    activityMod.validActivityExists(joinCode);
+    final ActivityBasicVo activityBasicVo = activityMod.joinActivityByJoinCode(joinCodeDto.getUserNum(), joinCode);
+    lineMessageHelper.sendJoinSuccessMessage(joinCodeDto, activityBasicVo);
+  }
 
   /**
-   * 組裝活動並建立
+   * 離開活動
    *
-   * @param userNum
-   * @return
+   * @param joinCodeDto
    */
-  private String genActivity(Long userNum) {
-    final String userName = Optional.ofNullable(appUserDao.getByPk(userNum))
-        .map(AppUserVo::getUserName)
-        .orElseThrow(RuntimeException::new);
-    final String now = yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now());
-    ActivityBasicVo activityBasicVo = new ActivityBasicVo();
-    activityBasicVo.setUserNum(userNum);
-    activityBasicVo.setActStatus(ActivityEnum.Status.PREPARE.val());
-    activityBasicVo.setStartDate(now);
-    activityBasicVo.setCreateDate(now);
-    activityBasicVo.setActTitle(String.format("%s所發起的活動", userName));
-    return activityMod.saveActivityFirstVersion(activityBasicVo);
+  private void leaveEvent(JoinCodeDto joinCodeDto) {
+    final String joinCode = joinCodeDto.getJoinCode();
+    activityMod.validActivityExists(joinCode);
+    activityMod.validActivitySetExists(joinCode, joinCodeDto.getUserNum());
+    activityMod.leaveActivityByJoinCode(joinCodeDto);
   }
+
+  /**
+   * 關閉活動
+   *
+   * @param joinCodeDto
+   */
+  private void closeEvent(JoinCodeDto joinCodeDto) {
+    activityMod.validUserIsHost(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+  }
+
 }

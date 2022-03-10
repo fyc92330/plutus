@@ -14,6 +14,8 @@ public interface ActivitySetDao extends ActivitySetBaseDao {
 
   ActivitySetVo getInProgressActivity(@Param("userNum") Long userNum, @Param("status") String status);
 
+  ActivitySetVo getByUserNumAndJoinCode(@Param("userNum") Long userNum, @Param("joinCode") String joinCode);
+
   List<Long> listUserNumByActivityHistory(@Param("userNum") Long userNum);
 
   List<AppUserVo> listUserListByActivityHistory(@Param("userNum") Long userNum);

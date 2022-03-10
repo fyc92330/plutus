@@ -12,12 +12,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.chun.lineBot.ILineBotService;
 import org.chun.plutus.common.constant.LineChannelViewConst;
 import org.chun.plutus.common.dto.JoinCodeDto;
+import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.util.JoinCodeUtil;
 import org.springframework.stereotype.Service;
 
 import static org.chun.plutus.common.constant.LineChannelViewConst.APP_VERSION;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CONFIRM_CREATE;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CREATE_SUCCESS;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.JOIN_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.WELCOME_MESSAGE;
 
 @Slf4j
@@ -62,6 +64,28 @@ public class LineMessageHelper {
    */
   public void sendCreateSuccessMessage(JoinCodeDto joinCodeDto) {
     TextMessage textMessage = new TextMessage(String.format(CREATE_SUCCESS, joinCodeDto.getJoinCode()));
+    replyMessage(textMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  }
+
+  /**
+   * 回傳錯誤訊息
+   *
+   * @param joinCodeDto
+   * @param errorMsg
+   */
+  public void sendErrorMessage(JoinCodeDto joinCodeDto, String errorMsg) {
+    replyMessage(new TextMessage(errorMsg), joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  }
+
+  /**
+   * 回傳加入成功訊息
+   *
+   * @param joinCodeDto
+   * @param activityBasicVo
+   */
+  public void sendJoinSuccessMessage(JoinCodeDto joinCodeDto, ActivityBasicVo activityBasicVo) {
+    TextMessage textMessage =
+        new TextMessage(String.format(JOIN_SUCCESS, activityBasicVo.getHostUserName(), activityBasicVo.getActTitle()));
     replyMessage(textMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
   }
 
