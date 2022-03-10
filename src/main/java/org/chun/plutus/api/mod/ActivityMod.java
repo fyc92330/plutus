@@ -10,6 +10,7 @@ import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.HostLeavingException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
 import org.chun.plutus.common.exceptions.UserNotHostException;
 import org.chun.plutus.common.exceptions.UserWithoutActivityException;
@@ -57,7 +58,7 @@ public class ActivityMod {
     activityBasicVo.setActTitle(String.format("%s的活動", yyyyMMdd.format(LocalDate.now())));
     activityBasicVo.setActDesc("");
     activityBasicVo.setUserNum(userNum);
-    activityBasicVo.setJoinCode(joinCode.toLowerCase());
+    activityBasicVo.setJoinCode(joinCode);
     activityBasicVo.setActStatus(ActivityEnum.Status.PREPARE.val());
     activityBasicVo.setCreateDate(now);
     activityBasicVo.setStartDate(now);
@@ -100,6 +101,30 @@ public class ActivityMod {
     DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(activitySetVo), activitySetVo);
   }
 
+  /**
+   * 關閉活動
+   *
+   * @param joinCodeDto
+   */
+  public void closeActivityByJoinCode(JoinCodeDto joinCodeDto) {
+    final String endDate = yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now());
+    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCodeDto.getJoinCode());
+    activityBasicVo.setActStatus(ActivityEnum.Status.FINISH.val());
+    activityBasicVo.setEndDate(endDate);
+    DaoValidationUtil.validateResultIsOne(() -> activityBasicDao.update(activityBasicVo), activityBasicVo);
+
+    // 所有參加者強制高歌離席
+    final ActivityEnum.SetStatus statusEnum = ActivityEnum.SetStatus.LEAVE;
+    activitySetDao.query(MapUtil.newHashMap("actNum", activityBasicVo.getActNum())).stream()
+        .filter(vo -> statusEnum != ActivityEnum.SetStatus.getEnum(vo.getStatus()))
+        .map(vo -> {
+          vo.setStatus(statusEnum.val());
+          vo.setEndDate(endDate);
+          return vo;
+        })
+        .forEach(vo -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(vo), vo));
+  }
+
   /** ================================================= validation ================================================= */
 
   /**
@@ -137,6 +162,7 @@ public class ActivityMod {
     ActivitySetVo activitySetVo = activitySetDao.getInProgressActivity(userNum, ActivityEnum.SetStatus.JOIN.val());
     if (activitySetVo == null) throw new UserWithoutActivityException();
     if (!joinCode.equals(activitySetVo.getJoinCode())) throw new ActivityDifferentException();
+    if (userNum.equals(activitySetVo.getHostUserNum())) throw new HostLeavingException();
   }
 
   /**
@@ -145,7 +171,7 @@ public class ActivityMod {
    * @param userNum
    * @param joinCode
    */
-  public void validUserIsHost(Long userNum, String joinCode){
+  public void validUserIsHost(Long userNum, String joinCode) {
     Optional.ofNullable(activityBasicDao.getByJoinCode(joinCode))
         .map(ActivityBasicVo::getUserNum)
         .filter(userNum::equals)

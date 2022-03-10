@@ -74,7 +74,7 @@ public class LineMessageHelper {
    * @param errorMsg
    */
   public void sendErrorMessage(JoinCodeDto joinCodeDto, String errorMsg) {
-    replyMessage(new TextMessage(errorMsg), joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+    this.sendTextMessage(joinCodeDto, errorMsg);
   }
 
   /**
@@ -87,6 +87,17 @@ public class LineMessageHelper {
     TextMessage textMessage =
         new TextMessage(String.format(JOIN_SUCCESS, activityBasicVo.getHostUserName(), activityBasicVo.getActTitle()));
     replyMessage(textMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  }
+
+  /**
+   * 傳送文字訊息
+   *
+   * @param joinCodeDto
+   * @param textContent
+   */
+  public void sendTextMessage(JoinCodeDto joinCodeDto, String textContent) {
+    replyMessage(new TextMessage(textContent), joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+
   }
 
   /** =================================================== private ================================================== */

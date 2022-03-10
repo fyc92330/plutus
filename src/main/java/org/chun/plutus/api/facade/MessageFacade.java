@@ -17,6 +17,7 @@ import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.HostLeavingException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
 import org.chun.plutus.common.exceptions.UserNotHostException;
 import org.chun.plutus.common.exceptions.UserWithoutActivityException;
@@ -30,6 +31,8 @@ import java.util.Optional;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_CLOSED;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DIFFERENT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.CLOSE_SUCCESS;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.HOST_CANNOT_LEAVE;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.USER_NOT_HOST;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.WITHOUT_ACTIVITY;
 
@@ -86,7 +89,7 @@ public class MessageFacade {
     final JoinCodeEnum joinCodeEnum = JoinCodeEnum.getEnum(prefix);
     final String joinCode = Optional.ofNullable(event.getMessage())
         .map(TextMessageContent::getText)
-        .map(text -> text.replaceFirst(prefix, Strings.EMPTY))
+        .map(text -> text.replace(prefix, Strings.EMPTY))
         .orElse(Strings.EMPTY);
     final JoinCodeDto joinCodeDto = new JoinCodeDto(event.getReplyToken(), event.getSource().getUserId(), joinCode, userNum);
     String errorMsg = null;
@@ -132,6 +135,8 @@ public class MessageFacade {
       errorMsg = WITHOUT_ACTIVITY;
     } catch (UserNotHostException uh) {
       errorMsg = USER_NOT_HOST;
+    } catch (HostLeavingException hl) {
+      errorMsg = HOST_CANNOT_LEAVE;
     } finally {
       if (errorMsg != null) lineMessageHelper.sendErrorMessage(joinCodeDto, errorMsg);
     }
@@ -196,6 +201,8 @@ public class MessageFacade {
    */
   private void closeEvent(JoinCodeDto joinCodeDto) {
     activityMod.validUserIsHost(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+    activityMod.closeActivityByJoinCode(joinCodeDto);
+    lineMessageHelper.sendTextMessage(joinCodeDto, CLOSE_SUCCESS);
   }
 
 }

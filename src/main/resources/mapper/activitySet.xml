@@ -10,6 +10,7 @@
     <resultMap id="inProgressAct" type="org.chun.plutus.common.vo.ActivitySetVo"
                extends="org.chun.plutus.common.dao.base.ActivitySetBaseDao.vo">
         <result property="actTitle" column="ACT_TITLE"/>
+        <result property="hostUserNum" column="HOST_USER_NUM"/>
         <result property="hostUserName" column="USER_NAME"/>
         <result property="joinCode" column="JOIN_CODE"/>
     </resultMap>
@@ -22,7 +23,8 @@
                 WHEN AU.USER_NAME IS NULL
                 THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
             END AS USER_NAME,
-            AB.JOIN_CODE
+            AB.JOIN_CODE,
+            AB.USER_NUM AS HOST_USER_NUM
         FROM ACTIVITY_SET ACTS
         JOIN ACTIVITY_BASIC AB ON ACTS.ACT_NUM = AB.ACT_NUM
         JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM

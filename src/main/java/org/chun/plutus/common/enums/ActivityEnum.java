@@ -53,5 +53,12 @@ public class ActivityEnum {
     public String val() {
       return this.status;
     }
+
+    public static SetStatus getEnum(String status) {
+      return Arrays.stream(values())
+          .filter(e -> e.val().equals(status))
+          .findAny()
+          .orElseThrow(() -> new EnumConstantNotPresentException(Status.class, status));
+    }
   }
 }

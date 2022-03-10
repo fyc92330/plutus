@@ -19,4 +19,8 @@ public class LineCommonMessageConst {
   public static final String ACTIVITY_DIFFERENT = "不同的活動正在進行中";
 
   public static final String USER_NOT_HOST = "只有主辦人可以關閉活動";
+
+  public static final String HOST_CANNOT_LEAVE = "主辦人不得離開活動";
+
+  public static final String CLOSE_SUCCESS = "成功關閉活動";
 }
