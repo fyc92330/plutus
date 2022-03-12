@@ -75,4 +75,5 @@
         FROM APP_USER AU
         JOIN USER_NUM_LIST UNL ON AU.USER_NUM = UNL.USER_NUM
     </select>
+
 </mapper>

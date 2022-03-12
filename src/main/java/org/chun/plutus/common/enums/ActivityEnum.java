@@ -61,4 +61,40 @@ public class ActivityEnum {
           .orElseThrow(() -> new EnumConstantNotPresentException(Status.class, status));
     }
   }
+
+  public enum PayType {
+
+    /** 預設:平均分配 */
+    DEFAULT("0","平均分配"),
+    /** 平均分配 */
+    AVERAGE("1","平均分配"),
+    /** 依時間比例分 */
+    SCALE("2","依時間比例分"),
+    /** 選擇性分配 */
+    CHOICE("3","依時間比例分");
+
+    private final String type;
+
+    private final String name;
+
+    PayType(String type, String name) {
+      this.type = type;
+      this.name = name;
+    }
+
+    public String val() {
+      return this.type;
+    }
+
+    public String getSimpleName() {
+      return
+    }
+
+    public static PayType getEnum(String type) {
+      return Arrays.stream(values())
+          .filter(e -> e.val().equals(type))
+          .findAny()
+          .orElseThrow(() -> new EnumConstantNotPresentException(ActivityPayTypeEnum.class, type));
+    }
+  }
 }

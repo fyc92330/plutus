@@ -23,4 +23,10 @@ public class LineCommonMessageConst {
   public static final String HOST_CANNOT_LEAVE = "主辦人不得離開活動";
 
   public static final String CLOSE_SUCCESS = "成功關閉活動";
+
+  public static final String PAY_TYPE_SETTING_ALREADY = "付款方式已設定";
+
+  public static final String SETTING_VALUE_EMPTY = "請輸入設定的值";
+
+  public static final String FUNCTION_NOT_SUPPORT = "此功能尚未支援";
 }

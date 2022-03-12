@@ -3,28 +3,53 @@ package org.chun.plutus.api.mod;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.chun.plutus.common.dao.ActivityBasicDao;
+import org.chun.plutus.common.dao.ActivityDtDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
+import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.dto.JoinCodeDto;
+import org.chun.plutus.common.dto.PaymentTimestampDto;
 import org.chun.plutus.common.enums.ActivityEnum;
+import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.CustomValueEmptyException;
+import org.chun.plutus.common.exceptions.FunctionNotSupportException;
 import org.chun.plutus.common.exceptions.HostLeavingException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
+import org.chun.plutus.common.exceptions.PayTypeChangeAlreadyException;
 import org.chun.plutus.common.exceptions.UserNotHostException;
 import org.chun.plutus.common.exceptions.UserWithoutActivityException;
+import org.chun.plutus.common.rvo.ActivityViewRvo;
 import org.chun.plutus.common.vo.ActivityBasicVo;
+import org.chun.plutus.common.vo.ActivityDtVo;
 import org.chun.plutus.common.vo.ActivitySetVo;
+import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.DaoValidationUtil;
 import org.chun.plutus.util.MapUtil;
-import org.chun.uploadcc.IUploadCcService;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static org.chun.plutus.common.constant.LineChannelViewConst.ACTIVITY_VIEW;
+import static org.chun.plutus.common.constant.LineChannelViewConst.GLOBAL_VIEW;
+import static org.chun.plutus.common.constant.LineChannelViewConst.GUEST_VIEW;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.COST;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.PAYER;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TITLE;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_AVERAGE;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_CHOICE;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_SCALE;
 import static org.chun.plutus.util.MomentUtil.Date.yyyyMMdd;
 import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 
@@ -36,8 +61,8 @@ public class ActivityMod {
   private static final String URL = "https://line.me/R/oaMessage/@530vubeg/?";
   private final ActivityBasicDao activityBasicDao;
   private final ActivitySetDao activitySetDao;
-  private final MessageMod messageMod;
-  private final IUploadCcService uploadCcService;
+  private final ActivityDtDao activityDtDao;
+  private final AppUserDao appUserDao;
 
   /**
    * 直接建立活動
@@ -123,6 +148,125 @@ public class ActivityMod {
           return vo;
         })
         .forEach(vo -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(vo), vo));
+
+    // 最後時間點為最後一個活動節點
+    this.saveActivityNode(joinCodeDto);
+  }
+
+  /**
+   * 儲存活動節點
+   *
+   * @param joinCodeDto
+   */
+  public void saveActivityNode(JoinCodeDto joinCodeDto) {
+    final String joinCode = joinCodeDto.getJoinCode();
+    ActivityDtVo lastActivityDtVo = activityDtDao.getLastActivityByJoinCode(joinCode);
+    ActivityDtVo nextActivityDtVo = new ActivityDtVo();
+    nextActivityDtVo.setPrePaidUser(joinCodeDto.getUserNum()); //v2調整,可選擇
+    nextActivityDtVo.setPayType(ActivityEnum.PayType.DEFAULT.val());
+    if (lastActivityDtVo == null) {
+      ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
+      nextActivityDtVo.setActNum(activityBasicVo.getActNum());
+      nextActivityDtVo.setAcdTitle(activityBasicVo.getActTitle());
+      nextActivityDtVo.setStartDate(activityBasicVo.getStartDate());
+      nextActivityDtVo.setEndDate(activityBasicVo.getEndDate());
+    } else {
+      nextActivityDtVo.setActNum(lastActivityDtVo.getActNum());
+      nextActivityDtVo.setAcdTitle(lastActivityDtVo.getAcdTitle());
+      nextActivityDtVo.setStartDate(lastActivityDtVo.getEndDate());
+      nextActivityDtVo.setEndDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+    }
+    activityDtDao.insert(nextActivityDtVo);
+  }
+
+  /**
+   * 取得使用者當下正在主持&進行的活動
+   *
+   * @param userNum
+   * @return
+   */
+  public ActivityDtVo getUserCurrentActivityNode(Long userNum) {
+    return activityDtDao.getLastActivityByUserNum(userNum);
+  }
+
+  /**
+   * 設定活動節點
+   *
+   * @param menuEnum
+   * @param commandValue
+   * @param acdNum
+   */
+  public void setNodeWithCustomValue(JoinCodeEnum.Menu menuEnum, String commandValue, Long acdNum) {
+    ActivityDtVo activityDtVo = new ActivityDtVo();
+    activityDtVo.setAcdNum(acdNum);
+    switch (menuEnum) {
+      case TITLE:
+        activityDtVo.setAcdTitle(commandValue);
+        break;
+      case COST:
+        activityDtVo.setCost(BigDecimal.valueOf(Double.parseDouble(commandValue)));
+        break;
+      case PAYER:
+        final Long payerUserNum = getPayerUserNum(commandValue);
+        if (payerUserNum != null) activityDtVo.setPrePaidUser(payerUserNum);
+        break;
+      default:
+        if (menuEnum == TYPE_AVERAGE) {
+          activityDtVo.setPayType(TYPE_AVERAGE.val());
+        } else if (menuEnum == TYPE_SCALE) {
+          activityDtVo.setPayType(TYPE_SCALE.val());
+        } else if (menuEnum == TYPE_CHOICE) {
+          activityDtVo.setPayType(TYPE_CHOICE.val());
+        }
+    }
+
+    DaoValidationUtil.validateResultIsOne(() -> activityDtDao.update(activityDtVo), activityDtVo);
+  }
+
+  /**
+   * 依據角色取得不同的檢視資訊
+   *
+   * @param joinCodeDto
+   * @return
+   */
+  public String sendActivityViewDistinguishRole(JoinCodeDto joinCodeDto) {
+    final String joinCode = joinCodeDto.getJoinCode();
+    final Long userNum = joinCodeDto.getUserNum();
+    ActivityViewRvo activityViewRvo = activityBasicDao.getCurrentActivityView(joinCode, userNum);
+    if (activityViewRvo == null) {
+      ActivityBasicVo activityQueryVo = new ActivityBasicVo();
+      activityQueryVo.setJoinCode(joinCode);
+      // 1:沒有活動 2:沒有參加活動
+      if (0 == activityBasicDao.count(activityQueryVo)) throw new ActivityNotFoundException();
+      throw new UserWithoutActivityException();
+    }
+
+    // 子活動標題
+    final List<ActivityDtVo> activityDtVoList = activityViewRvo.getActivityDtVoList();
+    List<String> acdTitleList = activityDtVoList.stream()
+        .map(ActivityDtVo::getAcdTitle)
+        .collect(Collectors.toList());
+    // 處理個人消費金額
+    BigDecimal personalPay = handleSubActivityPersonalPayment(activityDtVoList, userNum, activityViewRvo.getActNum());
+    // 取出變數組裝訊息
+    final String actTitle = activityViewRvo.getActTitle();
+    final String hostUserName = activityViewRvo.getHostUserName();
+    final Long userCount = activityViewRvo.getUserCount();
+    final BigDecimal currentCost = activityViewRvo.getCurrentCost();
+    final String nowDate = activityViewRvo.getNowDate();
+    final String userName = activityViewRvo.getUserName();
+    StringBuilder view = new StringBuilder();
+    view.append(String.format(GLOBAL_VIEW, actTitle, hostUserName, nowDate, userCount, currentCost.longValue(),
+            yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()), userName, personalPay.longValue()))
+        .append(ACTIVITY_VIEW);
+    if (activityViewRvo.getIsHost()) {
+      activityDtVoList.forEach(dtVo ->
+          view.append(String.format(GUEST_VIEW, dtVo.getAcdTitle(), dtVo.getStartDate(), dtVo.getEndDate(),
+              dtVo.getCost().longValue(), ActivityEnum.PayType.getEnum(dtVo.getPayType()).getSimpleName(), dtVo.getPayerName())));
+    } else {
+      acdTitleList.forEach(title -> view.append(title.concat("\n")));
+    }
+    return view.toString();
   }
 
   /** ================================================= validation ================================================= */
@@ -178,6 +322,36 @@ public class ActivityMod {
         .orElseThrow(UserNotHostException::new);
   }
 
+  /**
+   * 檢核使用者有正在進行中的活動
+   *
+   * @param userNum
+   */
+  public void validUserActivityExists(Long userNum) {
+    ActivityBasicVo activityQueryVo = new ActivityBasicVo();
+    activityQueryVo.setUserNum(userNum);
+    activityQueryVo.setActStatus(ActivityEnum.Status.PROGRESS.val());
+    if (0 == activityBasicDao.count(activityQueryVo)) throw new ActivityNotFoundException();
+  }
+
+  /**
+   * 檢核menu的值
+   *
+   * @param menuEnum
+   * @param commandValue
+   * @param originPayType
+   */
+  public void validSubMenuAction(JoinCodeEnum.Menu menuEnum, String commandValue, String originPayType) {
+    JoinCodeEnum.Menu[] settingMenus = new JoinCodeEnum.Menu[]{TITLE, COST, PAYER};
+    JoinCodeEnum.Menu[] payTypeMenus = new JoinCodeEnum.Menu[]{TYPE_AVERAGE, TYPE_SCALE, TYPE_CHOICE};
+    if (Arrays.asList(settingMenus).contains(menuEnum) && StringUtils.isBlank(commandValue))
+      throw new CustomValueEmptyException();
+    if (Arrays.asList(payTypeMenus).contains(menuEnum) &&
+        ActivityEnum.PayType.getEnum(originPayType) != ActivityEnum.PayType.DEFAULT) {
+      throw new PayTypeChangeAlreadyException();
+    }
+  }
+
   /** =================================================== private ================================================== */
 
 
@@ -204,6 +378,95 @@ public class ActivityMod {
           return set;
         })
         .forEach(set -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(set), set));
+  }
+
+  /**
+   * 取得預先付款人員
+   *
+   * @param commandValue
+   * @return
+   */
+  private Long getPayerUserNum(String commandValue) {
+    final String userName = commandValue.substring(1).trim();
+    return appUserDao.query(MapUtil.newHashMap("userLineName", userName)).stream()
+        .findAny()
+        .map(AppUserVo::getUserNum)
+        .orElse(null);
+  }
+
+  private BigDecimal handleSubActivityPersonalPayment(List<ActivityDtVo> activityDtVoList, Long userNum, Long actNum) {
+    // 取得參與者清單
+    List<ActivitySetVo> activitySetVoList = activitySetDao.query(MapUtil.newHashMap("actNum", actNum)).stream()
+        .filter(vo -> vo.getEndDate() == null
+            || ActivityEnum.SetStatus.LEAVE == ActivityEnum.SetStatus.getEnum(vo.getStatus()))
+        .collect(Collectors.toList());
+    BigDecimal personalPayment = BigDecimal.ZERO;
+
+    for (ActivityDtVo activityDtVo : activityDtVoList) {
+      BigDecimal pay = BigDecimal.ZERO;
+
+      // 先判斷是不是先付錢的人
+      final boolean isPayer = userNum.equals(activityDtVo.getPrePaidUser());
+      final BigDecimal cost = activityDtVo.getCost();
+      final ActivityEnum.PayType payTypeEnum = ActivityEnum.PayType.getEnum(activityDtVo.getPayType());
+      final LocalDateTime startDate = yyyy_MM_dd_HH_mm_ss.parse(activityDtVo.getStartDate());
+      final LocalDateTime endDate = yyyy_MM_dd_HH_mm_ss.parse(activityDtVo.getEndDate());
+
+      switch (payTypeEnum) {
+        case DEFAULT:
+        case AVERAGE:
+          long userCount = activitySetVoList.stream()
+              .filter(vo -> {
+                final String userLeaveDate = vo.getEndDate();
+                return userLeaveDate == null || yyyy_MM_dd_HH_mm_ss.parse(userLeaveDate).compareTo(startDate) >= 0;
+              })
+              .count();
+          pay = cost.divide(BigDecimal.valueOf(userCount), RoundingMode.HALF_UP);
+          break;
+        case SCALE:
+          PaymentTimestampDto paymentTimestampDto = handlePaymentWithTimestamp(activitySetVoList, startDate, endDate, userNum);
+          pay = cost.multiply(BigDecimal.valueOf(paymentTimestampDto.getUserTimestamp()))
+              .divide(BigDecimal.valueOf(paymentTimestampDto.getTotalTimestamp()), RoundingMode.HALF_UP);
+          break;
+        case CHOICE:
+          throw new FunctionNotSupportException();
+      }
+
+      personalPayment = isPayer
+          ? personalPayment.add(pay)
+          : personalPayment.subtract(pay);
+    }
+
+    return personalPayment;
+  }
+
+  /**
+   * 依時間比例取得運算物件
+   *
+   * @param activitySetVoList
+   * @param startDate
+   * @param endDate
+   * @param userNum
+   * @return
+   */
+  private PaymentTimestampDto handlePaymentWithTimestamp(List<ActivitySetVo> activitySetVoList, LocalDateTime startDate, LocalDateTime endDate, Long userNum) {
+    long totalTime = 0L;
+    long userTime = 0L;
+    final long joinStartTimestamp = Timestamp.valueOf(startDate).getTime();
+    for (ActivitySetVo activitySetVo : activitySetVoList) {
+      final String userLeaveDate = activitySetVo.getEndDate();
+      if (userLeaveDate == null || yyyy_MM_dd_HH_mm_ss.parse(userLeaveDate).compareTo(startDate) >= 0) {
+
+        final long joinEndTimestamp = userLeaveDate == null
+            ? Timestamp.valueOf(endDate).getTime()
+            : Timestamp.valueOf(userLeaveDate).getTime();
+        final long userJoinTimestamp = joinEndTimestamp - joinStartTimestamp;
+        if (userNum.equals(activitySetVo.getUserNum())) userTime = userJoinTimestamp;
+        totalTime = totalTime + userJoinTimestamp;
+      }
+    }
+
+    return new PaymentTimestampDto(userTime, totalTime);
   }
 
 

@@ -8,20 +8,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.ActivityMod;
-import org.chun.plutus.api.mod.MessageMod;
-import org.chun.plutus.common.dao.ActivityBasicDao;
-import org.chun.plutus.common.dao.ActivitySetDao;
-import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.CustomValueEmptyException;
+import org.chun.plutus.common.exceptions.FunctionNotSupportException;
 import org.chun.plutus.common.exceptions.HostLeavingException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
+import org.chun.plutus.common.exceptions.PayTypeChangeAlreadyException;
 import org.chun.plutus.common.exceptions.UserNotHostException;
 import org.chun.plutus.common.exceptions.UserWithoutActivityException;
 import org.chun.plutus.common.vo.ActivityBasicVo;
+import org.chun.plutus.common.vo.ActivityDtVo;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,10 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_CL
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DIFFERENT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CLOSE_SUCCESS;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.FUNCTION_NOT_SUPPORT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.HOST_CANNOT_LEAVE;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.PAY_TYPE_SETTING_ALREADY;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.SETTING_VALUE_EMPTY;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.USER_NOT_HOST;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.WITHOUT_ACTIVITY;
 
@@ -41,11 +44,7 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.WITHOUT_ACT
 @Service
 public class MessageFacade {
 
-  private final MessageMod messageMod;
   private final ActivityMod activityMod;
-  private final AppUserDao appUserDao;
-  private final ActivityBasicDao activityBasicDao;
-  private final ActivitySetDao activitySetDao;
   private final LineMessageHelper lineMessageHelper;
 
   /**
@@ -69,8 +68,8 @@ public class MessageFacade {
    */
   private void handleTextMessage(MessageEvent<TextMessageContent> event, Long userNum) {
     final String text = event.getMessage().getText();
-    Arrays.stream(JoinCodeEnum.values())
-        .map(JoinCodeEnum::val)
+    Arrays.stream(JoinCodeEnum.Action.values())
+        .map(JoinCodeEnum.Action::val)
         .filter(text::startsWith)
         .findAny()
         .ifPresent(prefix -> handleJoinCodeText(event, userNum, prefix));
@@ -86,7 +85,7 @@ public class MessageFacade {
    * @param prefix
    */
   public void handleJoinCodeText(MessageEvent<TextMessageContent> event, Long userNum, String prefix) {
-    final JoinCodeEnum joinCodeEnum = JoinCodeEnum.getEnum(prefix);
+    final JoinCodeEnum.Action actionEnum = JoinCodeEnum.Action.getEnum(prefix);
     final String joinCode = Optional.ofNullable(event.getMessage())
         .map(TextMessageContent::getText)
         .map(text -> text.replace(prefix, Strings.EMPTY))
@@ -94,11 +93,12 @@ public class MessageFacade {
     final JoinCodeDto joinCodeDto = new JoinCodeDto(event.getReplyToken(), event.getSource().getUserId(), joinCode, userNum);
     String errorMsg = null;
     try {
-      switch (joinCodeEnum) {
+      switch (actionEnum) {
         case CREATE:
           createEvent(joinCodeDto);
           break;
         case VIEW:
+          viewEvent(joinCodeDto);
           break;
         case INVITE:// v2實作
           break;
@@ -114,12 +114,10 @@ public class MessageFacade {
           closeEvent(joinCodeDto);
           break;
         case NODE:
+          nodeEvent(joinCodeDto);
           break;
-        case SUB_TYPE:
-          break;
-        case SUB_COST:
-          break;
-        case SUB_PAYER:
+        case MENU:
+          menuEvent(joinCodeDto);
           break;
         case FORCE_CREATE:
           forceCreateEvent(joinCodeDto);
@@ -137,9 +135,38 @@ public class MessageFacade {
       errorMsg = USER_NOT_HOST;
     } catch (HostLeavingException hl) {
       errorMsg = HOST_CANNOT_LEAVE;
+    } catch (PayTypeChangeAlreadyException pa) {
+      errorMsg = PAY_TYPE_SETTING_ALREADY;
+    } catch (CustomValueEmptyException ce) {
+      errorMsg = SETTING_VALUE_EMPTY;
+    } catch (FunctionNotSupportException fe) {
+      errorMsg = FUNCTION_NOT_SUPPORT;
     } finally {
       if (errorMsg != null) lineMessageHelper.sendErrorMessage(joinCodeDto, errorMsg);
     }
+  }
+
+  /**
+   * 設定菜單的選項 (v2 remove)
+   *
+   * @param joinCodeDto
+   */
+  public void menuEvent(JoinCodeDto joinCodeDto) {
+    final String commandCode = joinCodeDto.getJoinCode();
+    Arrays.stream(JoinCodeEnum.Menu.values())
+        .map(JoinCodeEnum.Menu::val)
+        .filter(commandCode::startsWith)
+        .findAny()
+        .ifPresent(action -> {
+          activityMod.validUserActivityExists(joinCodeDto.getUserNum());
+          final String commandValue = commandCode.replace(action, Strings.EMPTY).trim();
+          JoinCodeEnum.Menu menuEnum = JoinCodeEnum.Menu.getEnum(action);
+          // 取得這次節點的資訊
+          ActivityDtVo activityDtVo = activityMod.getUserCurrentActivityNode(joinCodeDto.getUserNum());
+          if (activityDtVo == null) return;
+          activityMod.validSubMenuAction(menuEnum, commandValue, activityDtVo.getPayType());
+          activityMod.setNodeWithCustomValue(menuEnum, commandValue, activityDtVo.getAcdNum());
+        });
   }
 
   /** =================================================== private ================================================== */
@@ -205,4 +232,26 @@ public class MessageFacade {
     lineMessageHelper.sendTextMessage(joinCodeDto, CLOSE_SUCCESS);
   }
 
+  /**
+   * 建立活動節點
+   *
+   * @param joinCodeDto
+   */
+  private void nodeEvent(JoinCodeDto joinCodeDto) {
+    activityMod.validActivityExists(joinCodeDto.getJoinCode());
+    activityMod.saveActivityNode(joinCodeDto);
+  }
+
+  /**
+   * 檢視活動
+   *
+   * @param joinCodeDto
+   */
+  private void viewEvent(JoinCodeDto joinCodeDto) {
+    final String joinCode = joinCodeDto.getJoinCode();
+    activityMod.validActivityExists(joinCode);
+    activityMod.validActivitySetExists(joinCode, joinCodeDto.getUserNum());
+    final String view = activityMod.sendActivityViewDistinguishRole(joinCodeDto);
+    lineMessageHelper.sendTextMessage(joinCodeDto, view);
+  }
 }
