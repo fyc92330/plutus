@@ -29,4 +29,6 @@ public class LineCommonMessageConst {
   public static final String SETTING_VALUE_EMPTY = "請輸入設定的值";
 
   public static final String FUNCTION_NOT_SUPPORT = "此功能尚未支援";
+
+  public static final String NODE_CREATE_SUCCESS = "節點已建立，\n請點選活動選單進行設定";
 }

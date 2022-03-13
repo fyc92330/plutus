@@ -8,21 +8,29 @@ public class JoinCodeEnum {
     /** 加入 */
     JOIN("$join-"),
     /** 離開 */
-    LEAVE("$leave-"),
+    LEAVE("$leave"),
     /** 邀請 */
     INVITE("$invite-"),
     /** 取消 */
     CANCEL("$cancel-"),
     /** 建立 */
-    CREATE("$create-"),
+    CREATE("$create"),
     /** 關閉 */
-    CLOSE("$close-"),
+    CLOSE("$close"),
     /** 建立節點 */
-    NODE("$node-"),
+    NODE("$node"),
     /** Menu Action */
     MENU("$menu-"),
     /** 檢視 */
-    VIEW("$view-"),
+    VIEW("$view"),
+    /** 返回主選單 */
+    MAIN_MENU("$main_selector"),
+    /** 開啟子選單 */
+    SUB_MENU("$sub_selector"),
+    /** 叫出template */
+    CALL_MENU("$call_menu"),
+    /** QrCode */
+    QRCODE("$qrcode"),
     /** 直接建立 */
     FORCE_CREATE("$force_create-");//todo v2移除
 

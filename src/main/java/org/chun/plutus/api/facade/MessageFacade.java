@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.api.helper.LineMessageHelper;
+import org.chun.plutus.api.helper.LineRichMenuHelper;
 import org.chun.plutus.api.mod.ActivityMod;
 import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.enums.JoinCodeEnum;
@@ -34,6 +35,7 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NO
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CLOSE_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.FUNCTION_NOT_SUPPORT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.HOST_CANNOT_LEAVE;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.NODE_CREATE_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.PAY_TYPE_SETTING_ALREADY;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.SETTING_VALUE_EMPTY;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.USER_NOT_HOST;
@@ -46,6 +48,7 @@ public class MessageFacade {
 
   private final ActivityMod activityMod;
   private final LineMessageHelper lineMessageHelper;
+  private final LineRichMenuHelper lineRichMenuHelper;
 
   /**
    * 處理訊息事件
@@ -90,7 +93,8 @@ public class MessageFacade {
         .map(TextMessageContent::getText)
         .map(text -> text.replace(prefix, Strings.EMPTY))
         .orElse(Strings.EMPTY);
-    final JoinCodeDto joinCodeDto = new JoinCodeDto(event.getReplyToken(), event.getSource().getUserId(), joinCode, userNum);
+    final String userId = event.getSource().getUserId();
+    final JoinCodeDto joinCodeDto = new JoinCodeDto(event.getReplyToken(), userId, joinCode, userNum);
     String errorMsg = null;
     try {
       switch (actionEnum) {
@@ -121,6 +125,9 @@ public class MessageFacade {
           break;
         case FORCE_CREATE:
           forceCreateEvent(joinCodeDto);
+        case MAIN_MENU:
+        case SUB_MENU:
+          richMenuEvent(actionEnum, userId);
           break;
       }
     } catch (ActivityNotFoundException ae) {
@@ -215,9 +222,10 @@ public class MessageFacade {
    * @param joinCodeDto
    */
   private void leaveEvent(JoinCodeDto joinCodeDto) {
-    final String joinCode = joinCodeDto.getJoinCode();
+    final String joinCode = this.confirmCurrentActivity(joinCodeDto);
+    joinCodeDto.setJoinCode(joinCode);
     activityMod.validActivityExists(joinCode);
-    activityMod.validActivitySetExists(joinCode, joinCodeDto.getUserNum());
+    activityMod.validActivitySetExists(joinCode, joinCodeDto.getUserNum(), true);
     activityMod.leaveActivityByJoinCode(joinCodeDto);
   }
 
@@ -227,7 +235,9 @@ public class MessageFacade {
    * @param joinCodeDto
    */
   private void closeEvent(JoinCodeDto joinCodeDto) {
-    activityMod.validUserIsHost(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+    final String joinCode = this.confirmCurrentActivity(joinCodeDto);
+    joinCodeDto.setJoinCode(joinCode);
+    activityMod.validUserIsHost(joinCodeDto.getUserNum(), joinCode);
     activityMod.closeActivityByJoinCode(joinCodeDto);
     lineMessageHelper.sendTextMessage(joinCodeDto, CLOSE_SUCCESS);
   }
@@ -238,20 +248,45 @@ public class MessageFacade {
    * @param joinCodeDto
    */
   private void nodeEvent(JoinCodeDto joinCodeDto) {
-    activityMod.validActivityExists(joinCodeDto.getJoinCode());
+    final String joinCode = this.confirmCurrentActivity(joinCodeDto);
+    joinCodeDto.setJoinCode(joinCode);
+    activityMod.validActivityExists(joinCode);
     activityMod.saveActivityNode(joinCodeDto);
+    lineMessageHelper.sendTextMessage(joinCodeDto, NODE_CREATE_SUCCESS);
   }
 
   /**
    * 檢視活動
-   *
-   * @param joinCodeDto
    */
   private void viewEvent(JoinCodeDto joinCodeDto) {
-    final String joinCode = joinCodeDto.getJoinCode();
+    final Long userNum = joinCodeDto.getUserNum();
+    final String joinCode = this.confirmCurrentActivity(joinCodeDto);
+    joinCodeDto.setJoinCode(joinCode);
     activityMod.validActivityExists(joinCode);
-    activityMod.validActivitySetExists(joinCode, joinCodeDto.getUserNum());
-    final String view = activityMod.sendActivityViewDistinguishRole(joinCodeDto);
+    activityMod.validActivitySetExists(joinCode, userNum, false);
+    final String view = activityMod.sendActivityViewDistinguishRole(joinCode, userNum);
     lineMessageHelper.sendTextMessage(joinCodeDto, view);
   }
+
+  /**
+   * 更換選單
+   *
+   * @param actionEnum
+   * @param userId
+   */
+  private void richMenuEvent(JoinCodeEnum.Action actionEnum, String userId) {
+    if (actionEnum == JoinCodeEnum.Action.SUB_MENU) {
+      lineRichMenuHelper.subMenuOnChange(userId);
+    } else if (actionEnum == JoinCodeEnum.Action.MAIN_MENU) {
+      lineRichMenuHelper.mainMenuOnChange(userId);
+    }
+  }
+
+  private String confirmCurrentActivity(JoinCodeDto joinCodeDto) {
+    final String joinCode = activityMod.getJoinCodeBySetUserNum(joinCodeDto.getUserNum());
+    if (joinCode == null) throw new UserWithoutActivityException();
+    return joinCode;
+  }
+
+
 }

@@ -1,6 +1,7 @@
 package org.chun.plutus.api.mod;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +29,7 @@ import org.chun.plutus.common.vo.ActivityDtVo;
 import org.chun.plutus.common.vo.ActivitySetVo;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.DaoValidationUtil;
+import org.chun.plutus.util.JsonBean;
 import org.chun.plutus.util.MapUtil;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 import static org.chun.plutus.common.constant.LineChannelViewConst.ACTIVITY_VIEW;
 import static org.chun.plutus.common.constant.LineChannelViewConst.GLOBAL_VIEW;
 import static org.chun.plutus.common.constant.LineChannelViewConst.GUEST_VIEW;
+import static org.chun.plutus.common.constant.LineChannelViewConst.NONE_CLOSE;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.COST;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.PAYER;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TITLE;
@@ -51,6 +54,7 @@ import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_AVERAGE;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_CHOICE;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_SCALE;
 import static org.chun.plutus.util.MomentUtil.Date.yyyyMMdd;
+import static org.chun.plutus.util.MomentUtil.Date.yyyy_MM_dd;
 import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 
 @Slf4j
@@ -174,7 +178,9 @@ public class ActivityMod {
       nextActivityDtVo.setActNum(lastActivityDtVo.getActNum());
       nextActivityDtVo.setAcdTitle(lastActivityDtVo.getAcdTitle());
       nextActivityDtVo.setStartDate(lastActivityDtVo.getEndDate());
-      nextActivityDtVo.setEndDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+      //把前一個關掉
+      lastActivityDtVo.setEndDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
+      DaoValidationUtil.validateResultIsOne(() -> activityDtDao.update(lastActivityDtVo), lastActivityDtVo);
     }
     activityDtDao.insert(nextActivityDtVo);
   }
@@ -226,13 +232,14 @@ public class ActivityMod {
   /**
    * 依據角色取得不同的檢視資訊
    *
-   * @param joinCodeDto
+   * @param joinCode
+   * @param userNum
    * @return
    */
-  public String sendActivityViewDistinguishRole(JoinCodeDto joinCodeDto) {
-    final String joinCode = joinCodeDto.getJoinCode();
-    final Long userNum = joinCodeDto.getUserNum();
+  @SneakyThrows
+  public String sendActivityViewDistinguishRole(String joinCode, Long userNum) {
     ActivityViewRvo activityViewRvo = activityBasicDao.getCurrentActivityView(joinCode, userNum);
+    log.info("{}", JsonBean.objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(activityViewRvo));
     if (activityViewRvo == null) {
       ActivityBasicVo activityQueryVo = new ActivityBasicVo();
       activityQueryVo.setJoinCode(joinCode);
@@ -253,20 +260,34 @@ public class ActivityMod {
     final String hostUserName = activityViewRvo.getHostUserName();
     final Long userCount = activityViewRvo.getUserCount();
     final BigDecimal currentCost = activityViewRvo.getCurrentCost();
-    final String nowDate = activityViewRvo.getNowDate();
+    final String nowDate = yyyy_MM_dd.format(LocalDate.now());
     final String userName = activityViewRvo.getUserName();
     StringBuilder view = new StringBuilder();
     view.append(String.format(GLOBAL_VIEW, actTitle, hostUserName, nowDate, userCount, currentCost.longValue(),
-            yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()), userName, personalPay.longValue()))
-        .append(ACTIVITY_VIEW);
-    if (activityViewRvo.getIsHost()) {
-      activityDtVoList.forEach(dtVo ->
-          view.append(String.format(GUEST_VIEW, dtVo.getAcdTitle(), dtVo.getStartDate(), dtVo.getEndDate(),
-              dtVo.getCost().longValue(), ActivityEnum.PayType.getEnum(dtVo.getPayType()).getSimpleName(), dtVo.getPayerName())));
-    } else {
-      acdTitleList.forEach(title -> view.append(title.concat("\n")));
+        yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()), userName, personalPay.longValue()));
+
+    // 組裝子活動
+    if (!activityDtVoList.isEmpty()) {
+      view.append(ACTIVITY_VIEW);
+      if (activityViewRvo.getIsHost()) {
+        activityDtVoList.forEach(dtVo -> {
+          String endDate = dtVo.getEndDate();
+          if (endDate == null) endDate = NONE_CLOSE;
+          view.append(String.format(GUEST_VIEW, dtVo.getAcdTitle(), dtVo.getStartDate(), endDate,
+              dtVo.getCost().longValue(), ActivityEnum.PayType.getEnum(dtVo.getPayType()).getSimpleName(), dtVo.getPayerName()));
+        });
+
+      } else {
+        acdTitleList.forEach(title -> view.append(title.concat("\n")));
+      }
     }
     return view.toString();
+  }
+
+  public String getJoinCodeBySetUserNum(Long userNum) {
+    return Optional.ofNullable(activityBasicDao.getActivityBySetUserNum(userNum))
+        .map(ActivityBasicVo::getJoinCode)
+        .orElse(null);
   }
 
   /** ================================================= validation ================================================= */
@@ -302,11 +323,11 @@ public class ActivityMod {
    * @param joinCode
    * @param userNum
    */
-  public void validActivitySetExists(String joinCode, Long userNum) {
+  public void validActivitySetExists(String joinCode, Long userNum, boolean isLeave) {
     ActivitySetVo activitySetVo = activitySetDao.getInProgressActivity(userNum, ActivityEnum.SetStatus.JOIN.val());
     if (activitySetVo == null) throw new UserWithoutActivityException();
     if (!joinCode.equals(activitySetVo.getJoinCode())) throw new ActivityDifferentException();
-    if (userNum.equals(activitySetVo.getHostUserNum())) throw new HostLeavingException();
+    if (isLeave && userNum.equals(activitySetVo.getHostUserNum())) throw new HostLeavingException();
   }
 
   /**
@@ -402,6 +423,7 @@ public class ActivityMod {
         .collect(Collectors.toList());
     BigDecimal personalPayment = BigDecimal.ZERO;
 
+
     for (ActivityDtVo activityDtVo : activityDtVoList) {
       BigDecimal pay = BigDecimal.ZERO;
 
@@ -410,7 +432,10 @@ public class ActivityMod {
       final BigDecimal cost = activityDtVo.getCost();
       final ActivityEnum.PayType payTypeEnum = ActivityEnum.PayType.getEnum(activityDtVo.getPayType());
       final LocalDateTime startDate = yyyy_MM_dd_HH_mm_ss.parse(activityDtVo.getStartDate());
-      final LocalDateTime endDate = yyyy_MM_dd_HH_mm_ss.parse(activityDtVo.getEndDate());
+      final String endDateStr = activityDtVo.getEndDate();
+      final LocalDateTime endDate = endDateStr == null
+          ? LocalDateTime.now()
+          : yyyy_MM_dd_HH_mm_ss.parse(endDateStr);
 
       switch (payTypeEnum) {
         case DEFAULT:

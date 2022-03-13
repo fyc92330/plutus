@@ -15,6 +15,8 @@ public interface ActivityBasicDao extends ActivityBasicBaseDao {
 
   ActivityViewRvo getCurrentActivityView(@Param("joinCode") String joinCode, @Param("userNum") Long userNum);
 
+  ActivityBasicVo getActivityBySetUserNum(@Param("userNum") Long userNum);
+
   ActivityBasicVo getOwnerActivityInfo(@Param("userNum") Long userNum);
 
   CancelActivityRvo getAndCancelAllActivitySet(@Param("joinCode") String joinCode);

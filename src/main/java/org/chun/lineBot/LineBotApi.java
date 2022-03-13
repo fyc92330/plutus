@@ -30,4 +30,10 @@ public interface LineBotApi {
       @Header(HttpHeaders.CONTENT_TYPE) String contentType,
       @Header(HttpHeaders.AUTHORIZATION) String channelAccessToken);
 
+  @POST("v2/bot/user/{userId}/richmenu/{richMenuId}")
+  Call<ResponseBody> menuChange(
+      @Header(HttpHeaders.AUTHORIZATION) String channelAccessToken,
+      @Path("userId") String userId,
+      @Path("richMenuId") String richMenuId);
+
 }

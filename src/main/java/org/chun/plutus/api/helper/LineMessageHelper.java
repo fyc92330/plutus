@@ -29,7 +29,6 @@ public class LineMessageHelper {
 
   private final ILineBotService lineBotService;
 
-
   /**
    * 歡迎訊息
    *
