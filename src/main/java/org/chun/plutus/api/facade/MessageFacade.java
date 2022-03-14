@@ -304,8 +304,10 @@ public class MessageFacade {
     final String qrcodeUrl = qrcodeUrlDto.getQrcodeUrl();
     String imageUrl;
     if (imageUploadHelper.qrcodeExists(qrcodeUrl)) {
+      log.info("路徑正確");
       imageUrl = qrcodeUrl;
     } else {
+      log.info("建立新的qrcode路徑");
       // 建立新的qrcode上傳
       final String url = QRCODE_INVITE_URL.concat(JoinCodeUtil.genJoinCode(joinCode));
       ByteArrayOutputStream os = QrcodeUtil.generateQrcode(url);
