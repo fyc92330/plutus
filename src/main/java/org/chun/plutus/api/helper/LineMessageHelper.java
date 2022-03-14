@@ -3,6 +3,7 @@ package org.chun.plutus.api.helper;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.MessageAction;
+import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
@@ -15,6 +16,8 @@ import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.util.JoinCodeUtil;
 import org.springframework.stereotype.Service;
+
+import java.net.URI;
 
 import static org.chun.plutus.common.constant.LineChannelViewConst.APP_VERSION;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CONFIRM_CREATE;
@@ -97,6 +100,18 @@ public class LineMessageHelper {
   public void sendTextMessage(JoinCodeDto joinCodeDto, String textContent) {
     replyMessage(new TextMessage(textContent), joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
 
+  }
+
+  /**
+   * 傳送圖片訊息
+   *
+   * @param joinCodeDto
+   * @param imageUrl
+   */
+  public void sendImageMessage(JoinCodeDto joinCodeDto, String imageUrl) {
+    URI uri = URI.create(imageUrl);
+    ImageMessage imageMessage = new ImageMessage(uri, uri);
+    replyMessage(imageMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
   }
 
   /** =================================================== private ================================================== */

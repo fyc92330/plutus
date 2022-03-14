@@ -11,6 +11,7 @@ import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.dto.PaymentTimestampDto;
+import org.chun.plutus.common.dto.QrcodeUrlDto;
 import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
@@ -284,10 +285,40 @@ public class ActivityMod {
     return view.toString();
   }
 
+  /**
+   * 取得參加中的邀請碼
+   *
+   * @param userNum
+   * @return
+   */
   public String getJoinCodeBySetUserNum(Long userNum) {
     return Optional.ofNullable(activityBasicDao.getActivityBySetUserNum(userNum))
         .map(ActivityBasicVo::getJoinCode)
         .orElse(null);
+  }
+
+  /**
+   * 取得活動邀請qrcode的路徑
+   *
+   * @param joinCode
+   * @return
+   */
+  public QrcodeUrlDto getQrcodeUrlByJoinCode(String joinCode) {
+    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
+    return new QrcodeUrlDto(activityBasicVo.getActNum(), activityBasicVo.getQrcodeUrl());
+  }
+
+  /**
+   * qrcode路徑寫入db
+   *
+   * @param actNum
+   * @param qrcodeUrl
+   */
+  public void saveQrcodeUrlInActivityVo(Long actNum, String qrcodeUrl) {
+    ActivityBasicVo activityBasicVo = new ActivityBasicVo();
+    activityBasicVo.setActNum(actNum);
+    activityBasicVo.setQrcodeUrl(qrcodeUrl);
+    DaoValidationUtil.validateResultIsOne(() -> activityBasicDao.update(activityBasicVo), activityBasicVo);
   }
 
   /** ================================================= validation ================================================= */

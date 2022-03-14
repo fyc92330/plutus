@@ -38,6 +38,9 @@ public class ActivityBasicBaseVo extends BaseVo implements Serializable, Cloneab
   /** 活動建立日期 */
   private String createDate;
 
+
+  private String qrcodeUrl;
+
   public Long getActNum() {
     return this.actNum;
   }
@@ -108,6 +111,14 @@ public class ActivityBasicBaseVo extends BaseVo implements Serializable, Cloneab
 
   public void setCreateDate(String createDate) {
     this.createDate = createDate;
+  }
+
+  public String getQrcodeUrl() {
+    return this.qrcodeUrl;
+  }
+
+  public void setQrcodeUrl(String qrcodeUrl) {
+    this.qrcodeUrl = qrcodeUrl;
   }
 
 

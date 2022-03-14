@@ -1,8 +1,12 @@
 package org.chun.uploadcc;
 
-import com.linecorp.bot.model.profile.UserProfileResponse;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
-import org.chun.lineBot.LineBotConfig;
+import org.apache.logging.log4j.util.Strings;
+import org.chun.plutus.util.StringUtil;
+import org.springframework.http.HttpStatus;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -14,7 +18,8 @@ import static org.chun.uploadcc.UploadCcConfig.OBJECT_MAPPER;
 
 public class UploadCcService implements IUploadCcService {
 
-  private static final String CONTENT_TYPE = "multipart/form-data";
+  private static final String FORM_DATA_NAME = "uploaded_file[]";
+  private static final String CONTENT_TYPE = "image/png";
   private final UploadCcApi uploadCcApi;
   private final String baseUrl;
 
@@ -28,14 +33,31 @@ public class UploadCcService implements IUploadCcService {
   }
 
   @Override
-  public String upload(UploadImageRequestBody requestBody) {
-    Call<ResponseBody> call = uploadCcApi.upload(requestBody, CONTENT_TYPE);
+  public String upload(UploadImageRequestBody uploadImageRequestBody) {
+    RequestBody requestBody = RequestBody.create(MediaType.parse(CONTENT_TYPE), uploadImageRequestBody.getUploadedFile());
+    MultipartBody.Part body = MultipartBody.Part.createFormData(FORM_DATA_NAME, uploadImageRequestBody.getFilename(), requestBody);
+    Call<ResponseBody> call = uploadCcApi.upload(body, baseUrl);
     UploadImageResponseBody response = convertResult(call, UploadImageResponseBody.class);
     return response.getSuccessImage().stream()
         .findAny()
         .map(UploadImageResponseBody.Image::getUrl)
-        .map(baseUrl::concat)
+        .map(url -> StringUtil.concat(baseUrl, "/", url))
         .get();
+  }
+
+  @Override
+  public boolean exists(String qrcodeUrl) {
+    if(qrcodeUrl == null) return false;
+    final String url = qrcodeUrl.replace(baseUrl, Strings.EMPTY).substring(1);
+    try {
+      Call<ResponseBody> call = uploadCcApi.exists(url);
+      Response<ResponseBody> response = call.execute();
+      if (HttpStatus.NOT_FOUND.value() == response.code())
+        throw new RuntimeException(HttpStatus.NOT_FOUND.getReasonPhrase());
+    } catch (Exception e) {
+      return false;
+    }
+    return true;
   }
 
   /** =================================================== private ================================================== */

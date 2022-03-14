@@ -6,10 +6,12 @@ import com.linecorp.bot.model.event.message.TextMessageContent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.chun.plutus.api.helper.ImageUploadHelper;
 import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.helper.LineRichMenuHelper;
 import org.chun.plutus.api.mod.ActivityMod;
 import org.chun.plutus.common.dto.JoinCodeDto;
+import org.chun.plutus.common.dto.QrcodeUrlDto;
 import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
@@ -24,11 +26,15 @@ import org.chun.plutus.common.exceptions.UserWithoutActivityException;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.common.vo.ActivityDtVo;
 import org.chun.plutus.common.vo.AppUserVo;
+import org.chun.plutus.util.JoinCodeUtil;
+import org.chun.plutus.util.QrcodeUtil;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static org.chun.plutus.common.constant.LineChannelViewConst.QRCODE_INVITE_URL;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_CLOSED;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DIFFERENT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
@@ -49,6 +55,8 @@ public class MessageFacade {
   private final ActivityMod activityMod;
   private final LineMessageHelper lineMessageHelper;
   private final LineRichMenuHelper lineRichMenuHelper;
+  private final ImageUploadHelper imageUploadHelper;
+
 
   /**
    * 處理訊息事件
@@ -128,6 +136,9 @@ public class MessageFacade {
         case MAIN_MENU:
         case SUB_MENU:
           richMenuEvent(actionEnum, userId);
+          break;
+        case QRCODE:
+          qrcodeEvent(joinCodeDto);
           break;
       }
     } catch (ActivityNotFoundException ae) {
@@ -282,6 +293,37 @@ public class MessageFacade {
     }
   }
 
+  /**
+   * 建立QRcode, 上傳暫存, 發送圖片
+   *
+   * @param joinCodeDto
+   */
+  private void qrcodeEvent(JoinCodeDto joinCodeDto) {
+    final String joinCode = this.confirmCurrentActivity(joinCodeDto);
+    final QrcodeUrlDto qrcodeUrlDto = activityMod.getQrcodeUrlByJoinCode(joinCode);
+    final String qrcodeUrl = qrcodeUrlDto.getQrcodeUrl();
+    String imageUrl;
+    if (imageUploadHelper.qrcodeExists(qrcodeUrl)) {
+      imageUrl = qrcodeUrl;
+    } else {
+      // 建立新的qrcode上傳
+      final String url = QRCODE_INVITE_URL.concat(JoinCodeUtil.genJoinCode(joinCode));
+      ByteArrayOutputStream os = QrcodeUtil.generateQrcode(url);
+      imageUrl = imageUploadHelper.uploadImage(os);
+      // 將路徑寫進活動
+      activityMod.saveQrcodeUrlInActivityVo(qrcodeUrlDto.getActNum(), imageUrl);
+    }
+
+    // 發送圖片訊息
+    lineMessageHelper.sendImageMessage(joinCodeDto, imageUrl);
+  }
+
+  /**
+   * 抓取參加的活動邀請碼(v1)
+   *
+   * @param joinCodeDto
+   * @return
+   */
   private String confirmCurrentActivity(JoinCodeDto joinCodeDto) {
     final String joinCode = activityMod.getJoinCodeBySetUserNum(joinCodeDto.getUserNum());
     if (joinCode == null) throw new UserWithoutActivityException();
