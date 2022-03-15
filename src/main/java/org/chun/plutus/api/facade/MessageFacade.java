@@ -1,12 +1,8 @@
 package org.chun.plutus.api.facade;
 
-import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.MessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
-import com.linecorp.bot.model.message.Message;
-import com.linecorp.bot.model.message.TemplateMessage;
-import com.linecorp.bot.model.message.TextMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -20,6 +16,7 @@ import org.chun.plutus.common.dto.SubMenuImageDto;
 import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
+import org.chun.plutus.common.exceptions.ActivityDtNotFoundException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
 import org.chun.plutus.common.exceptions.CustomValueEmptyException;
 import org.chun.plutus.common.exceptions.FunctionNotSupportException;
@@ -37,13 +34,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.chun.plutus.common.constant.LineChannelViewConst.QRCODE_INVITE_URL;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_CLOSED;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DIFFERENT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.ACT_DT_IS_NOT_FOUND;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CLOSE_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.FUNCTION_NOT_SUPPORT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.HOST_CANNOT_LEAVE;
@@ -168,6 +165,10 @@ public class MessageFacade {
       errorMsg = SETTING_VALUE_EMPTY;
     } catch (FunctionNotSupportException fe) {
       errorMsg = FUNCTION_NOT_SUPPORT;
+    } catch (ActivityDtNotFoundException afe) {
+      errorMsg = ACT_DT_IS_NOT_FOUND;
+    } catch (Exception e) {
+      log.error("", e);
     } finally {
       if (errorMsg != null) lineMessageHelper.sendErrorMessage(joinCodeDto, errorMsg);
     }
@@ -190,9 +191,10 @@ public class MessageFacade {
           JoinCodeEnum.Menu menuEnum = JoinCodeEnum.Menu.getEnum(action);
           // 取得這次節點的資訊
           ActivityDtVo activityDtVo = activityMod.getUserCurrentActivityNode(joinCodeDto.getUserNum());
-          if (activityDtVo == null) return;
+          if (activityDtVo == null) throw new ActivityDtNotFoundException();
           activityMod.validSubMenuAction(menuEnum, commandValue, activityDtVo.getPayType());
-          activityMod.setNodeWithCustomValue(menuEnum, commandValue, activityDtVo.getAcdNum());
+          final String message = activityMod.setNodeWithCustomValue(menuEnum, commandValue, activityDtVo.getAcdNum());
+          lineMessageHelper.sendTextMessage(joinCodeDto, message);
         });
   }
 
@@ -206,11 +208,10 @@ public class MessageFacade {
   private void createEvent(JoinCodeDto joinCodeDto) {
     try {
       activityMod.validMultiActivity(joinCodeDto.getUserNum());
+      this.forceCreateEvent(joinCodeDto);
     } catch (MultiActivityException e) {
-      log.info("too many activity exists.");
       lineMessageHelper.sendConfirmCreateMessage(joinCodeDto);
     }
-    this.forceCreateEvent(joinCodeDto);
   }
 
   /**
@@ -335,10 +336,11 @@ public class MessageFacade {
    * @param joinCodeDto
    */
   private void settingMenuEvent(JoinCodeDto joinCodeDto) {
+    activityMod.validActivityDtExists(joinCodeDto.getUserNum());
     final String joinCode = this.confirmCurrentActivity(joinCodeDto);
     joinCodeDto.setJoinCode(joinCode);
     final SubMenuImageDto subMenuImageDto = imageUploadHelper.genSubMenuDto(joinCode);
-    lineMessageHelper.sendMenuTemplateMessage(joinCodeDto,subMenuImageDto);
+    lineMessageHelper.sendMenuTemplateMessage(joinCodeDto, subMenuImageDto);
   }
 
   /**

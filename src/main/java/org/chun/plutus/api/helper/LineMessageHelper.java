@@ -69,14 +69,13 @@ public class LineMessageHelper {
    */
   public void sendConfirmCreateMessage(JoinCodeDto joinCodeDto) {
     final String joinCode = joinCodeDto.getJoinCode();
-    final String replyToken = joinCodeDto.getReplyToken();
-    final String userId = joinCodeDto.getUserId();
 
-    ConfirmTemplate template = new ConfirmTemplate(CONFIRM_CREATE,
+    ConfirmTemplate template = new ConfirmTemplate(CONFIRM_CREATE, Arrays.asList(
         new MessageAction(LineChannelViewConst.YES_STR, JoinCodeUtil.genForceCreateCode(joinCode)),
         new MessageAction(LineChannelViewConst.NO_STR, JoinCodeUtil.genCancelJoinCode(joinCode))
-    );
-    replyMessage(new TemplateMessage("", template), replyToken, userId);
+    ));
+
+    sendTemplateMessage(joinCodeDto, new TemplateMessage("123", template));
   }
 
   /**

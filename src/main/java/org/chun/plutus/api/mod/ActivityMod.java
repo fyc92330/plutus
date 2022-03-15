@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivityDtDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
@@ -16,6 +17,7 @@ import org.chun.plutus.common.enums.ActivityEnum;
 import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
+import org.chun.plutus.common.exceptions.ActivityDtNotFoundException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
 import org.chun.plutus.common.exceptions.CustomValueEmptyException;
 import org.chun.plutus.common.exceptions.FunctionNotSupportException;
@@ -48,6 +50,13 @@ import static org.chun.plutus.common.constant.LineChannelViewConst.ACTIVITY_VIEW
 import static org.chun.plutus.common.constant.LineChannelViewConst.GLOBAL_VIEW;
 import static org.chun.plutus.common.constant.LineChannelViewConst.GUEST_VIEW;
 import static org.chun.plutus.common.constant.LineChannelViewConst.NONE_CLOSE;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.COST_SETTING_ALREADY;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.PAYER_SETTING_ALREADY;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.TITLE_SETTING_ALREADY;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_AVERAGE_STR;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_CHOICE_STR;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_SCALE_STR;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_SETTING_ALREADY;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.COST;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.PAYER;
 import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TITLE;
@@ -63,7 +72,6 @@ import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
 @Service
 public class ActivityMod {
 
-  private static final String URL = "https://line.me/R/oaMessage/@530vubeg/?";
   private final ActivityBasicDao activityBasicDao;
   private final ActivitySetDao activitySetDao;
   private final ActivityDtDao activityDtDao;
@@ -79,6 +87,7 @@ public class ActivityMod {
     activityBasicDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
         .map(vo -> {
           vo.setActStatus(ActivityEnum.Status.FINISH.val());
+          vo.setEndDate(now);
           return vo;
         })
         .forEach(vo -> DaoValidationUtil.validateResultIsOne(() -> activityBasicDao.update(vo), vo));
@@ -115,6 +124,11 @@ public class ActivityMod {
     activitySetVo.setStatus(ActivityEnum.SetStatus.JOIN.val());
     activitySetVo.setStartDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
     activitySetDao.insert(activitySetVo);
+
+    // 有一個參加者就將活動改為進行中
+    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityBasicVo.getActStatus())) {
+      activityBasicVo.setActStatus(ActivityEnum.Status.PROGRESS.val());
+    }
 
     return activityBasicVo;
   }
@@ -203,31 +217,43 @@ public class ActivityMod {
    * @param commandValue
    * @param acdNum
    */
-  public void setNodeWithCustomValue(JoinCodeEnum.Menu menuEnum, String commandValue, Long acdNum) {
+  public String setNodeWithCustomValue(JoinCodeEnum.Menu menuEnum, String commandValue, Long acdNum) {
     ActivityDtVo activityDtVo = new ActivityDtVo();
     activityDtVo.setAcdNum(acdNum);
+    String messageContent;
     switch (menuEnum) {
       case TITLE:
+        messageContent = String.format(TITLE_SETTING_ALREADY, commandValue);
         activityDtVo.setAcdTitle(commandValue);
         break;
       case COST:
+        messageContent = String.format(COST_SETTING_ALREADY, commandValue);
         activityDtVo.setCost(BigDecimal.valueOf(Double.parseDouble(commandValue)));
         break;
       case PAYER:
+        messageContent = String.format(PAYER_SETTING_ALREADY, commandValue);
         final Long payerUserNum = getPayerUserNum(commandValue);
         if (payerUserNum != null) activityDtVo.setPrePaidUser(payerUserNum);
         break;
       default:
+        String typeName;
         if (menuEnum == TYPE_AVERAGE) {
+          typeName = TYPE_AVERAGE_STR;
           activityDtVo.setPayType(TYPE_AVERAGE.val());
         } else if (menuEnum == TYPE_SCALE) {
+          typeName = TYPE_SCALE_STR;
           activityDtVo.setPayType(TYPE_SCALE.val());
         } else if (menuEnum == TYPE_CHOICE) {
+          typeName = TYPE_CHOICE_STR;
           activityDtVo.setPayType(TYPE_CHOICE.val());
+        } else {
+          typeName = Strings.EMPTY;
         }
+        messageContent = TYPE_SETTING_ALREADY.concat(typeName);
     }
 
     DaoValidationUtil.validateResultIsOne(() -> activityDtDao.update(activityDtVo), activityDtVo);
+    return messageContent;
   }
 
   /**
@@ -260,12 +286,17 @@ public class ActivityMod {
     final String actTitle = activityViewRvo.getActTitle();
     final String hostUserName = activityViewRvo.getHostUserName();
     final Long userCount = activityViewRvo.getUserCount();
-    final BigDecimal currentCost = activityViewRvo.getCurrentCost();
     final String nowDate = yyyy_MM_dd.format(LocalDate.now());
     final String userName = activityViewRvo.getUserName();
+    final BigDecimal currentCost = activityViewRvo.getCurrentCost();
+    // 收入支出邏輯
+    long pay = personalPay.longValue();
+    final boolean isPayer = pay > 0;
+    if (!isPayer) pay = -pay;
+
     StringBuilder view = new StringBuilder();
     view.append(String.format(GLOBAL_VIEW, actTitle, hostUserName, nowDate, userCount, currentCost.longValue(),
-        yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()), userName, personalPay.longValue()));
+        yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()), userName, pay));
 
     // 組裝子活動
     if (!activityDtVoList.isEmpty()) {
@@ -282,7 +313,11 @@ public class ActivityMod {
         acdTitleList.forEach(title -> view.append(title.concat("\n")));
       }
     }
-    return view.toString();
+
+    final String rtnStr = view.toString();
+    return isPayer
+        ? rtnStr.replace("目前消費", "目前收款")
+        : rtnStr;
   }
 
   /**
@@ -404,6 +439,15 @@ public class ActivityMod {
     }
   }
 
+  /**
+   * 檢核節點是否建立
+   *
+   * @param userNum
+   */
+  public void validActivityDtExists(Long userNum) {
+    if (activityDtDao.getLastActivityByUserNum(userNum) == null) throw new ActivityDtNotFoundException();
+  }
+
   /** =================================================== private ================================================== */
 
 
@@ -415,21 +459,25 @@ public class ActivityMod {
    * @param startDate
    */
   private void saveHostActivitySet(Long userNum, Long actNum, String startDate) {
+    // 將所有被邀請的群狀態都壓成拒絕
+    activitySetDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
+        .filter(set -> {
+          ActivityEnum.SetStatus setStatusEnum = ActivityEnum.SetStatus.getEnum(set.getStatus());
+          return ActivityEnum.SetStatus.JOIN == setStatusEnum || ActivityEnum.SetStatus.INVITE == setStatusEnum;
+        })
+        .map(set -> {
+          set.setStatus(ActivityEnum.SetStatus.LEAVE.val());
+          return set;
+        })
+        .forEach(set -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(set), set));
+
+    // 新增現有加入狀態
     ActivitySetVo activitySetVo = new ActivitySetVo();
     activitySetVo.setUserNum(userNum);
     activitySetVo.setActNum(actNum);
     activitySetVo.setStartDate(startDate);
     activitySetVo.setStatus(ActivityEnum.SetStatus.JOIN.val());
     activitySetDao.insert(activitySetVo);
-
-    // 將所有被邀請的群狀態都壓成拒絕
-    activitySetDao.query(MapUtil.newHashMap("userNum", userNum)).stream()
-        .filter(set -> ActivityEnum.SetStatus.INVITE.val().equals(set.getStatus()))
-        .map(set -> {
-          set.setStatus(ActivityEnum.SetStatus.CANCEL.val());
-          return set;
-        })
-        .forEach(set -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(set), set));
   }
 
   /**
