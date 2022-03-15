@@ -19,10 +19,10 @@ import java.io.IOException;
 public class ImageUploadHelper {
 
   private static final String QRCODE_FILE_NAME = "qrcodePic.png";
-  private static final String TITLE_FILE_NAME = "title.jpg";
-  private static final String COST_FILE_NAME = "cost.jpg";
-  private static final String DADDY_FILE_NAME = "daddy.jpg";
-  private static final String TYPE_FILE_NAME = "type.jpg";
+  private static final String TITLE_FILE_NAME = "title.png";
+  private static final String COST_FILE_NAME = "cost.png";
+  private static final String DADDY_FILE_NAME = "daddy.png";
+  private static final String TYPE_FILE_NAME = "type.png";
   private static final String PNG_CONTENT_TYPE = "image/png";
   private static final String JPG_CONTENT_TYPE = "image/jpg";
 
@@ -64,13 +64,13 @@ public class ImageUploadHelper {
    */
   public SubMenuImageDto genSubMenuDto(String joinCode) {
     final String titleImageUrl = uploadCcService.upload(
-        new UploadImageRequestBody(new File(TITLE_FILE_NAME), TITLE_FILE_NAME, JPG_CONTENT_TYPE)).getUrl();
+        new UploadImageRequestBody(new File(TITLE_FILE_NAME), TITLE_FILE_NAME, PNG_CONTENT_TYPE)).getUrl();
     final String costImageUrl = uploadCcService.upload(
-        new UploadImageRequestBody(new File(COST_FILE_NAME), COST_FILE_NAME, JPG_CONTENT_TYPE)).getUrl();
+        new UploadImageRequestBody(new File(COST_FILE_NAME), COST_FILE_NAME, PNG_CONTENT_TYPE)).getUrl();
     final String daddyImageUrl = uploadCcService.upload(
-        new UploadImageRequestBody(new File(DADDY_FILE_NAME), DADDY_FILE_NAME, JPG_CONTENT_TYPE)).getUrl();
+        new UploadImageRequestBody(new File(DADDY_FILE_NAME), DADDY_FILE_NAME, PNG_CONTENT_TYPE)).getUrl();
     final String typeImageUrl = uploadCcService.upload(
-        new UploadImageRequestBody(new File(TYPE_FILE_NAME), TYPE_FILE_NAME, JPG_CONTENT_TYPE)).getUrl();
+        new UploadImageRequestBody(new File(TYPE_FILE_NAME), TYPE_FILE_NAME, PNG_CONTENT_TYPE)).getUrl();
     return new SubMenuImageDto(joinCode, titleImageUrl, costImageUrl, daddyImageUrl, typeImageUrl);
   }
 }

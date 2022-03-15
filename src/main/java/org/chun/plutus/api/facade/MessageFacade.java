@@ -1,9 +1,12 @@
 package org.chun.plutus.api.facade;
 
+import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.MessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
+import com.linecorp.bot.model.message.TextMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -34,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.chun.plutus.common.constant.LineChannelViewConst.QRCODE_INVITE_URL;
@@ -334,9 +338,7 @@ public class MessageFacade {
     final String joinCode = this.confirmCurrentActivity(joinCodeDto);
     joinCodeDto.setJoinCode(joinCode);
     final SubMenuImageDto subMenuImageDto = imageUploadHelper.genSubMenuDto(joinCode);
-    final TemplateMessage templateMessage = lineMessageHelper.genMenuTemplateMessage(subMenuImageDto);
-    lineMessageHelper.sendTemplateMessage(joinCodeDto, templateMessage);
-    //remove image
+    lineMessageHelper.sendMenuTemplateMessage(joinCodeDto,subMenuImageDto);
   }
 
   /**
