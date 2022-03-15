@@ -1,4 +1,4 @@
-package org.chun.uploadcc;
+package org.chun.uploadcc.model;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class DeleteImageRequestBody {
+public class RemoveImageRequestBody {
 
   private String path;
 

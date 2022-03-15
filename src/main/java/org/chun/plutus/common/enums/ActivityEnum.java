@@ -94,7 +94,7 @@ public class ActivityEnum {
       return Arrays.stream(values())
           .filter(e -> e.val().equals(type))
           .findAny()
-          .orElseThrow(() -> new EnumConstantNotPresentException(ActivityPayTypeEnum.class, type));
+          .orElseThrow(() -> new EnumConstantNotPresentException(PayType.class, type));
     }
   }
 }

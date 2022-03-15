@@ -3,6 +3,7 @@ package org.chun.plutus.api.facade;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.message.MessageContent;
 import com.linecorp.bot.model.event.message.TextMessageContent;
+import com.linecorp.bot.model.message.TemplateMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -12,6 +13,7 @@ import org.chun.plutus.api.helper.LineRichMenuHelper;
 import org.chun.plutus.api.mod.ActivityMod;
 import org.chun.plutus.common.dto.JoinCodeDto;
 import org.chun.plutus.common.dto.QrcodeUrlDto;
+import org.chun.plutus.common.dto.SubMenuImageDto;
 import org.chun.plutus.common.enums.JoinCodeEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
@@ -139,6 +141,9 @@ public class MessageFacade {
           break;
         case QRCODE:
           qrcodeEvent(joinCodeDto);
+          break;
+        case CALL_MENU:
+          settingMenuEvent(joinCodeDto);
           break;
       }
     } catch (ActivityNotFoundException ae) {
@@ -311,13 +316,27 @@ public class MessageFacade {
       // 建立新的qrcode上傳
       final String url = QRCODE_INVITE_URL.concat(JoinCodeUtil.genJoinCode(joinCode));
       ByteArrayOutputStream os = QrcodeUtil.generateQrcode(url);
-      imageUrl = imageUploadHelper.uploadImage(os);
+      imageUrl = imageUploadHelper.uploadImage(os).getUrl();
       // 將路徑寫進活動
       activityMod.saveQrcodeUrlInActivityVo(qrcodeUrlDto.getActNum(), imageUrl);
     }
 
     // 發送圖片訊息
     lineMessageHelper.sendImageMessage(joinCodeDto, imageUrl);
+  }
+
+  /**
+   * 設定子活動選單
+   *
+   * @param joinCodeDto
+   */
+  private void settingMenuEvent(JoinCodeDto joinCodeDto) {
+    final String joinCode = this.confirmCurrentActivity(joinCodeDto);
+    joinCodeDto.setJoinCode(joinCode);
+    final SubMenuImageDto subMenuImageDto = imageUploadHelper.genSubMenuDto(joinCode);
+    final TemplateMessage templateMessage = lineMessageHelper.genMenuTemplateMessage(subMenuImageDto);
+    lineMessageHelper.sendTemplateMessage(joinCodeDto, templateMessage);
+    //remove image
   }
 
   /**

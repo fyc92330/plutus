@@ -1,12 +1,14 @@
-package org.chun.uploadcc;
+package org.chun.uploadcc.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
 @Getter
 @Setter
+@ToString
 public class UploadImageResponseBody {
 
   private Integer code;
@@ -15,14 +17,8 @@ public class UploadImageResponseBody {
 
   private Integer totalSuccess;
 
-  private List<Image> successImage;
+  private List<ImageBody> successImage;
 
-  @Getter
-  @Setter
-  static class Image {
-    private String delete;
-    private String name;
-    private String thumbnail;
-    private String url;
-  }
+  private String url;
+
 }

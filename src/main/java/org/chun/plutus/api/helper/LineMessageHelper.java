@@ -3,27 +3,36 @@ package org.chun.plutus.api.helper;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.MessageAction;
+import com.linecorp.bot.model.action.URIAction;
 import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
 import com.linecorp.bot.model.message.TemplateMessage;
 import com.linecorp.bot.model.message.TextMessage;
+import com.linecorp.bot.model.message.template.CarouselColumn;
+import com.linecorp.bot.model.message.template.CarouselTemplate;
 import com.linecorp.bot.model.message.template.ConfirmTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.chun.lineBot.ILineBotService;
 import org.chun.plutus.common.constant.LineChannelViewConst;
 import org.chun.plutus.common.dto.JoinCodeDto;
+import org.chun.plutus.common.dto.SubMenuImageDto;
 import org.chun.plutus.common.vo.ActivityBasicVo;
 import org.chun.plutus.util.JoinCodeUtil;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.util.Collections;
 
 import static org.chun.plutus.common.constant.LineChannelViewConst.APP_VERSION;
+import static org.chun.plutus.common.constant.LineChannelViewConst.QRCODE_INVITE_URL;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CONFIRM_CREATE;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CREATE_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.JOIN_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.WELCOME_MESSAGE;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Action.MENU;
+import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TITLE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -92,6 +101,39 @@ public class LineMessageHelper {
   }
 
   /**
+   * 製作活動選單模板
+   *
+   * @param subMenuImageDto
+   * @return
+   */
+  public TemplateMessage genMenuTemplateMessage(SubMenuImageDto subMenuImageDto) {
+    final String redirectUri = QRCODE_INVITE_URL.concat(MENU.val());
+    final URIAction titleSettingAction = new URIAction("設定標題", URI.create(redirectUri.concat(TITLE.val())), new URIAction.AltUri(URI.create("")));
+    CarouselColumn carouselColumn = CarouselColumn.builder()
+        .title("設定標題")
+        .text("準備設定上一個節點的標題")
+        .thumbnailImageUrl(URI.create(subMenuImageDto.getTitleImageUrl()))
+        .defaultAction(titleSettingAction)
+        .actions(Collections.singletonList(titleSettingAction))
+        .build();
+    //2
+    //3
+    //4
+
+
+    // 組裝模板
+    CarouselTemplate carouselTemplate = CarouselTemplate.builder()
+        .imageSize("contain")
+        .imageAspectRatio("square")
+        .columns(Collections.singletonList(carouselColumn))
+        .build();
+
+    return new TemplateMessage(Strings.EMPTY, carouselTemplate);
+  }
+
+  /** =================================================== Message ================================================== */
+
+  /**
    * 傳送文字訊息
    *
    * @param joinCodeDto
@@ -112,6 +154,16 @@ public class LineMessageHelper {
     URI uri = URI.create(imageUrl);
     ImageMessage imageMessage = new ImageMessage(uri, uri);
     replyMessage(imageMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  }
+
+  /**
+   * 傳送模板訊息
+   *
+   * @param joinCodeDto
+   * @param templateMessage
+   */
+  public void sendTemplateMessage(JoinCodeDto joinCodeDto, TemplateMessage templateMessage) {
+    replyMessage(templateMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
   }
 
   /** =================================================== private ================================================== */

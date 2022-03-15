@@ -1,13 +1,15 @@
-package org.chun.uploadcc;
+package org.chun.uploadcc.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.File;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 public class UploadImageRequestBody {
 
@@ -15,5 +17,5 @@ public class UploadImageRequestBody {
 
   private String filename;
 
-  private final String contentType = "image/png";
+  private String contentType;
 }
