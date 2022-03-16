@@ -9,4 +9,6 @@ import org.chun.plutus.common.vo.base.ActivityDtBaseVo;
 public class ActivityDtVo extends ActivityDtBaseVo {
 
   private String payerName;
+
+  private String actStatus;
 }

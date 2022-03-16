@@ -10,16 +10,17 @@ import org.chun.plutus.common.dao.ActivityBasicDao;
 import org.chun.plutus.common.dao.ActivityDtDao;
 import org.chun.plutus.common.dao.ActivitySetDao;
 import org.chun.plutus.common.dao.AppUserDao;
-import org.chun.plutus.common.dto.JoinCodeDto;
+import org.chun.plutus.common.dto.LineUserDto;
 import org.chun.plutus.common.dto.PaymentTimestampDto;
 import org.chun.plutus.common.dto.QrcodeUrlDto;
 import org.chun.plutus.common.enums.ActivityEnum;
-import org.chun.plutus.common.enums.JoinCodeEnum;
+import org.chun.plutus.common.enums.MenuEnum;
 import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
 import org.chun.plutus.common.exceptions.ActivityDtNotFoundException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
 import org.chun.plutus.common.exceptions.CustomValueEmptyException;
+import org.chun.plutus.common.exceptions.EmptyPartnerException;
 import org.chun.plutus.common.exceptions.FunctionNotSupportException;
 import org.chun.plutus.common.exceptions.HostLeavingException;
 import org.chun.plutus.common.exceptions.MultiActivityException;
@@ -57,12 +58,12 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_AVERAG
 import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_CHOICE_STR;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_SCALE_STR;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.TYPE_SETTING_ALREADY;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.COST;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.PAYER;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TITLE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_AVERAGE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_CHOICE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_SCALE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.COST;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.PAYER;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TITLE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_AVERAGE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_CHOICE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_SCALE;
 import static org.chun.plutus.util.MomentUtil.Date.yyyyMMdd;
 import static org.chun.plutus.util.MomentUtil.Date.yyyy_MM_dd;
 import static org.chun.plutus.util.MomentUtil.DateTime.yyyy_MM_dd_HH_mm_ss;
@@ -136,10 +137,10 @@ public class ActivityMod {
   /**
    * 離開活動 狀態壓成離開
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    */
-  public void leaveActivityByJoinCode(JoinCodeDto joinCodeDto) {
-    ActivitySetVo activitySetVo = activitySetDao.getByUserNumAndJoinCode(joinCodeDto.getUserNum(), joinCodeDto.getJoinCode());
+  public void leaveActivityByJoinCode(LineUserDto lineUserDto) {
+    ActivitySetVo activitySetVo = activitySetDao.getByUserNumAndJoinCode(lineUserDto.getUserNum(), lineUserDto.getJoinCode());
     activitySetVo.setStatus(ActivityEnum.SetStatus.LEAVE.val());
     activitySetVo.setEndDate(yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now()));
     DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(activitySetVo), activitySetVo);
@@ -148,11 +149,11 @@ public class ActivityMod {
   /**
    * 關閉活動
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    */
-  public void closeActivityByJoinCode(JoinCodeDto joinCodeDto) {
+  public void closeActivityByJoinCode(LineUserDto lineUserDto) {
     final String endDate = yyyy_MM_dd_HH_mm_ss.format(LocalDateTime.now());
-    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCodeDto.getJoinCode());
+    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(lineUserDto.getJoinCode());
     activityBasicVo.setActStatus(ActivityEnum.Status.FINISH.val());
     activityBasicVo.setEndDate(endDate);
     DaoValidationUtil.validateResultIsOne(() -> activityBasicDao.update(activityBasicVo), activityBasicVo);
@@ -169,19 +170,19 @@ public class ActivityMod {
         .forEach(vo -> DaoValidationUtil.validateResultIsOne(() -> activitySetDao.update(vo), vo));
 
     // 最後時間點為最後一個活動節點
-    this.saveActivityNode(joinCodeDto);
+    this.saveActivityNode(lineUserDto);
   }
 
   /**
    * 儲存活動節點
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    */
-  public void saveActivityNode(JoinCodeDto joinCodeDto) {
-    final String joinCode = joinCodeDto.getJoinCode();
+  public void saveActivityNode(LineUserDto lineUserDto) {
+    final String joinCode = lineUserDto.getJoinCode();
     ActivityDtVo lastActivityDtVo = activityDtDao.getLastActivityByJoinCode(joinCode);
     ActivityDtVo nextActivityDtVo = new ActivityDtVo();
-    nextActivityDtVo.setPrePaidUser(joinCodeDto.getUserNum()); //v2調整,可選擇
+    nextActivityDtVo.setPrePaidUser(lineUserDto.getUserNum()); //v2調整,可選擇
     nextActivityDtVo.setPayType(ActivityEnum.PayType.DEFAULT.val());
     if (lastActivityDtVo == null) {
       ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
@@ -207,21 +208,24 @@ public class ActivityMod {
    * @return
    */
   public ActivityDtVo getUserCurrentActivityNode(Long userNum) {
-    return activityDtDao.getLastActivityByUserNum(userNum);
+    ActivityDtVo activityDtVo = activityDtDao.getLastActivityByUserNum(userNum);
+    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityDtVo.getActStatus()))
+      throw new EmptyPartnerException();
+    return activityDtVo;
   }
 
   /**
    * 設定活動節點
    *
-   * @param menuEnum
+   * @param settingEnum
    * @param commandValue
    * @param acdNum
    */
-  public String setNodeWithCustomValue(JoinCodeEnum.Menu menuEnum, String commandValue, Long acdNum) {
+  public String setNodeWithCustomValue(MenuEnum.Setting settingEnum, String commandValue, Long acdNum) {
     ActivityDtVo activityDtVo = new ActivityDtVo();
     activityDtVo.setAcdNum(acdNum);
     String messageContent;
-    switch (menuEnum) {
+    switch (settingEnum) {
       case TITLE:
         messageContent = String.format(TITLE_SETTING_ALREADY, commandValue);
         activityDtVo.setAcdTitle(commandValue);
@@ -237,13 +241,13 @@ public class ActivityMod {
         break;
       default:
         String typeName;
-        if (menuEnum == TYPE_AVERAGE) {
+        if (settingEnum == TYPE_AVERAGE) {
           typeName = TYPE_AVERAGE_STR;
           activityDtVo.setPayType(TYPE_AVERAGE.val());
-        } else if (menuEnum == TYPE_SCALE) {
+        } else if (settingEnum == TYPE_SCALE) {
           typeName = TYPE_SCALE_STR;
           activityDtVo.setPayType(TYPE_SCALE.val());
-        } else if (menuEnum == TYPE_CHOICE) {
+        } else if (settingEnum == TYPE_CHOICE) {
           typeName = TYPE_CHOICE_STR;
           activityDtVo.setPayType(TYPE_CHOICE.val());
         } else {
@@ -339,7 +343,8 @@ public class ActivityMod {
    * @return
    */
   public QrcodeUrlDto getQrcodeUrlByJoinCode(String joinCode) {
-    ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
+    ActivityBasicVo activityBasicVo = Optional.ofNullable(activityBasicDao.getByJoinCode(joinCode))
+        .orElseThrow(ActivityNotFoundException::new);
     return new QrcodeUrlDto(activityBasicVo.getActNum(), activityBasicVo.getQrcodeUrl());
   }
 
@@ -424,16 +429,16 @@ public class ActivityMod {
   /**
    * 檢核menu的值
    *
-   * @param menuEnum
+   * @param settingEnum
    * @param commandValue
    * @param originPayType
    */
-  public void validSubMenuAction(JoinCodeEnum.Menu menuEnum, String commandValue, String originPayType) {
-    JoinCodeEnum.Menu[] settingMenus = new JoinCodeEnum.Menu[]{TITLE, COST, PAYER};
-    JoinCodeEnum.Menu[] payTypeMenus = new JoinCodeEnum.Menu[]{TYPE_AVERAGE, TYPE_SCALE, TYPE_CHOICE};
-    if (Arrays.asList(settingMenus).contains(menuEnum) && StringUtils.isBlank(commandValue))
+  public void validSubMenuAction(MenuEnum.Setting settingEnum, String commandValue, String originPayType) {
+    MenuEnum.Setting[] settingSettings = new MenuEnum.Setting[]{TITLE, COST, PAYER};
+    MenuEnum.Setting[] payTypeSettings = new MenuEnum.Setting[]{TYPE_AVERAGE, TYPE_SCALE, TYPE_CHOICE};
+    if (Arrays.asList(settingSettings).contains(settingEnum) && StringUtils.isBlank(commandValue))
       throw new CustomValueEmptyException();
-    if (Arrays.asList(payTypeMenus).contains(menuEnum) &&
+    if (Arrays.asList(payTypeSettings).contains(settingEnum) &&
         ActivityEnum.PayType.getEnum(originPayType) != ActivityEnum.PayType.DEFAULT) {
       throw new PayTypeChangeAlreadyException();
     }
@@ -442,10 +447,13 @@ public class ActivityMod {
   /**
    * 檢核節點是否建立
    *
-   * @param userNum
+   * @param lineUserDto
    */
-  public void validActivityDtExists(Long userNum) {
-    if (activityDtDao.getLastActivityByUserNum(userNum) == null) throw new ActivityDtNotFoundException();
+  public void validActivityDtExists(LineUserDto lineUserDto) {
+    final ActivityDtVo activityDtVo = activityDtDao.getLastActivityByUserNum(lineUserDto.getUserNum());
+    if (activityDtVo == null) throw new ActivityDtNotFoundException();
+    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityDtVo.getActStatus()))
+      throw new EmptyPartnerException();
   }
 
   /** =================================================== private ================================================== */

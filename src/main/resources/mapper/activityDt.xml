@@ -5,6 +5,7 @@
     <resultMap id="vo" type="org.chun.plutus.common.vo.ActivityDtVo"
                extends="org.chun.plutus.common.dao.base.ActivityDtBaseDao.vo">
         <result property="payerName" column="PAYER_NAME"/>
+        <result property="actStatus" column="ACT_STATUS"/>
     </resultMap>
 
     <sql id="lastDt">
@@ -12,7 +13,8 @@
         <include refid="org.chun.plutus.common.dao.base.ActivityDtBaseDao.columnsAlias">
             <property name="alias" value="AD"/>
             <property name="prefix" value=""/>
-        </include>
+        </include>,
+        AB.ACT_STATUS
         FROM ACTIVITY_BASIC AB
         JOIN ACTIVITY_DT AD ON AB.ACT_NUM = AD.ACT_NUM
     </sql>
@@ -27,7 +29,7 @@
     <select id="getLastActivityByUserNum" resultMap="vo">
         <include refid="lastDt"/>
         WHERE AB.USER_NUM = #{userNum}
-          AND AB.ACT_STATUS = '1' /* 進行中 */
+          AND AB.ACT_STATUS <![CDATA[<>]]> '9' /* 結束 */
         ORDER BY AD.START_DATE DESC
         LIMIT 1
     </select>

@@ -2,7 +2,7 @@ package org.chun.plutus.common.enums;
 
 import java.util.Arrays;
 
-public class JoinCodeEnum {
+public class MenuEnum {
 
   public enum Action {
     /** 加入 */
@@ -32,7 +32,7 @@ public class JoinCodeEnum {
     /** QrCode */
     QRCODE("$qrcode"),
     /** 直接建立 */
-    FORCE_CREATE("$force_create-");//todo v2移除
+    FORCE_CREATE("$force_create");//todo v2移除
 
     private final String prefix;
 
@@ -52,7 +52,7 @@ public class JoinCodeEnum {
     }
   }
 
-  public enum Menu {
+  public enum Setting {
 
     /** 設定活動子標題 */
     TITLE("title-"),
@@ -69,7 +69,7 @@ public class JoinCodeEnum {
 
     private final String action;
 
-    Menu(String action) {
+    Setting(String action) {
       this.action = action;
     }
 
@@ -77,11 +77,11 @@ public class JoinCodeEnum {
       return this.action;
     }
 
-    public static Menu getEnum(String action) {
+    public static Setting getEnum(String action) {
       return Arrays.stream(values())
           .filter(e -> e.action.equals(action))
           .findAny()
-          .orElseThrow(() -> new EnumConstantNotPresentException(Menu.class, action));
+          .orElseThrow(() -> new EnumConstantNotPresentException(Setting.class, action));
     }
 
   }

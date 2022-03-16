@@ -1,6 +1,6 @@
 package org.chun.plutus.common.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,8 +8,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
-public class JoinCodeDto {
+@Builder
+public class LineUserDto {
 
   private String replyToken;
 

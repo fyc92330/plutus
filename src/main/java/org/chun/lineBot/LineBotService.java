@@ -51,6 +51,7 @@ public class LineBotService implements ILineBotService {
   @Override
   public void push(PushMessage pushMessage) {
     Call<ResponseBody> call = lineBotApi.push(pushMessage, CONTENT_TYPE, channelAccessToken);
+    log.info("push message.");
     sendMessage(call);
   }
 

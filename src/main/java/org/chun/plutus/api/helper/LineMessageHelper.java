@@ -3,7 +3,7 @@ package org.chun.plutus.api.helper;
 import com.linecorp.bot.model.PushMessage;
 import com.linecorp.bot.model.ReplyMessage;
 import com.linecorp.bot.model.action.Action;
-import com.linecorp.bot.model.action.MessageAction;
+import com.linecorp.bot.model.action.PostbackAction;
 import com.linecorp.bot.model.action.URIAction;
 import com.linecorp.bot.model.message.ImageMessage;
 import com.linecorp.bot.model.message.Message;
@@ -17,11 +17,9 @@ import com.linecorp.bot.model.message.template.ImageCarouselTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.chun.lineBot.ILineBotService;
-import org.chun.plutus.common.constant.LineChannelViewConst;
-import org.chun.plutus.common.dto.JoinCodeDto;
+import org.chun.plutus.common.dto.LineUserDto;
 import org.chun.plutus.common.dto.SubMenuImageDto;
 import org.chun.plutus.common.vo.ActivityBasicVo;
-import org.chun.plutus.util.JoinCodeUtil;
 import org.chun.plutus.util.StringUtil;
 import org.springframework.stereotype.Service;
 
@@ -32,18 +30,22 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.chun.plutus.common.constant.LineChannelViewConst.APP_VERSION;
+import static org.chun.plutus.common.constant.LineChannelViewConst.NO_STR;
 import static org.chun.plutus.common.constant.LineChannelViewConst.QRCODE_INVITE_URL;
+import static org.chun.plutus.common.constant.LineChannelViewConst.YES_STR;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CONFIRM_CREATE;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CREATE_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.JOIN_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.WELCOME_MESSAGE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Action.MENU;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.COST;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.PAYER;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TITLE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_AVERAGE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_CHOICE;
-import static org.chun.plutus.common.enums.JoinCodeEnum.Menu.TYPE_SCALE;
+import static org.chun.plutus.common.enums.MenuEnum.Action.CANCEL;
+import static org.chun.plutus.common.enums.MenuEnum.Action.FORCE_CREATE;
+import static org.chun.plutus.common.enums.MenuEnum.Action.MENU;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.COST;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.PAYER;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TITLE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_AVERAGE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_CHOICE;
+import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_SCALE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -65,59 +67,58 @@ public class LineMessageHelper {
   /**
    * 有未結束的活動, 回傳詢問
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    */
-  public void sendConfirmCreateMessage(JoinCodeDto joinCodeDto) {
-    final String joinCode = joinCodeDto.getJoinCode();
+  public void sendConfirmCreateMessage(LineUserDto lineUserDto) {
 
     ConfirmTemplate template = new ConfirmTemplate(CONFIRM_CREATE, Arrays.asList(
-        new MessageAction(LineChannelViewConst.YES_STR, JoinCodeUtil.genForceCreateCode(joinCode)),
-        new MessageAction(LineChannelViewConst.NO_STR, JoinCodeUtil.genCancelJoinCode(joinCode))
+        new PostbackAction(YES_STR, FORCE_CREATE.val()),
+        new PostbackAction(NO_STR, CANCEL.val())
     ));
 
-    sendTemplateMessage(joinCodeDto, new TemplateMessage("123", template));
+    sendTemplateMessage(lineUserDto, new TemplateMessage("開啟新活動", template));
   }
 
   /**
    * 回傳活動建立成功訊息
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    */
-  public void sendCreateSuccessMessage(JoinCodeDto joinCodeDto) {
-    TextMessage textMessage = new TextMessage(String.format(CREATE_SUCCESS, joinCodeDto.getJoinCode()));
-    replyMessage(textMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  public void sendCreateSuccessMessage(LineUserDto lineUserDto) {
+    TextMessage textMessage = new TextMessage(String.format(CREATE_SUCCESS, lineUserDto.getJoinCode()));
+    replyMessage(textMessage, lineUserDto.getReplyToken(), lineUserDto.getUserId());
   }
 
   /**
    * 回傳錯誤訊息
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    * @param errorMsg
    */
-  public void sendErrorMessage(JoinCodeDto joinCodeDto, String errorMsg) {
-    this.sendTextMessage(joinCodeDto, errorMsg);
+  public void sendErrorMessage(LineUserDto lineUserDto, String errorMsg) {
+    this.sendTextMessage(lineUserDto, errorMsg);
   }
 
   /**
    * 回傳加入成功訊息
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    * @param activityBasicVo
    */
-  public void sendJoinSuccessMessage(JoinCodeDto joinCodeDto, ActivityBasicVo activityBasicVo) {
+  public void sendJoinSuccessMessage(LineUserDto lineUserDto, ActivityBasicVo activityBasicVo) {
     TextMessage textMessage =
         new TextMessage(String.format(JOIN_SUCCESS, activityBasicVo.getHostUserName(), activityBasicVo.getActTitle()));
-    replyMessage(textMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+    replyMessage(textMessage, lineUserDto.getReplyToken(), lineUserDto.getUserId());
   }
 
   /**
    * 製作活動選單模板
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    * @param subMenuImageDto
    * @return
    */
-  public void sendMenuTemplateMessage(JoinCodeDto joinCodeDto, SubMenuImageDto subMenuImageDto) {
+  public void sendMenuTemplateMessage(LineUserDto lineUserDto, SubMenuImageDto subMenuImageDto) {
     // 先製作設定圖片選單
     ImageCarouselTemplate imageCarouselTemplate = generateSettingTemplateMessage(subMenuImageDto);
     TemplateMessage settingTemplate = TemplateMessage.builder()
@@ -145,7 +146,7 @@ public class LineMessageHelper {
         .template(carouselTemplate)
         .build();
 
-    this.sendTemplateMessage(joinCodeDto, settingTemplate, payTypeTemplate);
+    this.sendTemplateMessage(lineUserDto, settingTemplate, payTypeTemplate);
   }
 
   /** =================================================== Message ================================================== */
@@ -153,34 +154,34 @@ public class LineMessageHelper {
   /**
    * 傳送文字訊息
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    * @param textContent
    */
-  public void sendTextMessage(JoinCodeDto joinCodeDto, String textContent) {
-    replyMessage(new TextMessage(textContent), joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  public void sendTextMessage(LineUserDto lineUserDto, String textContent) {
+    replyMessage(new TextMessage(textContent), lineUserDto.getReplyToken(), lineUserDto.getUserId());
 
   }
 
   /**
    * 傳送圖片訊息
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    * @param imageUrl
    */
-  public void sendImageMessage(JoinCodeDto joinCodeDto, String imageUrl) {
+  public void sendImageMessage(LineUserDto lineUserDto, String imageUrl) {
     URI uri = URI.create(imageUrl);
     ImageMessage imageMessage = new ImageMessage(uri, uri);
-    replyMessage(imageMessage, joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+    replyMessage(imageMessage, lineUserDto.getReplyToken(), lineUserDto.getUserId());
   }
 
   /**
    * 傳送模板訊息
    *
-   * @param joinCodeDto
+   * @param lineUserDto
    * @param templateMessages
    */
-  public void sendTemplateMessage(JoinCodeDto joinCodeDto, TemplateMessage... templateMessages) {
-    replyMessages(Arrays.asList(templateMessages), joinCodeDto.getReplyToken(), joinCodeDto.getUserId());
+  public void sendTemplateMessage(LineUserDto lineUserDto, TemplateMessage... templateMessages) {
+    replyMessages(Arrays.asList(templateMessages), lineUserDto.getReplyToken(), lineUserDto.getUserId());
   }
 
   /** =================================================== private ================================================== */
