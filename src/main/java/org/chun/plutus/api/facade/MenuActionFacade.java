@@ -41,6 +41,7 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_CL
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DIFFERENT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACT_DT_IS_NOT_FOUND;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.CANCEL_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CLOSE_SUCCESS;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.COMMAND_EXPIRED;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.FUNCTION_NOT_SUPPORT;
@@ -295,7 +296,7 @@ public class MenuActionFacade {
    */
   private void cancelEvent(LineUserDto lineUserDto, String captcha) {
     cacheUtil.removeCache("CAPTCHA_CACHE_60", captcha);
-    lineMessageHelper.sendTextMessage(lineUserDto, CLOSE_SUCCESS);
+    lineMessageHelper.sendTextMessage(lineUserDto, CANCEL_SUCCESS);
   }
 
   /**
