@@ -81,10 +81,10 @@ test {
 }
 
 task getJar(type: Copy) {
-    dependsOn(':plutus:build')
+    dependsOn(':build')
 }
 
 task runJar(type: JavaExec){
     dependsOn(':getJar')
-    classpath = files("plutus/build/libs/plutus-0.0.1-SNAPSHOT.jar")
+    classpath = files("build/libs/plutus-0.0.1-SNAPSHOT.jar")
 }
