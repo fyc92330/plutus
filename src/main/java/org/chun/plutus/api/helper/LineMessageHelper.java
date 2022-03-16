@@ -20,6 +20,7 @@ import org.chun.lineBot.ILineBotService;
 import org.chun.plutus.common.dto.LineUserDto;
 import org.chun.plutus.common.dto.SubMenuImageDto;
 import org.chun.plutus.common.vo.ActivityBasicVo;
+import org.chun.plutus.util.CacheUtil;
 import org.chun.plutus.util.StringUtil;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +54,7 @@ import static org.chun.plutus.common.enums.MenuEnum.Setting.TYPE_SCALE;
 public class LineMessageHelper {
 
   private final ILineBotService lineBotService;
+  private final CacheUtil cacheUtil;
 
   /**
    * 歡迎訊息
@@ -69,11 +71,13 @@ public class LineMessageHelper {
    *
    * @param lineUserDto
    */
-  public void sendConfirmCreateMessage(LineUserDto lineUserDto) {
+  public void sendConfirmCreateMessage(LineUserDto lineUserDto, String captcha) {
+
+    cacheUtil.putIntoCache("CAPTCHA_CACHE_60", captcha, captcha);
 
     ConfirmTemplate template = new ConfirmTemplate(CONFIRM_CREATE, Arrays.asList(
-        new PostbackAction(YES_STR, FORCE_CREATE.val()),
-        new PostbackAction(NO_STR, CANCEL.val())
+        new PostbackAction(YES_STR, FORCE_CREATE.val().concat(captcha)),
+        new PostbackAction(NO_STR, CANCEL.val().concat(captcha))
     ));
 
     sendTemplateMessage(lineUserDto, new TemplateMessage("開啟新活動", template));

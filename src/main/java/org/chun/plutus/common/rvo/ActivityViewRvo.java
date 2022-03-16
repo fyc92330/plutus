@@ -35,10 +35,4 @@ public class ActivityViewRvo {
   /** 是否為主辦人 */
   private Boolean isHost;
 
-// v2 啟用屬性
-//  /** 活動描述 */
-//  private String actDesc;
-//  /** 活動明細(acdNum,acdTitle,startDate,endDate,cost) */
-//  private List<ActivityDtVo> activityDtVoList;
-
 }

@@ -3,6 +3,9 @@ package org.chun.plutus.api.facade;
 import com.linecorp.bot.model.event.PostbackEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.api.helper.ImageUploadHelper;
 import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.helper.LineRichMenuHelper;
@@ -15,6 +18,7 @@ import org.chun.plutus.common.exceptions.ActivityClosedException;
 import org.chun.plutus.common.exceptions.ActivityDifferentException;
 import org.chun.plutus.common.exceptions.ActivityDtNotFoundException;
 import org.chun.plutus.common.exceptions.ActivityNotFoundException;
+import org.chun.plutus.common.exceptions.CommandExpiredException;
 import org.chun.plutus.common.exceptions.CustomValueEmptyException;
 import org.chun.plutus.common.exceptions.EmptyPartnerException;
 import org.chun.plutus.common.exceptions.FunctionNotSupportException;
@@ -23,6 +27,7 @@ import org.chun.plutus.common.exceptions.MultiActivityException;
 import org.chun.plutus.common.exceptions.PayTypeChangeAlreadyException;
 import org.chun.plutus.common.exceptions.UserNotHostException;
 import org.chun.plutus.common.exceptions.UserWithoutActivityException;
+import org.chun.plutus.util.CacheUtil;
 import org.chun.plutus.util.JoinCodeUtil;
 import org.chun.plutus.util.QrcodeUtil;
 import org.springframework.stereotype.Service;
@@ -37,6 +42,7 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_DI
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACTIVITY_NOT_FOUND;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.ACT_DT_IS_NOT_FOUND;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.CLOSE_SUCCESS;
+import static org.chun.plutus.common.constant.LineCommonMessageConst.COMMAND_EXPIRED;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.FUNCTION_NOT_SUPPORT;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.HOST_CANNOT_LEAVE;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.NODE_CREATE_SUCCESS;
@@ -45,6 +51,7 @@ import static org.chun.plutus.common.constant.LineCommonMessageConst.PAY_TYPE_SE
 import static org.chun.plutus.common.constant.LineCommonMessageConst.SETTING_VALUE_EMPTY;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.USER_NOT_HOST;
 import static org.chun.plutus.common.constant.LineCommonMessageConst.WITHOUT_ACTIVITY;
+import static org.chun.plutus.common.enums.MenuEnum.Action.CANCEL;
 import static org.chun.plutus.common.enums.MenuEnum.Action.CREATE;
 import static org.chun.plutus.common.enums.MenuEnum.Action.FORCE_CREATE;
 import static org.chun.plutus.common.enums.MenuEnum.Action.MAIN_MENU;
@@ -56,11 +63,13 @@ import static org.chun.plutus.common.enums.MenuEnum.Action.SUB_MENU;
 public class MenuActionFacade {
 
   private static final List<MenuEnum.Action> unauthActionList = Arrays.asList(MAIN_MENU, SUB_MENU, CREATE, FORCE_CREATE);
+  private static final List<MenuEnum.Action> onceActionList = Arrays.asList(FORCE_CREATE, CANCEL);
 
   private final ActivityMod activityMod;
   private final LineRichMenuHelper lineRichMenuHelper;
   private final LineMessageHelper lineMessageHelper;
   private final ImageUploadHelper imageUploadHelper;
+  private final CacheUtil cacheUtil;
 
   /**
    * 處理postback事件
@@ -70,7 +79,15 @@ public class MenuActionFacade {
    */
   public void handlePostbackEvent(PostbackEvent event, LineUserDto lineUserDto) {
     final String data = event.getPostbackContent().getData();
-    final MenuEnum.Action actionEnum = MenuEnum.Action.getEnum(data);
+    final String action = onceActionList.stream()
+        .filter(e -> StringUtils.startsWith(data, e.val()))
+        .findAny()
+        .map(MenuEnum.Action::val)
+        .orElse(data);
+    final String captcha = data.length() > 8
+        ? data.replace(action, Strings.EMPTY)
+        : Strings.EMPTY;
+    final MenuEnum.Action actionEnum = MenuEnum.Action.getEnum(action);
     String errorMsg = null;
     try {
       // 取得活動邀請碼
@@ -92,6 +109,7 @@ public class MenuActionFacade {
           createEvent(lineUserDto);
           break;
         case FORCE_CREATE:
+          captchaExists(captcha);
           forceCreateEvent(lineUserDto);
           break;
         case NODE:
@@ -105,6 +123,9 @@ public class MenuActionFacade {
           break;
         case QRCODE:
           qrcodeEvent(lineUserDto);
+          break;
+        case CANCEL:
+          cancelEvent(lineUserDto, captcha);
           break;
       }
     } catch (UserWithoutActivityException ua) {
@@ -129,6 +150,8 @@ public class MenuActionFacade {
       errorMsg = ACT_DT_IS_NOT_FOUND;
     } catch (EmptyPartnerException ep) {
       errorMsg = PARTNER_EMPTY;
+    } catch (CommandExpiredException cee) {
+      errorMsg = COMMAND_EXPIRED;
     } catch (Exception e) {
       log.error("", e);
     } finally {
@@ -188,7 +211,8 @@ public class MenuActionFacade {
       activityMod.validMultiActivity(lineUserDto.getUserNum());
       this.forceCreateEvent(lineUserDto);
     } catch (MultiActivityException e) {
-      lineMessageHelper.sendConfirmCreateMessage(lineUserDto);
+      final String captcha = RandomStringUtils.random(8, true, true);
+      lineMessageHelper.sendConfirmCreateMessage(lineUserDto, captcha);
     }
   }
 
@@ -261,5 +285,25 @@ public class MenuActionFacade {
 
     // 發送圖片訊息
     lineMessageHelper.sendImageMessage(lineUserDto, imageUrl);
+  }
+
+  /**
+   * 取消活動強制建立
+   *
+   * @param lineUserDto
+   * @param captcha
+   */
+  private void cancelEvent(LineUserDto lineUserDto, String captcha) {
+    cacheUtil.removeCache("CAPTCHA_CACHE_60", captcha);
+    lineMessageHelper.sendTextMessage(lineUserDto, CLOSE_SUCCESS);
+  }
+
+  /**
+   * 檢核captcha是否失效
+   *
+   * @param captcha
+   */
+  private void captchaExists(String captcha) {
+    if (cacheUtil.getObjectFromCache("CAPTCHA_CACHE_60", captcha) == null) throw new CommandExpiredException();
   }
 }

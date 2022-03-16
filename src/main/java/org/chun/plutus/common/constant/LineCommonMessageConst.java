@@ -34,6 +34,8 @@ public class LineCommonMessageConst {
 
   public static final String PARTNER_EMPTY = "邀請至少一位參與者加入\n使活動開始";
 
+  public static final String COMMAND_EXPIRED = "指令已失效";
+
   public static final String NODE_CREATE_SUCCESS = "節點已建立\n請點選活動選單進行設定";
 
   public static final String TITLE_SETTING_ALREADY = "節點標題已成功設定為(%s)";
