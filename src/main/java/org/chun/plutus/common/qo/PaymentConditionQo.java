@@ -2,9 +2,11 @@ package org.chun.plutus.common.qo;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class PaymentConditionQo {
 
   /** 使用者流水號 */

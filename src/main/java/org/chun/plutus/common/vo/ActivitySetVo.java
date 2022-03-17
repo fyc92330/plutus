@@ -10,7 +10,11 @@ public class ActivitySetVo extends ActivitySetBaseVo {
 
   private String actTitle;
 
+  private Long hostUserNum;
+
   private String hostUserName;
 
   private String userLineId;
+
+  private String joinCode;
 }

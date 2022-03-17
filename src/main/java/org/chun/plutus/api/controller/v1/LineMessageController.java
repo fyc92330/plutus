@@ -5,12 +5,16 @@ import com.linecorp.bot.model.event.CallbackRequest;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
 import com.linecorp.bot.model.event.MessageEvent;
+import com.linecorp.bot.model.event.PostbackEvent;
+import com.linecorp.bot.model.event.ReplyEvent;
 import com.linecorp.bot.model.event.UnfollowEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.chun.plutus.api.facade.MenuActionFacade;
 import org.chun.plutus.api.facade.MessageFacade;
-import org.chun.plutus.api.mod.MessageMod;
+import org.chun.plutus.api.helper.LineMessageHelper;
 import org.chun.plutus.api.mod.UserMod;
+import org.chun.plutus.common.dto.LineUserDto;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.JsonBean;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,9 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/webhook")
 public class LineMessageController {
 
-  private final UserMod userMod;
   private final MessageFacade messageFacade;
-  private final MessageMod messageMod;
+  private final MenuActionFacade menuActionFacade;
+  private final UserMod userMod;
+  private final LineMessageHelper lineMessageHelper;
 
   /**
    * LINE訊息入口
@@ -54,15 +59,17 @@ public class LineMessageController {
     for (Event lineEvent : request.getEvents()) {
 
       // 建立/取得使用者資訊
-      final AppUserVo appUserVo = userMod.saveAppUser(lineEvent.getSource().getUserId());
-      final Long userNum = appUserVo.getUserNum();
-      final String userId = appUserVo.getUserLineId();
+      final String userId = lineEvent.getSource().getUserId();
+      final LineUserDto lineUserDto = this.genUserProfile(userId, lineEvent);
+      final Long userNum = lineUserDto.getUserNum();
 
-      if (lineEvent instanceof MessageEvent) {
-        messageFacade.handleMessageEvent((MessageEvent) lineEvent, appUserVo);
+      if (lineEvent instanceof PostbackEvent) {
+        menuActionFacade.handlePostbackEvent((PostbackEvent) lineEvent, lineUserDto);
+      } else if (lineEvent instanceof MessageEvent) {
+        messageFacade.handleMessageEvent((MessageEvent) lineEvent, lineUserDto);
       } else if (lineEvent instanceof FollowEvent) {
         final String replyToken = ((FollowEvent) lineEvent).getReplyToken();
-        messageMod.sendFirstWelcomeMessage(replyToken, userId);
+        lineMessageHelper.sendFirstWelcomeMessage(replyToken, userId);
         userMod.handleFollowEvent(userNum);
       } else if (lineEvent instanceof UnfollowEvent) {
         userMod.handleUnFollowEvent(userNum);
@@ -71,6 +78,20 @@ public class LineMessageController {
     }
   }
 
-
+  /**
+   * 取得使用者資訊
+   *
+   * @param userId
+   * @return
+   */
+  private LineUserDto genUserProfile(String userId, Event event) {
+    final AppUserVo appUserVo = userMod.saveAppUser(userId);
+    LineUserDto.LineUserDtoBuilder userDtoBuilder = LineUserDto.builder();
+    if (event instanceof ReplyEvent) userDtoBuilder.replyToken(((ReplyEvent) event).getReplyToken());
+    return userDtoBuilder
+        .userNum(appUserVo.getUserNum())
+        .userId(userId)
+        .build();
+  }
 
 }

@@ -8,6 +8,7 @@ import com.linecorp.bot.model.profile.UserProfileResponse;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.ResponseBody;
 import org.chun.plutus.common.constant.LineApiResponseMessageConst;
+import org.springframework.util.concurrent.SuccessCallback;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -50,7 +51,14 @@ public class LineBotService implements ILineBotService {
   @Override
   public void push(PushMessage pushMessage) {
     Call<ResponseBody> call = lineBotApi.push(pushMessage, CONTENT_TYPE, channelAccessToken);
+    log.info("push message.");
     sendMessage(call);
+  }
+
+  @Override
+  public void menuChange(String userId, String menuId) {
+    Call<ResponseBody> call = lineBotApi.menuChange(channelAccessToken, userId, menuId);
+    exec(call);
   }
 
   /** =================================================== private ================================================== */
@@ -64,6 +72,16 @@ public class LineBotService implements ILineBotService {
     }
   }
 
+  private void exec(Call<ResponseBody> call){
+    try {
+      Response<ResponseBody> response = call.execute();
+      System.out.println(response);
+      String responseBody = response.body().string();
+      if (!LineApiResponseMessageConst.SUCCESS_RESPONSE_BODY.equals(responseBody)) throw new RuntimeException();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   private boolean sendMessage(Call<ResponseBody> call) {
     ErrorResponse error;

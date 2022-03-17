@@ -12,7 +12,11 @@ import java.util.List;
  */
 public interface ActivitySetDao extends ActivitySetBaseDao {
 
+  /** 以狀態取得使用者參加中的活動 */
   ActivitySetVo getInProgressActivity(@Param("userNum") Long userNum, @Param("status") String status);
+
+  /** 以邀請碼取得使用者參加中的活動 */
+  ActivitySetVo getByUserNumAndJoinCode(@Param("userNum") Long userNum, @Param("joinCode") String joinCode);
 
   List<Long> listUserNumByActivityHistory(@Param("userNum") Long userNum);
 

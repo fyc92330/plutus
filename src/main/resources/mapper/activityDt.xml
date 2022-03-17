@@ -3,6 +3,35 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="org.chun.plutus.common.dao.ActivityDtDao">
     <resultMap id="vo" type="org.chun.plutus.common.vo.ActivityDtVo"
-               extends="org.chun.plutus.common.dao.base.ActivityDtBaseDao.vo"/>
+               extends="org.chun.plutus.common.dao.base.ActivityDtBaseDao.vo">
+        <result property="payerName" column="PAYER_NAME"/>
+        <result property="actStatus" column="ACT_STATUS"/>
+    </resultMap>
+
+    <sql id="lastDt">
+        SELECT
+        <include refid="org.chun.plutus.common.dao.base.ActivityDtBaseDao.columnsAlias">
+            <property name="alias" value="AD"/>
+            <property name="prefix" value=""/>
+        </include>,
+        AB.ACT_STATUS
+        FROM ACTIVITY_BASIC AB
+        JOIN ACTIVITY_DT AD ON AB.ACT_NUM = AD.ACT_NUM
+    </sql>
+
+    <select id="getLastActivityByJoinCode" resultMap="vo">
+        <include refid="lastDt"/>
+        WHERE AB.JOIN_CODE = #{joinCode}
+        ORDER BY AD.START_DATE DESC
+        LIMIT 1
+    </select>
+
+    <select id="getLastActivityByUserNum" resultMap="vo">
+        <include refid="lastDt"/>
+        WHERE AB.USER_NUM = #{userNum}
+          AND AB.ACT_STATUS <![CDATA[<>]]> '9' /* 結束 */
+        ORDER BY AD.START_DATE DESC
+        LIMIT 1
+    </select>
 
 </mapper>

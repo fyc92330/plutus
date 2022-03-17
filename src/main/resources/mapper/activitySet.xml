@@ -10,7 +10,9 @@
     <resultMap id="inProgressAct" type="org.chun.plutus.common.vo.ActivitySetVo"
                extends="org.chun.plutus.common.dao.base.ActivitySetBaseDao.vo">
         <result property="actTitle" column="ACT_TITLE"/>
+        <result property="hostUserNum" column="HOST_USER_NUM"/>
         <result property="hostUserName" column="USER_NAME"/>
+        <result property="joinCode" column="JOIN_CODE"/>
     </resultMap>
 
     <select id="getInProgressActivity" resultMap="inProgressAct">
@@ -20,12 +22,26 @@
             CASE
                 WHEN AU.USER_NAME IS NULL
                 THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
-            END AS USER_NAME
+            END AS USER_NAME,
+            AB.JOIN_CODE,
+            AB.USER_NUM AS HOST_USER_NUM
         FROM ACTIVITY_SET ACTS
         JOIN ACTIVITY_BASIC AB ON ACTS.ACT_NUM = AB.ACT_NUM
         JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
         WHERE ACTS.USER_NUM = #{userNum}
           AND ACTS.STATUS = #{status}
+    </select>
+
+    <select id="getByUserNumAndJoinCode" resultMap="vo">
+        SELECT
+        <include refid="org.chun.plutus.common.dao.base.ActivitySetBaseDao.columnsAlias">
+            <property name="alias" value="ACS"/>
+            <property name="prefix" value=""/>
+        </include>
+        FROM ACTIVITY_SET ACS
+        JOIN ACTIVITY_BASIC AB ON ACS.ACT_NUM = AB.ACT_NUM
+        WHERE ACS.USER_NUM = #{userNum}
+          AND AB.JOIN_CODE = #{joinCode}
     </select>
 
     <select id="listUserNumByActivityHistory" resultType="java.lang.Long">
@@ -59,4 +75,5 @@
         FROM APP_USER AU
         JOIN USER_NUM_LIST UNL ON AU.USER_NUM = UNL.USER_NUM
     </select>
+
 </mapper>

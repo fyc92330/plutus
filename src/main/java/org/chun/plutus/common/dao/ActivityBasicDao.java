@@ -11,7 +11,11 @@ import org.chun.plutus.common.vo.ActivityBasicVo;
  */
 public interface ActivityBasicDao extends ActivityBasicBaseDao {
 
-  ActivityViewRvo getCurrentActivityView(@Param("userNum") Long userNum);
+  ActivityBasicVo getByJoinCode(@Param("joinCode") String joinCode);
+
+  ActivityViewRvo getCurrentActivityView(@Param("joinCode") String joinCode, @Param("userNum") Long userNum);
+
+  ActivityBasicVo getActivityBySetUserNum(@Param("userNum") Long userNum);
 
   ActivityBasicVo getOwnerActivityInfo(@Param("userNum") Long userNum);
 

@@ -8,4 +8,7 @@ import org.chun.plutus.common.vo.base.ActivityDtBaseVo;
 @Setter
 public class ActivityDtVo extends ActivityDtBaseVo {
 
+  private String payerName;
+
+  private String actStatus;
 }

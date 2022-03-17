@@ -7,7 +7,6 @@ import org.chun.lineBot.ILineBotService;
 import org.chun.plutus.common.dao.AppUserDao;
 import org.chun.plutus.common.dao.AppUserMemberStatusDao;
 import org.chun.plutus.common.enums.UserStatusEnum;
-import org.chun.plutus.common.exceptions.UserNotFoundException;
 import org.chun.plutus.common.vo.AppUserMemberStatusVo;
 import org.chun.plutus.common.vo.AppUserVo;
 import org.chun.plutus.util.DaoValidationUtil;
@@ -16,7 +15,6 @@ import org.chun.plutus.util.MomentUtil;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -106,21 +104,5 @@ public class UserMod {
             ? appUserMemberStatusDao.insert(appUserMemberStatusVo)
             : appUserMemberStatusDao.update(appUserMemberStatusVo)
         , appUserMemberStatusVo);
-  }
-
-  /** =================================================== private ================================================== */
-
-  /**
-   * 檢核使用者資訊有無遺失
-   *
-   * @param userNumList
-   */
-  public void validUserExists(List<Long> userNumList) {
-    for (Long userNum : userNumList) {
-      final boolean isAnyUserNotFound = Optional.ofNullable(appUserDao.getByPk(userNum))
-          .map(AppUserVo::getUserLineId)
-          .isPresent();
-      if (isAnyUserNotFound) throw new UserNotFoundException(userNum);
-    }
   }
 }
