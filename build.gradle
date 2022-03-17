@@ -19,6 +19,8 @@ repositories {
 
 dependencies {
 
+    implementation group: 'com.heroku', name: 'webapp-runner', version: '9.0.41.0'
+
     // spring
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter'
