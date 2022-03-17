@@ -295,7 +295,7 @@ public class MenuActionFacade {
    * @param captcha
    */
   private void cancelEvent(LineUserDto lineUserDto, String captcha) {
-    cacheUtil.removeCache("CAPTCHA_CACHE_60", captcha);
+    cacheUtil.removeCache("CaptchaCache_60", captcha);
     lineMessageHelper.sendTextMessage(lineUserDto, CANCEL_SUCCESS);
   }
 
@@ -305,6 +305,6 @@ public class MenuActionFacade {
    * @param captcha
    */
   private void captchaExists(String captcha) {
-    if (cacheUtil.getObjectFromCache("CAPTCHA_CACHE_60", captcha) == null) throw new CommandExpiredException();
+    if (cacheUtil.getObjectFromCache("CaptchaCache_60", captcha) == null) throw new CommandExpiredException();
   }
 }

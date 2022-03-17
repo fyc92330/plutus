@@ -73,7 +73,7 @@ public class LineMessageHelper {
    */
   public void sendConfirmCreateMessage(LineUserDto lineUserDto, String captcha) {
 
-    cacheUtil.putIntoCache("CAPTCHA_CACHE_60", captcha, captcha);
+    cacheUtil.putIntoCache("CaptchaCache_60", captcha, captcha);
 
     ConfirmTemplate template = new ConfirmTemplate(CONFIRM_CREATE, Arrays.asList(
         new PostbackAction(YES_STR, FORCE_CREATE.val().concat(captcha)),
