@@ -47,8 +47,6 @@ public class MessageFacade {
 
   private final ActivityMod activityMod;
   private final LineMessageHelper lineMessageHelper;
-  private final LineRichMenuHelper lineRichMenuHelper;
-  private final ImageUploadHelper imageUploadHelper;
 
 
   /**
@@ -66,7 +64,11 @@ public class MessageFacade {
           .filter(text::startsWith)
           .findAny()
           .orElse(Strings.EMPTY);
-      if (StringUtils.isNotBlank(action)) lineUserDto.setJoinCode(text.replace(action, Strings.EMPTY));
+      if (StringUtils.isNotBlank(action)) {
+        lineUserDto.setJoinCode(text.replace(action, Strings.EMPTY));
+      } else {
+        return;
+      }
       final MenuEnum.Action actionEnum = MenuEnum.Action.getEnum(action);
       this.handleJoinCodeText(event, actionEnum, lineUserDto);
     } else {
