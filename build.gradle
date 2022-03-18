@@ -14,13 +14,9 @@ compileTestJava.options.encoding = 'UTF-8'
 
 heroku {
     appName = "plutuz"
-    includes = ["README.md","title.png","cost.png","daddy.png","type.png"]
-    includes = ["build/libs/plutus-0.0.1-SNAPSHOT.jar"]
+    includes = ["README.md","title.png","cost.png","daddy.png","type.png","build/libs/plutus-0.0.1-SNAPSHOT.jar"]
     includeBuildDir = false
     jdkVersion = 8
-    processTypes(
-            web: "java -jar build/libs/plutus-0.0.1-SNAPSHOT.jar"
-    )
 }
 
 repositories {
@@ -31,7 +27,8 @@ repositories {
 
 dependencies {
 
-    implementation group: 'com.heroku', name: 'webapp-runner', version: '9.0.41.0'
+
+    implementation group: 'com.heroku.sdk', name: 'heroku-deploy', version: '2.0.0'
 
     // spring
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
@@ -94,8 +91,15 @@ test {
     useJUnitPlatform()
 }
 
+task cleanProj(dependsOn: clean)
+
+task buildProj(dependsOn: build)
+
+task stage(dependsOn :[':cleanProj',':buildProj'])
+buildProj.mustRunAfter(cleanProj)
+
 task getJar(type: Copy) {
-    dependsOn(':build')
+    dependsOn(':stage')
 }
 
 task runJar(type: JavaExec){
