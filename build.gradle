@@ -14,7 +14,7 @@ compileTestJava.options.encoding = 'UTF-8'
 
 heroku {
     appName = "plutuz"
-    includes = ["README.md","title.png","cost.png","daddy.png","type.png","build/libs/plutus-0.0.1-SNAPSHOT.jar"]
+    includes = ["README.md", "title.png", "cost.png", "daddy.png", "type.png", "build/libs/plutus-0.0.1-SNAPSHOT.jar"]
     includeBuildDir = false
     jdkVersion = 8
 }
@@ -23,11 +23,12 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url 'https://jitpack.io' }
+    maven { url "https://plugins.gradle.org/m2/" }
 }
 
 dependencies {
 
-
+    implementation "gradle.plugin.com.heroku.sdk.heroku-gradle:heroku-gradle:2.0.0"
     implementation group: 'com.heroku.sdk', name: 'heroku-deploy', version: '2.0.0'
 
     // spring
@@ -96,14 +97,14 @@ task cleanProj(dependsOn: clean)
 
 task buildProj(dependsOn: build)
 
-task stage(dependsOn :[':cleanProj',':buildProj'])
+task stage(dependsOn: [':cleanProj', ':buildProj'])
 buildProj.mustRunAfter(cleanProj)
 
 task getJar(type: Copy) {
     dependsOn(':stage')
 }
 
-task runJar(type: JavaExec){
+task runJar(type: JavaExec) {
     dependsOn(':getJar')
     classpath = files("build/libs/plutus-0.0.1-SNAPSHOT.jar")
 }
