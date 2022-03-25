@@ -42,9 +42,10 @@ public class LineMessageController {
    * @throws JsonProcessingException
    */
   @PostMapping("/line/callback")
-  public void lineCallBack(@RequestBody CallbackRequest request, @RequestHeader(name = "x-line-signature") String signature) throws JsonProcessingException {
+  public String lineCallBack(@RequestBody CallbackRequest request, @RequestHeader(name = "x-line-signature") String signature) throws JsonProcessingException {
     log.info("signature:{},\nrequest:\n{}", signature, JsonBean.Extra.objectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(request));
     handleLineCallbackRequest(request);
+    return "index";
   }
 
 
