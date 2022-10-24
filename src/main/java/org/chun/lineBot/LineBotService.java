@@ -72,12 +72,14 @@ public class LineBotService implements ILineBotService {
     }
   }
 
-  private void exec(Call<ResponseBody> call){
+  private void exec(Call<ResponseBody> call) {
     try {
       Response<ResponseBody> response = call.execute();
       System.out.println(response);
       String responseBody = response.body().string();
-      if (!LineApiResponseMessageConst.SUCCESS_RESPONSE_BODY.equals(responseBody)) throw new RuntimeException();
+      if (!LineApiResponseMessageConst.SUCCESS_RESPONSE_BODY.equals(responseBody)) {
+        throw new RuntimeException();
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -89,7 +91,9 @@ public class LineBotService implements ILineBotService {
       Response<ResponseBody> response = call.execute();
       assert response.body() != null;
       String responseBody = response.body().string();
-      if (LineApiResponseMessageConst.SUCCESS_RESPONSE_BODY.equals(responseBody)) return true;
+      if (LineApiResponseMessageConst.SUCCESS_RESPONSE_BODY.equals(responseBody)) {
+        return true;
+      }
       error = convertResult(responseBody, ErrorResponse.class);
     } catch (Exception e) {
       throw new RuntimeException();

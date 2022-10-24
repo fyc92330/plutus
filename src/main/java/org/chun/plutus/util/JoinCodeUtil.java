@@ -4,7 +4,7 @@ import org.chun.plutus.common.enums.MenuEnum;
 
 public class JoinCodeUtil {
 
-  public static String genForceCreateCode(String joinCode){
+  public static String genForceCreateCode(String joinCode) {
     return MenuEnum.Action.FORCE_CREATE.val().concat(joinCode);
   }
 

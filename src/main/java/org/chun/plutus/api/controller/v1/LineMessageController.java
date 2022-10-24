@@ -4,12 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.linecorp.bot.model.event.CallbackRequest;
 import com.linecorp.bot.model.event.Event;
 import com.linecorp.bot.model.event.FollowEvent;
+import com.linecorp.bot.model.event.JoinEvent;
+import com.linecorp.bot.model.event.LeaveEvent;
 import com.linecorp.bot.model.event.MessageEvent;
 import com.linecorp.bot.model.event.PostbackEvent;
 import com.linecorp.bot.model.event.ReplyEvent;
 import com.linecorp.bot.model.event.UnfollowEvent;
+import com.linecorp.bot.model.event.source.Source;
+import com.linecorp.bot.model.event.source.UserSource;
+import com.linecorp.bot.model.message.TextMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.chun.plutus.api.facade.MenuActionFacade;
 import org.chun.plutus.api.facade.MessageFacade;
 import org.chun.plutus.api.helper.LineMessageHelper;
@@ -22,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -60,9 +69,17 @@ public class LineMessageController {
     for (Event lineEvent : request.getEvents()) {
 
       // 建立/取得使用者資訊
-      final String userId = lineEvent.getSource().getUserId();
-      final LineUserDto lineUserDto = this.genUserProfile(userId, lineEvent);
-      final Long userNum = lineUserDto.getUserNum();
+      LineUserDto lineUserDto = null;
+      Long userNum = null;
+      final String userId = Optional.ofNullable(lineEvent.getSource())
+          .filter(source -> source instanceof UserSource)
+          .map(Source::getUserId)
+          .orElse(Strings.EMPTY);
+
+      if (StringUtils.isNotBlank(userId)) {
+        lineUserDto = this.genUserProfile(userId, lineEvent);
+        userNum = lineUserDto.getUserNum();
+      }
 
       if (lineEvent instanceof PostbackEvent) {
         menuActionFacade.handlePostbackEvent((PostbackEvent) lineEvent, lineUserDto);
@@ -74,6 +91,11 @@ public class LineMessageController {
         userMod.handleFollowEvent(userNum);
       } else if (lineEvent instanceof UnfollowEvent) {
         userMod.handleUnFollowEvent(userNum);
+      } else if (lineEvent instanceof JoinEvent) {
+        log.warn("JOIN EVENT!!");
+        lineMessageHelper.replyMessage(new TextMessage("我來了"), ((JoinEvent) lineEvent).getReplyToken(), null);
+      } else if (lineEvent instanceof LeaveEvent) {
+        log.warn("LEAVE EVENT!!");
       }
 
     }
@@ -88,7 +110,9 @@ public class LineMessageController {
   private LineUserDto genUserProfile(String userId, Event event) {
     final AppUserVo appUserVo = userMod.saveAppUser(userId);
     LineUserDto.LineUserDtoBuilder userDtoBuilder = LineUserDto.builder();
-    if (event instanceof ReplyEvent) userDtoBuilder.replyToken(((ReplyEvent) event).getReplyToken());
+    if (event instanceof ReplyEvent) {
+      userDtoBuilder.replyToken(((ReplyEvent) event).getReplyToken());
+    }
     return userDtoBuilder
         .userNum(appUserVo.getUserNum())
         .userId(userId)

@@ -1,6 +1,7 @@
 package org.chun.plutus.common.dao.base;
 
 import java.util.List;
+
 import org.chun.plutus.common.vo.PaymentRecordVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,22 +11,22 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface PaymentRecordBaseDao {
 
-    List<PaymentRecordVo> query( Object params );
+  List<PaymentRecordVo> query(Object params);
 
-    int insert( Object params );
+  int insert(Object params);
 
-    List<PaymentRecordVo> listAll();
+  List<PaymentRecordVo> listAll();
 
-    Integer count( Object params );
+  Integer count(Object params);
 
-    int delete( Object params );
+  int delete(Object params);
 
-    PaymentRecordVo getByPk( @Param( "paymentNum" ) Long paymentNum );
+  PaymentRecordVo getByPk(@Param("paymentNum") Long paymentNum);
 
-    int deleteByPk( @Param( "paymentNum" ) Long paymentNum );
+  int deleteByPk(@Param("paymentNum") Long paymentNum);
 
-    int update( Object params );
+  int update(Object params);
 
-    int forceUpdate( Object params );
+  int forceUpdate(Object params);
 
 }

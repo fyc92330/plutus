@@ -93,7 +93,9 @@ public class MenuActionFacade {
     try {
       // 取得活動邀請碼
       final String joinCode = activityMod.getJoinCodeBySetUserNum(lineUserDto.getUserNum());
-      if (!unauthActionList.contains(actionEnum) && joinCode == null) throw new UserWithoutActivityException();
+      if (!unauthActionList.contains(actionEnum) && joinCode == null) {
+        throw new UserWithoutActivityException();
+      }
       lineUserDto.setJoinCode(joinCode);
       switch (actionEnum) {
         case MAIN_MENU:
@@ -156,7 +158,9 @@ public class MenuActionFacade {
     } catch (Exception e) {
       log.error("", e);
     } finally {
-      if (errorMsg != null) lineMessageHelper.sendErrorMessage(lineUserDto, errorMsg);
+      if (errorMsg != null) {
+        lineMessageHelper.sendErrorMessage(lineUserDto, errorMsg);
+      }
     }
   }
 
@@ -305,6 +309,8 @@ public class MenuActionFacade {
    * @param captcha
    */
   private void captchaExists(String captcha) {
-    if (cacheUtil.getObjectFromCache("CaptchaCache_60", captcha) == null) throw new CommandExpiredException();
+    if (cacheUtil.getObjectFromCache("CaptchaCache_60", captcha) == null) {
+      throw new CommandExpiredException();
+    }
   }
 }

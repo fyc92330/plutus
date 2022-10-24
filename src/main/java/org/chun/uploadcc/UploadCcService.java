@@ -56,13 +56,16 @@ public class UploadCcService implements IUploadCcService {
 
   @Override
   public boolean exists(String qrcodeUrl) {
-    if (qrcodeUrl == null) return false;
+    if (qrcodeUrl == null) {
+      return false;
+    }
     final String url = qrcodeUrl.replace(baseUrl, Strings.EMPTY).substring(1);
     try {
       Call<ResponseBody> call = uploadCcApi.exists(url);
       Response<ResponseBody> response = call.execute();
-      if (HttpStatus.NOT_FOUND.value() == response.code())
+      if (HttpStatus.NOT_FOUND.value() == response.code()) {
         throw new RuntimeException(HttpStatus.NOT_FOUND.getReasonPhrase());
+      }
     } catch (Exception e) {
       return false;
     }

@@ -7,23 +7,23 @@
 <mapper namespace="org.chun.plutus.common.dao.base.AppUserMemberStatusBaseDao">
 
     <resultMap id="vo" type="appUserMemberStatusVo">
-        <id column="aums_num" property="aumsNum" />
-        <result column="user_num" property="userNum" />
-        <result column="user_status" property="userStatus" />
-        <result column="create_date" property="createDate" />
-        <result column="follow_date" property="followDate" />
-        <result column="un_follow_date" property="unFollowDate" />
-        <result column="un_follow_time" property="unFollowTime" />
+        <id column="aums_num" property="aumsNum"/>
+        <result column="user_num" property="userNum"/>
+        <result column="user_status" property="userStatus"/>
+        <result column="create_date" property="createDate"/>
+        <result column="follow_date" property="followDate"/>
+        <result column="un_follow_date" property="unFollowDate"/>
+        <result column="un_follow_time" property="unFollowTime"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.aums_num                     as ${prefix}aums_num,
-        ${alias}.user_num                     as ${prefix}user_num,
-        ${alias}.user_status                  as ${prefix}user_status,
-        D19(${alias}.create_date)             as ${prefix}create_date,
-        D19(${alias}.follow_date)             as ${prefix}follow_date,
-        D19(${alias}.un_follow_date)          as ${prefix}un_follow_date,
-        ${alias}.un_follow_time               as ${prefix}un_follow_time
+        ${alias}.aums_num as ${prefix}aums_num,
+        ${alias}.user_num as ${prefix}user_num,
+        ${alias}.user_status as ${prefix}user_status,
+        D19(${alias}.create_date) as ${prefix}create_date,
+        D19(${alias}.follow_date) as ${prefix}follow_date,
+        D19(${alias}.un_follow_date) as ${prefix}un_follow_date,
+        ${alias}.un_follow_time as ${prefix}un_follow_time
     </sql>
 
     <select id="query" resultMap="vo">
@@ -70,23 +70,23 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="aums_num" keyProperty="aumsNum">
         insert into app_user_member_status (
         <trim prefix="" prefixOverrides=",">
-                <if test="aumsNum!=null">, aums_num</if>
-                <if test="userNum!=null">, user_num</if>
-                <if test="userStatus!=null">, user_status</if>
-                <if test="createDate!=null">, create_date</if>
-                <if test="followDate!=null">, follow_date</if>
-                <if test="unFollowDate!=null">, un_follow_date</if>
-                <if test="unFollowTime!=null">, un_follow_time</if>
+            <if test="aumsNum!=null">, aums_num</if>
+            <if test="userNum!=null">, user_num</if>
+            <if test="userStatus!=null">, user_status</if>
+            <if test="createDate!=null">, create_date</if>
+            <if test="followDate!=null">, follow_date</if>
+            <if test="unFollowDate!=null">, un_follow_date</if>
+            <if test="unFollowTime!=null">, un_follow_time</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="aumsNum!=null">, #{aumsNum}</if>
-                <if test="userNum!=null">, #{userNum}</if>
-                <if test="userStatus!=null">, #{userStatus}</if>
-                <if test="createDate!=null">, to_timestamp(#{createDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="followDate!=null">, to_timestamp(#{followDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="unFollowDate!=null">, to_timestamp(#{unFollowDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="unFollowTime!=null">, #{unFollowTime}</if>
+            <if test="aumsNum!=null">, #{aumsNum}</if>
+            <if test="userNum!=null">, #{userNum}</if>
+            <if test="userStatus!=null">, #{userStatus}</if>
+            <if test="createDate!=null">, to_timestamp(#{createDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="followDate!=null">, to_timestamp(#{followDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="unFollowDate!=null">, to_timestamp(#{unFollowDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="unFollowTime!=null">, #{unFollowTime}</if>
         </trim>
         )
     </insert>
@@ -113,13 +113,13 @@
         </include>
         from app_user_member_status appUserMemberStatus
         where
-            aums_num=#{aumsNum}
+        aums_num=#{aumsNum}
     </select>
 
     <delete id="deleteByPk">
         delete from app_user_member_status
         where
-            aums_num=#{aumsNum}
+        aums_num=#{aumsNum}
     </delete>
 
     <update id="update">
@@ -146,28 +146,28 @@
             <if test="unFollowTime!=null">, un_follow_time=#{unFollowTime}</if>
         </trim>
         where
-            aums_num=#{aumsNum}
+        aums_num=#{aumsNum}
     </update>
 
     <update id="forceUpdate">
         update app_user_member_status
         <trim prefix="set" prefixOverrides=",">
-                            , user_num=#{userNum}
+            , user_num=#{userNum}
 
-        <if test="userStatus!=''">, user_status=#{userStatus}</if>
-        <if test="userStatus==''">, user_status=null</if>
+            <if test="userStatus!=''">, user_status=#{userStatus}</if>
+            <if test="userStatus==''">, user_status=null</if>
 
-        <if test="followDate!=''">, follow_date=to_timestamp(#{followDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-        <if test="followDate==''">, follow_date=null</if>
+            <if test="followDate!=''">, follow_date=to_timestamp(#{followDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="followDate==''">, follow_date=null</if>
 
-        <if test="unFollowDate!=''">, un_follow_date=to_timestamp(#{unFollowDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-        <if test="unFollowDate==''">, un_follow_date=null</if>
+            <if test="unFollowDate!=''">, un_follow_date=to_timestamp(#{unFollowDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="unFollowDate==''">, un_follow_date=null</if>
 
-                            , un_follow_time=#{unFollowTime}
+            , un_follow_time=#{unFollowTime}
 
         </trim>
         where
-            aums_num=#{aumsNum}
+        aums_num=#{aumsNum}
     </update>
 
 </mapper>

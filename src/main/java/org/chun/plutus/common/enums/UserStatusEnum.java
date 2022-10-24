@@ -9,11 +9,11 @@ public enum UserStatusEnum {
 
   private final String status;
 
-  UserStatusEnum(String status){
+  UserStatusEnum(String status) {
     this.status = status;
   }
 
-  public String val(){
+  public String val() {
     return this.status;
   }
 }

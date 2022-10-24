@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class PaymentTagGroupVo extends PaymentTagGroupBaseVo {
 
-  public PaymentTagGroupVo(Long tagGroupNum, String tagGroupName, String tagGroupColor){
+  public PaymentTagGroupVo(Long tagGroupNum, String tagGroupName, String tagGroupColor) {
     super.setTagGroupNum(tagGroupNum);
     super.setTagGroupName(tagGroupName);
     super.setTagGroupColor(tagGroupColor);

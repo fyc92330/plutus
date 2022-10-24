@@ -18,23 +18,23 @@ class PlutusApplicationTests {
   void contextLoads() {
     int[] arr = new int[]{1, 1, 2};
     System.out.printf("answer:(%d)", q26(arr));
-    System.out.println(RandomStringUtils.random(6,true,true));
+    System.out.println(RandomStringUtils.random(6, true, true));
   }
 
   private int q26(int[] nums) {
     int len = nums.length;
     List<Integer> numList = new ArrayList<>();
-    for( int i : nums){
-      if(!numList.contains(i)){
+    for (int i : nums) {
+      if (!numList.contains(i)) {
         numList.add(i);
       }
     }
 
-    for(int j = 0 ; j < numList.size(); j++){
+    for (int j = 0; j < numList.size(); j++) {
       nums[j] = numList.get(j);
     }
 
-    for(int k = numList.size(); k<len; k++){
+    for (int k = numList.size(); k < len; k++) {
       nums[k] = 0;
     }
 

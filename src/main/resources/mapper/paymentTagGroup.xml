@@ -13,12 +13,12 @@
 
     <select id="listGroupListWithTagsByUser" resultMap="groupWithTag">
         SELECT
-            G.TAG_GROUP_NUM,
-            G.TAG_GROUP_NAME,
-            G.TAG_GROUP_COLOR,
-            T.TAG_NUM   AS T_TAG_NUM,
-            T.TAG_NAME  AS T_TAG_NAME,
-            T.TAG_COLOR AS T_TAG_COLOR
+        G.TAG_GROUP_NUM,
+        G.TAG_GROUP_NAME,
+        G.TAG_GROUP_COLOR,
+        T.TAG_NUM AS T_TAG_NUM,
+        T.TAG_NAME AS T_TAG_NAME,
+        T.TAG_COLOR AS T_TAG_COLOR
         FROM PAYMENT_TAG_GROUP G
         LEFT JOIN PAYMENT_TAG T ON G.TAG_GROUP_NUM = T.TAG_GROUP_NUM
         WHERE G.USER_NUM = #{userNum}

@@ -8,7 +8,7 @@ import org.chun.plutus.common.vo.base.PaymentUserBaseVo;
 @Setter
 public class PaymentUserVo extends PaymentUserBaseVo {
 
-  PaymentUserVo(){
+  PaymentUserVo() {
     super();
   }
 }

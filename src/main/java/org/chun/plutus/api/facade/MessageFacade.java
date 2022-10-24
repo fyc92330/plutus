@@ -148,7 +148,9 @@ public class MessageFacade {
     } catch (Exception e) {
       log.error("", e);
     } finally {
-      if (errorMsg != null) lineMessageHelper.sendErrorMessage(lineUserDto, errorMsg);
+      if (errorMsg != null) {
+        lineMessageHelper.sendErrorMessage(lineUserDto, errorMsg);
+      }
     }
   }
 
@@ -169,7 +171,9 @@ public class MessageFacade {
           MenuEnum.Setting settingEnum = MenuEnum.Setting.getEnum(action);
           // 取得這次節點的資訊
           ActivityDtVo activityDtVo = activityMod.getUserCurrentActivityNode(lineUserDto.getUserNum());
-          if (activityDtVo == null) throw new ActivityDtNotFoundException();
+          if (activityDtVo == null) {
+            throw new ActivityDtNotFoundException();
+          }
           activityMod.validSubMenuAction(settingEnum, commandValue, activityDtVo.getPayType());
           final String message = activityMod.setNodeWithCustomValue(settingEnum, commandValue, activityDtVo.getAcdNum());
           lineMessageHelper.sendTextMessage(lineUserDto, message);
@@ -329,7 +333,9 @@ public class MessageFacade {
    */
   private String confirmCurrentActivity(LineUserDto lineUserDto) {
     final String joinCode = activityMod.getJoinCodeBySetUserNum(lineUserDto.getUserNum());
-    if (joinCode == null) throw new UserWithoutActivityException();
+    if (joinCode == null) {
+      throw new UserWithoutActivityException();
+    }
     return joinCode;
   }
 

@@ -7,27 +7,27 @@
 <mapper namespace="org.chun.plutus.common.dao.base.PaymentRecordBaseDao">
 
     <resultMap id="vo" type="paymentRecordVo">
-        <id column="payment_num" property="paymentNum" />
-        <result column="user_num" property="userNum" />
-        <result column="payment_title" property="paymentTitle" />
-        <result column="payment_desc" property="paymentDesc" />
-        <result column="payment_cost" property="paymentCost" />
-        <result column="record_type" property="recordType" />
-        <result column="record_date" property="recordDate" />
-        <result column="create_date" property="createDate" />
-        <result column="update_date" property="updateDate" />
+        <id column="payment_num" property="paymentNum"/>
+        <result column="user_num" property="userNum"/>
+        <result column="payment_title" property="paymentTitle"/>
+        <result column="payment_desc" property="paymentDesc"/>
+        <result column="payment_cost" property="paymentCost"/>
+        <result column="record_type" property="recordType"/>
+        <result column="record_date" property="recordDate"/>
+        <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.payment_num                  as ${prefix}payment_num,
-        ${alias}.user_num                     as ${prefix}user_num,
-        ${alias}.payment_title                as ${prefix}payment_title,
-        ${alias}.payment_desc                 as ${prefix}payment_desc,
-        ${alias}.payment_cost                 as ${prefix}payment_cost,
-        ${alias}.record_type                  as ${prefix}record_type,
-        D19(${alias}.record_date)             as ${prefix}record_date,
-        D19(${alias}.create_date)             as ${prefix}create_date,
-        D19(${alias}.update_date)             as ${prefix}update_date
+        ${alias}.payment_num as ${prefix}payment_num,
+        ${alias}.user_num as ${prefix}user_num,
+        ${alias}.payment_title as ${prefix}payment_title,
+        ${alias}.payment_desc as ${prefix}payment_desc,
+        ${alias}.payment_cost as ${prefix}payment_cost,
+        ${alias}.record_type as ${prefix}record_type,
+        D19(${alias}.record_date) as ${prefix}record_date,
+        D19(${alias}.create_date) as ${prefix}create_date,
+        D19(${alias}.update_date) as ${prefix}update_date
     </sql>
 
     <select id="query" resultMap="vo">
@@ -78,27 +78,27 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="payment_num" keyProperty="paymentNum">
         insert into payment_record (
         <trim prefix="" prefixOverrides=",">
-                <if test="paymentNum!=null">, payment_num</if>
-                <if test="userNum!=null">, user_num</if>
-                <if test="paymentTitle!=null">, payment_title</if>
-                <if test="paymentDesc!=null">, payment_desc</if>
-                <if test="paymentCost!=null">, payment_cost</if>
-                <if test="recordType!=null">, record_type</if>
-                <if test="recordDate!=null">, record_date</if>
-                <if test="createDate!=null">, create_date</if>
-                <if test="updateDate!=null">, update_date</if>
+            <if test="paymentNum!=null">, payment_num</if>
+            <if test="userNum!=null">, user_num</if>
+            <if test="paymentTitle!=null">, payment_title</if>
+            <if test="paymentDesc!=null">, payment_desc</if>
+            <if test="paymentCost!=null">, payment_cost</if>
+            <if test="recordType!=null">, record_type</if>
+            <if test="recordDate!=null">, record_date</if>
+            <if test="createDate!=null">, create_date</if>
+            <if test="updateDate!=null">, update_date</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="paymentNum!=null">, #{paymentNum}</if>
-                <if test="userNum!=null">, #{userNum}</if>
-                <if test="paymentTitle!=null">, #{paymentTitle}</if>
-                <if test="paymentDesc!=null">, #{paymentDesc}</if>
-                <if test="paymentCost!=null">, #{paymentCost}</if>
-                <if test="recordType!=null">, #{recordType}</if>
-                <if test="recordDate!=null">, to_timestamp(#{recordDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="createDate!=null">, to_timestamp(#{createDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="updateDate!=null">, to_timestamp(#{updateDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="paymentNum!=null">, #{paymentNum}</if>
+            <if test="userNum!=null">, #{userNum}</if>
+            <if test="paymentTitle!=null">, #{paymentTitle}</if>
+            <if test="paymentDesc!=null">, #{paymentDesc}</if>
+            <if test="paymentCost!=null">, #{paymentCost}</if>
+            <if test="recordType!=null">, #{recordType}</if>
+            <if test="recordDate!=null">, to_timestamp(#{recordDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="createDate!=null">, to_timestamp(#{createDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="updateDate!=null">, to_timestamp(#{updateDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
         </trim>
         )
     </insert>
@@ -127,13 +127,13 @@
         </include>
         from payment_record paymentRecord
         where
-            payment_num=#{paymentNum}
+        payment_num=#{paymentNum}
     </select>
 
     <delete id="deleteByPk">
         delete from payment_record
         where
-            payment_num=#{paymentNum}
+        payment_num=#{paymentNum}
     </delete>
 
     <update id="update">
@@ -168,34 +168,34 @@
             </if>
         </trim>
         where
-            payment_num=#{paymentNum}
+        payment_num=#{paymentNum}
     </update>
 
     <update id="forceUpdate">
         update payment_record
         <trim prefix="set" prefixOverrides=",">
-                            , user_num=#{userNum}
+            , user_num=#{userNum}
 
-        <if test="paymentTitle!=''">, payment_title=#{paymentTitle}</if>
-        <if test="paymentTitle==''">, payment_title=null</if>
+            <if test="paymentTitle!=''">, payment_title=#{paymentTitle}</if>
+            <if test="paymentTitle==''">, payment_title=null</if>
 
-        <if test="paymentDesc!=''">, payment_desc=#{paymentDesc}</if>
-        <if test="paymentDesc==''">, payment_desc=null</if>
+            <if test="paymentDesc!=''">, payment_desc=#{paymentDesc}</if>
+            <if test="paymentDesc==''">, payment_desc=null</if>
 
-                            , payment_cost=#{paymentCost}
+            , payment_cost=#{paymentCost}
 
-        <if test="recordType!=''">, record_type=#{recordType}</if>
-        <if test="recordType==''">, record_type=null</if>
+            <if test="recordType!=''">, record_type=#{recordType}</if>
+            <if test="recordType==''">, record_type=null</if>
 
-        <if test="recordDate!=''">, record_date=to_timestamp(#{recordDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-        <if test="recordDate==''">, record_date=null</if>
+            <if test="recordDate!=''">, record_date=to_timestamp(#{recordDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="recordDate==''">, record_date=null</if>
 
-        <if test="updateDate!=''">, update_date=to_timestamp(#{updateDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-        <if test="updateDate==''">, update_date=null</if>
+            <if test="updateDate!=''">, update_date=to_timestamp(#{updateDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="updateDate==''">, update_date=null</if>
 
         </trim>
         where
-            payment_num=#{paymentNum}
+        payment_num=#{paymentNum}
     </update>
 
 </mapper>

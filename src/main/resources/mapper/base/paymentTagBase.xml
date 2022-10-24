@@ -7,17 +7,17 @@
 <mapper namespace="org.chun.plutus.common.dao.base.PaymentTagBaseDao">
 
     <resultMap id="vo" type="paymentTagVo">
-        <id column="tag_num" property="tagNum" />
-        <result column="tag_group_num" property="tagGroupNum" />
-        <result column="tag_name" property="tagName" />
-        <result column="tag_color" property="tagColor" />
+        <id column="tag_num" property="tagNum"/>
+        <result column="tag_group_num" property="tagGroupNum"/>
+        <result column="tag_name" property="tagName"/>
+        <result column="tag_color" property="tagColor"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.tag_num                      as ${prefix}tag_num,
-        ${alias}.tag_group_num                as ${prefix}tag_group_num,
-        ${alias}.tag_name                     as ${prefix}tag_name,
-        ${alias}.tag_color                    as ${prefix}tag_color
+        ${alias}.tag_num as ${prefix}tag_num,
+        ${alias}.tag_group_num as ${prefix}tag_group_num,
+        ${alias}.tag_name as ${prefix}tag_name,
+        ${alias}.tag_color as ${prefix}tag_color
     </sql>
 
     <select id="query" resultMap="vo">
@@ -58,17 +58,17 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="tag_num" keyProperty="tagNum">
         insert into payment_tag (
         <trim prefix="" prefixOverrides=",">
-                <if test="tagNum!=null">, tag_num</if>
-                <if test="tagGroupNum!=null">, tag_group_num</if>
-                <if test="tagName!=null">, tag_name</if>
-                <if test="tagColor!=null">, tag_color</if>
+            <if test="tagNum!=null">, tag_num</if>
+            <if test="tagGroupNum!=null">, tag_group_num</if>
+            <if test="tagName!=null">, tag_name</if>
+            <if test="tagColor!=null">, tag_color</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="tagNum!=null">, #{tagNum}</if>
-                <if test="tagGroupNum!=null">, #{tagGroupNum}</if>
-                <if test="tagName!=null">, #{tagName}</if>
-                <if test="tagColor!=null">, #{tagColor}</if>
+            <if test="tagNum!=null">, #{tagNum}</if>
+            <if test="tagGroupNum!=null">, #{tagGroupNum}</if>
+            <if test="tagName!=null">, #{tagName}</if>
+            <if test="tagColor!=null">, #{tagColor}</if>
         </trim>
         )
     </insert>
@@ -92,13 +92,13 @@
         </include>
         from payment_tag paymentTag
         where
-            tag_num=#{tagNum}
+        tag_num=#{tagNum}
     </select>
 
     <delete id="deleteByPk">
         delete from payment_tag
         where
-            tag_num=#{tagNum}
+        tag_num=#{tagNum}
     </delete>
 
     <update id="update">
@@ -116,23 +116,23 @@
             </if>
         </trim>
         where
-            tag_num=#{tagNum}
+        tag_num=#{tagNum}
     </update>
 
     <update id="forceUpdate">
         update payment_tag
         <trim prefix="set" prefixOverrides=",">
-                            , tag_group_num=#{tagGroupNum}
+            , tag_group_num=#{tagGroupNum}
 
-        <if test="tagName!=''">, tag_name=#{tagName}</if>
-        <if test="tagName==''">, tag_name=null</if>
+            <if test="tagName!=''">, tag_name=#{tagName}</if>
+            <if test="tagName==''">, tag_name=null</if>
 
-        <if test="tagColor!=''">, tag_color=#{tagColor}</if>
-        <if test="tagColor==''">, tag_color=null</if>
+            <if test="tagColor!=''">, tag_color=#{tagColor}</if>
+            <if test="tagColor==''">, tag_color=null</if>
 
         </trim>
         where
-            tag_num=#{tagNum}
+        tag_num=#{tagNum}
     </update>
 
 </mapper>

@@ -1,6 +1,7 @@
 package org.chun.plutus.common.vo;
 
 import java.io.Serializable;
+
 import org.chun.plutus.common.vo.base.ActivityDtExcludeBaseVo;
 
 /**
@@ -8,8 +9,8 @@ import org.chun.plutus.common.vo.base.ActivityDtExcludeBaseVo;
  */
 public class ActivityDtExcludeVo extends ActivityDtExcludeBaseVo implements Serializable, Cloneable {
 
-    public ActivityDtExcludeVo() {
-        super();
-    }
+  public ActivityDtExcludeVo() {
+    super();
+  }
 
 }

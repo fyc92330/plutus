@@ -1,6 +1,7 @@
 package org.chun.plutus.common.dao.base;
 
 import java.util.List;
+
 import org.chun.plutus.common.vo.AppUserMemberStatusVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,22 +11,22 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface AppUserMemberStatusBaseDao {
 
-    List<AppUserMemberStatusVo> query( Object params );
+  List<AppUserMemberStatusVo> query(Object params);
 
-    int insert( Object params );
+  int insert(Object params);
 
-    List<AppUserMemberStatusVo> listAll();
+  List<AppUserMemberStatusVo> listAll();
 
-    Integer count( Object params );
+  Integer count(Object params);
 
-    int delete( Object params );
+  int delete(Object params);
 
-    AppUserMemberStatusVo getByPk( @Param( "aumsNum" ) Long aumsNum );
+  AppUserMemberStatusVo getByPk(@Param("aumsNum") Long aumsNum);
 
-    int deleteByPk( @Param( "aumsNum" ) Long aumsNum );
+  int deleteByPk(@Param("aumsNum") Long aumsNum);
 
-    int update( Object params );
+  int update(Object params);
 
-    int forceUpdate( Object params );
+  int forceUpdate(Object params);
 
 }

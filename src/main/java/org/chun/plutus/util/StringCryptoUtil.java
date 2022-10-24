@@ -194,8 +194,9 @@ public class StringCryptoUtil {
    * @return
    */
   public static byte[] parseHexStr2Byte(String paramString) {
-    if (paramString.length() < 1)
+    if (paramString.length() < 1) {
       return null;
+    }
     byte[] arrayOfByte = new byte[paramString.length() / 2];
     for (int i = 0; i < paramString.length() / 2; i++) {
       int j = Integer.parseInt(paramString.substring(i * 2, i * 2 + 1), 16);

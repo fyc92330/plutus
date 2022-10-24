@@ -7,17 +7,17 @@
 <mapper namespace="org.chun.plutus.common.dao.base.PaymentTagGroupBaseDao">
 
     <resultMap id="vo" type="paymentTagGroupVo">
-        <id column="tag_group_num" property="tagGroupNum" />
-        <result column="tag_group_name" property="tagGroupName" />
-        <result column="tag_group_color" property="tagGroupColor" />
-        <result column="user_num" property="userNum" />
+        <id column="tag_group_num" property="tagGroupNum"/>
+        <result column="tag_group_name" property="tagGroupName"/>
+        <result column="tag_group_color" property="tagGroupColor"/>
+        <result column="user_num" property="userNum"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.tag_group_num                as ${prefix}tag_group_num,
-        ${alias}.tag_group_name               as ${prefix}tag_group_name,
-        ${alias}.tag_group_color              as ${prefix}tag_group_color,
-        ${alias}.user_num                     as ${prefix}user_num
+        ${alias}.tag_group_num as ${prefix}tag_group_num,
+        ${alias}.tag_group_name as ${prefix}tag_group_name,
+        ${alias}.tag_group_color as ${prefix}tag_group_color,
+        ${alias}.user_num as ${prefix}user_num
     </sql>
 
     <select id="query" resultMap="vo">
@@ -58,17 +58,17 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="tag_group_num" keyProperty="tagGroupNum">
         insert into payment_tag_group (
         <trim prefix="" prefixOverrides=",">
-                <if test="tagGroupNum!=null">, tag_group_num</if>
-                <if test="tagGroupName!=null">, tag_group_name</if>
-                <if test="tagGroupColor!=null">, tag_group_color</if>
-                <if test="userNum!=null">, user_num</if>
+            <if test="tagGroupNum!=null">, tag_group_num</if>
+            <if test="tagGroupName!=null">, tag_group_name</if>
+            <if test="tagGroupColor!=null">, tag_group_color</if>
+            <if test="userNum!=null">, user_num</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="tagGroupNum!=null">, #{tagGroupNum}</if>
-                <if test="tagGroupName!=null">, #{tagGroupName}</if>
-                <if test="tagGroupColor!=null">, #{tagGroupColor}</if>
-                <if test="userNum!=null">, #{userNum}</if>
+            <if test="tagGroupNum!=null">, #{tagGroupNum}</if>
+            <if test="tagGroupName!=null">, #{tagGroupName}</if>
+            <if test="tagGroupColor!=null">, #{tagGroupColor}</if>
+            <if test="userNum!=null">, #{userNum}</if>
         </trim>
         )
     </insert>
@@ -92,13 +92,13 @@
         </include>
         from payment_tag_group paymentTagGroup
         where
-            tag_group_num=#{tagGroupNum}
+        tag_group_num=#{tagGroupNum}
     </select>
 
     <delete id="deleteByPk">
         delete from payment_tag_group
         where
-            tag_group_num=#{tagGroupNum}
+        tag_group_num=#{tagGroupNum}
     </delete>
 
     <update id="update">
@@ -116,23 +116,23 @@
             <if test="userNum!=null">, user_num=#{userNum}</if>
         </trim>
         where
-            tag_group_num=#{tagGroupNum}
+        tag_group_num=#{tagGroupNum}
     </update>
 
     <update id="forceUpdate">
         update payment_tag_group
         <trim prefix="set" prefixOverrides=",">
-        <if test="tagGroupName!=''">, tag_group_name=#{tagGroupName}</if>
-        <if test="tagGroupName==''">, tag_group_name=null</if>
+            <if test="tagGroupName!=''">, tag_group_name=#{tagGroupName}</if>
+            <if test="tagGroupName==''">, tag_group_name=null</if>
 
-        <if test="tagGroupColor!=''">, tag_group_color=#{tagGroupColor}</if>
-        <if test="tagGroupColor==''">, tag_group_color=null</if>
+            <if test="tagGroupColor!=''">, tag_group_color=#{tagGroupColor}</if>
+            <if test="tagGroupColor==''">, tag_group_color=null</if>
 
-                            , user_num=#{userNum}
+            , user_num=#{userNum}
 
         </trim>
         where
-            tag_group_num=#{tagGroupNum}
+        tag_group_num=#{tagGroupNum}
     </update>
 
 </mapper>

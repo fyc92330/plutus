@@ -19,11 +19,11 @@ public class LineRichMenuHelper {
   @Value("${line.client.sub-menu}")
   private String subMenuId;
 
-  public void mainMenuOnChange(String userId){
+  public void mainMenuOnChange(String userId) {
     lineBotService.menuChange(userId, mainMenuId);
   }
 
-  public void subMenuOnChange(String userId){
+  public void subMenuOnChange(String userId) {
     lineBotService.menuChange(userId, subMenuId);
   }
 

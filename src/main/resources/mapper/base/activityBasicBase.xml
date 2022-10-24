@@ -7,29 +7,29 @@
 <mapper namespace="org.chun.plutus.common.dao.base.ActivityBasicBaseDao">
 
     <resultMap id="vo" type="activityBasicVo">
-        <id column="act_num" property="actNum" />
-        <result column="user_num" property="userNum" />
-        <result column="act_title" property="actTitle" />
-        <result column="act_desc" property="actDesc" />
-        <result column="start_date" property="startDate" />
-        <result column="end_date" property="endDate" />
-        <result column="join_code" property="joinCode" />
-        <result column="act_status" property="actStatus" />
-        <result column="create_date" property="createDate" />
-        <result column="qrcode_url" property="qrcodeUrl" />
+        <id column="act_num" property="actNum"/>
+        <result column="user_num" property="userNum"/>
+        <result column="act_title" property="actTitle"/>
+        <result column="act_desc" property="actDesc"/>
+        <result column="start_date" property="startDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="join_code" property="joinCode"/>
+        <result column="act_status" property="actStatus"/>
+        <result column="create_date" property="createDate"/>
+        <result column="qrcode_url" property="qrcodeUrl"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.act_num                      as ${prefix}act_num,
-        ${alias}.user_num                     as ${prefix}user_num,
-        ${alias}.act_title                    as ${prefix}act_title,
-        ${alias}.act_desc                     as ${prefix}act_desc,
-        D19(${alias}.start_date)              as ${prefix}start_date,
-        D19(${alias}.end_date)                as ${prefix}end_date,
-        ${alias}.join_code                    as ${prefix}join_code,
-        ${alias}.act_status                   as ${prefix}act_status,
-        D19(${alias}.create_date)             as ${prefix}create_date,
-        ${alias}.qrcode_url                   as ${prefix}qrcode_url
+        ${alias}.act_num as ${prefix}act_num,
+        ${alias}.user_num as ${prefix}user_num,
+        ${alias}.act_title as ${prefix}act_title,
+        ${alias}.act_desc as ${prefix}act_desc,
+        D19(${alias}.start_date) as ${prefix}start_date,
+        D19(${alias}.end_date) as ${prefix}end_date,
+        ${alias}.join_code as ${prefix}join_code,
+        ${alias}.act_status as ${prefix}act_status,
+        D19(${alias}.create_date) as ${prefix}create_date,
+        ${alias}.qrcode_url as ${prefix}qrcode_url
     </sql>
 
     <select id="query" resultMap="vo">
@@ -82,29 +82,29 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="act_num" keyProperty="actNum">
         insert into activity_basic (
         <trim prefix="" prefixOverrides=",">
-                <if test="actNum!=null">, act_num</if>
-                <if test="userNum!=null">, user_num</if>
-                <if test="actTitle!=null">, act_title</if>
-                <if test="actDesc!=null">, act_desc</if>
-                <if test="startDate!=null">, start_date</if>
-                <if test="endDate!=null">, end_date</if>
-                <if test="joinCode!=null">, join_code</if>
-                <if test="actStatus!=null">, act_status</if>
-                <if test="createDate!=null">, create_date</if>
-                <if test="qrcodeUrl!=null">, qrcode_url</if>
+            <if test="actNum!=null">, act_num</if>
+            <if test="userNum!=null">, user_num</if>
+            <if test="actTitle!=null">, act_title</if>
+            <if test="actDesc!=null">, act_desc</if>
+            <if test="startDate!=null">, start_date</if>
+            <if test="endDate!=null">, end_date</if>
+            <if test="joinCode!=null">, join_code</if>
+            <if test="actStatus!=null">, act_status</if>
+            <if test="createDate!=null">, create_date</if>
+            <if test="qrcodeUrl!=null">, qrcode_url</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="actNum!=null">, #{actNum}</if>
-                <if test="userNum!=null">, #{userNum}</if>
-                <if test="actTitle!=null">, #{actTitle}</if>
-                <if test="actDesc!=null">, #{actDesc}</if>
-                <if test="startDate!=null">, to_timestamp(#{startDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="endDate!=null">, to_timestamp(#{endDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="joinCode!=null">, #{joinCode}</if>
-                <if test="actStatus!=null">, #{actStatus}</if>
-                <if test="createDate!=null">, to_timestamp(#{createDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-                <if test="qrcodeUrl!=null">, #{qrcodeUrl}</if>
+            <if test="actNum!=null">, #{actNum}</if>
+            <if test="userNum!=null">, #{userNum}</if>
+            <if test="actTitle!=null">, #{actTitle}</if>
+            <if test="actDesc!=null">, #{actDesc}</if>
+            <if test="startDate!=null">, to_timestamp(#{startDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="endDate!=null">, to_timestamp(#{endDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="joinCode!=null">, #{joinCode}</if>
+            <if test="actStatus!=null">, #{actStatus}</if>
+            <if test="createDate!=null">, to_timestamp(#{createDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="qrcodeUrl!=null">, #{qrcodeUrl}</if>
         </trim>
         )
     </insert>
@@ -134,13 +134,13 @@
         </include>
         from activity_basic activityBasic
         where
-            act_num=#{actNum}
+        act_num=#{actNum}
     </select>
 
     <delete id="deleteByPk">
         delete from activity_basic
         where
-            act_num=#{actNum}
+        act_num=#{actNum}
     </delete>
 
     <update id="update">
@@ -182,38 +182,38 @@
             </if>
         </trim>
         where
-            act_num=#{actNum}
+        act_num=#{actNum}
     </update>
 
     <update id="forceUpdate">
         update activity_basic
         <trim prefix="set" prefixOverrides=",">
-                            , user_num=#{userNum}
+            , user_num=#{userNum}
 
-        <if test="actTitle!=''">, act_title=#{actTitle}</if>
-        <if test="actTitle==''">, act_title=null</if>
+            <if test="actTitle!=''">, act_title=#{actTitle}</if>
+            <if test="actTitle==''">, act_title=null</if>
 
-        <if test="actDesc!=''">, act_desc=#{actDesc}</if>
-        <if test="actDesc==''">, act_desc=null</if>
+            <if test="actDesc!=''">, act_desc=#{actDesc}</if>
+            <if test="actDesc==''">, act_desc=null</if>
 
-        <if test="startDate!=''">, start_date=to_timestamp(#{startDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-        <if test="startDate==''">, start_date=null</if>
+            <if test="startDate!=''">, start_date=to_timestamp(#{startDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="startDate==''">, start_date=null</if>
 
-        <if test="endDate!=''">, end_date=to_timestamp(#{endDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
-        <if test="endDate==''">, end_date=null</if>
+            <if test="endDate!=''">, end_date=to_timestamp(#{endDate}, 'YYYY-MM-DD HH24:MI:SS')</if>
+            <if test="endDate==''">, end_date=null</if>
 
-        <if test="joinCode!=''">, join_code=#{joinCode}</if>
-        <if test="joinCode==''">, join_code=null</if>
+            <if test="joinCode!=''">, join_code=#{joinCode}</if>
+            <if test="joinCode==''">, join_code=null</if>
 
-        <if test="actStatus!=''">, act_status=#{actStatus}</if>
-        <if test="actStatus==''">, act_status=null</if>
+            <if test="actStatus!=''">, act_status=#{actStatus}</if>
+            <if test="actStatus==''">, act_status=null</if>
 
-        <if test="qrcodeUrl!=''">, qrcode_url=#{qrcodeUrl}</if>
-        <if test="qrcodeUrl==''">, qrcode_url=null</if>
+            <if test="qrcodeUrl!=''">, qrcode_url=#{qrcodeUrl}</if>
+            <if test="qrcodeUrl==''">, qrcode_url=null</if>
 
         </trim>
         where
-            act_num=#{actNum}
+        act_num=#{actNum}
     </update>
 
 </mapper>

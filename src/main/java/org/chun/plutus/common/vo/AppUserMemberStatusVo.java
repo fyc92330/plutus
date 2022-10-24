@@ -1,6 +1,7 @@
 package org.chun.plutus.common.vo;
 
 import java.io.Serializable;
+
 import org.chun.plutus.common.vo.base.AppUserMemberStatusBaseVo;
 
 /**
@@ -8,8 +9,8 @@ import org.chun.plutus.common.vo.base.AppUserMemberStatusBaseVo;
  */
 public class AppUserMemberStatusVo extends AppUserMemberStatusBaseVo implements Serializable, Cloneable {
 
-    public AppUserMemberStatusVo() {
-        super();
-    }
+  public AppUserMemberStatusVo() {
+    super();
+  }
 
 }

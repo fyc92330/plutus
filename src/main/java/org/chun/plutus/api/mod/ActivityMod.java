@@ -209,8 +209,9 @@ public class ActivityMod {
    */
   public ActivityDtVo getUserCurrentActivityNode(Long userNum) {
     ActivityDtVo activityDtVo = activityDtDao.getLastActivityByUserNum(userNum);
-    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityDtVo.getActStatus()))
+    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityDtVo.getActStatus())) {
       throw new EmptyPartnerException();
+    }
     return activityDtVo;
   }
 
@@ -237,7 +238,9 @@ public class ActivityMod {
       case PAYER:
         messageContent = String.format(PAYER_SETTING_ALREADY, commandValue);
         final Long payerUserNum = getPayerUserNum(commandValue);
-        if (payerUserNum != null) activityDtVo.setPrePaidUser(payerUserNum);
+        if (payerUserNum != null) {
+          activityDtVo.setPrePaidUser(payerUserNum);
+        }
         break;
       default:
         String typeName;
@@ -275,7 +278,9 @@ public class ActivityMod {
       ActivityBasicVo activityQueryVo = new ActivityBasicVo();
       activityQueryVo.setJoinCode(joinCode);
       // 1:沒有活動 2:沒有參加活動
-      if (0 == activityBasicDao.count(activityQueryVo)) throw new ActivityNotFoundException();
+      if (0 == activityBasicDao.count(activityQueryVo)) {
+        throw new ActivityNotFoundException();
+      }
       throw new UserWithoutActivityException();
     }
 
@@ -296,7 +301,9 @@ public class ActivityMod {
     // 收入支出邏輯
     long pay = personalPay.longValue();
     final boolean isPayer = pay > 0;
-    if (!isPayer) pay = -pay;
+    if (!isPayer) {
+      pay = -pay;
+    }
 
     StringBuilder view = new StringBuilder();
     view.append(String.format(GLOBAL_VIEW, actTitle, hostUserName, nowDate, userCount, currentCost.longValue(),
@@ -308,7 +315,9 @@ public class ActivityMod {
       if (activityViewRvo.getIsHost()) {
         activityDtVoList.forEach(dtVo -> {
           String endDate = dtVo.getEndDate();
-          if (endDate == null) endDate = NONE_CLOSE;
+          if (endDate == null) {
+            endDate = NONE_CLOSE;
+          }
           view.append(String.format(GUEST_VIEW, dtVo.getAcdTitle(), dtVo.getStartDate(), endDate,
               dtVo.getCost().longValue(), ActivityEnum.PayType.getEnum(dtVo.getPayType()).getSimpleName(), dtVo.getPayerName()));
         });
@@ -373,7 +382,9 @@ public class ActivityMod {
         .map(ActivityBasicVo::getActStatus)
         .map(ActivityEnum.Status::getEnum)
         .anyMatch(e -> ActivityEnum.Status.FINISH != e);
-    if (hasMultiActivity) throw new MultiActivityException();
+    if (hasMultiActivity) {
+      throw new MultiActivityException();
+    }
   }
 
   /**
@@ -383,9 +394,12 @@ public class ActivityMod {
    */
   public void validActivityExists(String joinCode) {
     ActivityBasicVo activityBasicVo = activityBasicDao.getByJoinCode(joinCode);
-    if (activityBasicVo == null) throw new ActivityNotFoundException();
-    if (ActivityEnum.Status.getEnum(activityBasicVo.getActStatus()) == ActivityEnum.Status.FINISH)
+    if (activityBasicVo == null) {
+      throw new ActivityNotFoundException();
+    }
+    if (ActivityEnum.Status.getEnum(activityBasicVo.getActStatus()) == ActivityEnum.Status.FINISH) {
       throw new ActivityClosedException();
+    }
   }
 
   /**
@@ -396,9 +410,15 @@ public class ActivityMod {
    */
   public void validActivitySetExists(String joinCode, Long userNum, boolean isLeave) {
     ActivitySetVo activitySetVo = activitySetDao.getInProgressActivity(userNum, ActivityEnum.SetStatus.JOIN.val());
-    if (activitySetVo == null) throw new UserWithoutActivityException();
-    if (!joinCode.equals(activitySetVo.getJoinCode())) throw new ActivityDifferentException();
-    if (isLeave && userNum.equals(activitySetVo.getHostUserNum())) throw new HostLeavingException();
+    if (activitySetVo == null) {
+      throw new UserWithoutActivityException();
+    }
+    if (!joinCode.equals(activitySetVo.getJoinCode())) {
+      throw new ActivityDifferentException();
+    }
+    if (isLeave && userNum.equals(activitySetVo.getHostUserNum())) {
+      throw new HostLeavingException();
+    }
   }
 
   /**
@@ -423,7 +443,9 @@ public class ActivityMod {
     ActivityBasicVo activityQueryVo = new ActivityBasicVo();
     activityQueryVo.setUserNum(userNum);
     activityQueryVo.setActStatus(ActivityEnum.Status.PROGRESS.val());
-    if (0 == activityBasicDao.count(activityQueryVo)) throw new ActivityNotFoundException();
+    if (0 == activityBasicDao.count(activityQueryVo)) {
+      throw new ActivityNotFoundException();
+    }
   }
 
   /**
@@ -436,8 +458,9 @@ public class ActivityMod {
   public void validSubMenuAction(MenuEnum.Setting settingEnum, String commandValue, String originPayType) {
     MenuEnum.Setting[] settingSettings = new MenuEnum.Setting[]{TITLE, COST, PAYER};
     MenuEnum.Setting[] payTypeSettings = new MenuEnum.Setting[]{TYPE_AVERAGE, TYPE_SCALE, TYPE_CHOICE};
-    if (Arrays.asList(settingSettings).contains(settingEnum) && StringUtils.isBlank(commandValue))
+    if (Arrays.asList(settingSettings).contains(settingEnum) && StringUtils.isBlank(commandValue)) {
       throw new CustomValueEmptyException();
+    }
     if (Arrays.asList(payTypeSettings).contains(settingEnum) &&
         ActivityEnum.PayType.getEnum(originPayType) != ActivityEnum.PayType.DEFAULT) {
       throw new PayTypeChangeAlreadyException();
@@ -451,9 +474,12 @@ public class ActivityMod {
    */
   public void validActivityDtExists(LineUserDto lineUserDto) {
     final ActivityDtVo activityDtVo = activityDtDao.getLastActivityByUserNum(lineUserDto.getUserNum());
-    if (activityDtVo == null) throw new ActivityDtNotFoundException();
-    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityDtVo.getActStatus()))
+    if (activityDtVo == null) {
+      throw new ActivityDtNotFoundException();
+    }
+    if (ActivityEnum.Status.PREPARE == ActivityEnum.Status.getEnum(activityDtVo.getActStatus())) {
       throw new EmptyPartnerException();
+    }
   }
 
   /** =================================================== private ================================================== */
@@ -573,7 +599,9 @@ public class ActivityMod {
             ? Timestamp.valueOf(endDate).getTime()
             : Timestamp.valueOf(userLeaveDate).getTime();
         final long userJoinTimestamp = joinEndTimestamp - joinStartTimestamp;
-        if (userNum.equals(activitySetVo.getUserNum())) userTime = userJoinTimestamp;
+        if (userNum.equals(activitySetVo.getUserNum())) {
+          userTime = userJoinTimestamp;
+        }
         totalTime = totalTime + userJoinTimestamp;
       }
     }

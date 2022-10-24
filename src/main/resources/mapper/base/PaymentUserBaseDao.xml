@@ -13,12 +13,12 @@
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.user_num                      as ${prefix}user_num,
-        ${alias}.user_name                     as ${prefix}user_name,
-        ${alias}.user_gender                   as ${prefix}user_gender,
-        ${alias}.user_mobile                   as ${prefix}user_mobile,
-        ${alias}.user_email                    as ${prefix}user_email,
-        ${alias}.line_user_id                  as ${prefix}line_user_id
+        ${alias}.user_num as ${prefix}user_num,
+        ${alias}.user_name as ${prefix}user_name,
+        ${alias}.user_gender as ${prefix}user_gender,
+        ${alias}.user_mobile as ${prefix}user_mobile,
+        ${alias}.user_email as ${prefix}user_email,
+        ${alias}.line_user_id as ${prefix}line_user_id
     </sql>
 
     <select id="query" resultMap="vo">

@@ -7,17 +7,17 @@
 <mapper namespace="org.chun.plutus.common.dao.base.PaymentRecordMTagBaseDao">
 
     <resultMap id="vo" type="paymentRecordMTagVo">
-        <id column="prmt_num" property="prmtNum" />
-        <result column="payment_num" property="paymentNum" />
-        <result column="tag_group_num" property="tagGroupNum" />
-        <result column="tag_num" property="tagNum" />
+        <id column="prmt_num" property="prmtNum"/>
+        <result column="payment_num" property="paymentNum"/>
+        <result column="tag_group_num" property="tagGroupNum"/>
+        <result column="tag_num" property="tagNum"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.prmt_num                     as ${prefix}prmt_num,
-        ${alias}.payment_num                  as ${prefix}payment_num,
-        ${alias}.tag_group_num                as ${prefix}tag_group_num,
-        ${alias}.tag_num                      as ${prefix}tag_num
+        ${alias}.prmt_num as ${prefix}prmt_num,
+        ${alias}.payment_num as ${prefix}payment_num,
+        ${alias}.tag_group_num as ${prefix}tag_group_num,
+        ${alias}.tag_num as ${prefix}tag_num
     </sql>
 
     <select id="query" resultMap="vo">
@@ -58,17 +58,17 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="prmt_num" keyProperty="prmtNum">
         insert into payment_record_m_tag (
         <trim prefix="" prefixOverrides=",">
-                <if test="prmtNum!=null">, prmt_num</if>
-                <if test="paymentNum!=null">, payment_num</if>
-                <if test="tagGroupNum!=null">, tag_group_num</if>
-                <if test="tagNum!=null">, tag_num</if>
+            <if test="prmtNum!=null">, prmt_num</if>
+            <if test="paymentNum!=null">, payment_num</if>
+            <if test="tagGroupNum!=null">, tag_group_num</if>
+            <if test="tagNum!=null">, tag_num</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="prmtNum!=null">, #{prmtNum}</if>
-                <if test="paymentNum!=null">, #{paymentNum}</if>
-                <if test="tagGroupNum!=null">, #{tagGroupNum}</if>
-                <if test="tagNum!=null">, #{tagNum}</if>
+            <if test="prmtNum!=null">, #{prmtNum}</if>
+            <if test="paymentNum!=null">, #{paymentNum}</if>
+            <if test="tagGroupNum!=null">, #{tagGroupNum}</if>
+            <if test="tagNum!=null">, #{tagNum}</if>
         </trim>
         )
     </insert>
@@ -92,13 +92,13 @@
         </include>
         from payment_record_m_tag paymentRecordMTag
         where
-            prmt_num=#{prmtNum}
+        prmt_num=#{prmtNum}
     </select>
 
     <delete id="deleteByPk">
         delete from payment_record_m_tag
         where
-            prmt_num=#{prmtNum}
+        prmt_num=#{prmtNum}
     </delete>
 
     <update id="update">
@@ -110,21 +110,21 @@
             <if test="tagNum!=null">, tag_num=#{tagNum}</if>
         </trim>
         where
-            prmt_num=#{prmtNum}
+        prmt_num=#{prmtNum}
     </update>
 
     <update id="forceUpdate">
         update payment_record_m_tag
         <trim prefix="set" prefixOverrides=",">
-                            , payment_num=#{paymentNum}
+            , payment_num=#{paymentNum}
 
-                            , tag_group_num=#{tagGroupNum}
+            , tag_group_num=#{tagGroupNum}
 
-                            , tag_num=#{tagNum}
+            , tag_num=#{tagNum}
 
         </trim>
         where
-            prmt_num=#{prmtNum}
+        prmt_num=#{prmtNum}
     </update>
 
 </mapper>

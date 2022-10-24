@@ -7,17 +7,17 @@
 <mapper namespace="org.chun.plutus.common.dao.base.ActivityDtExcludeBaseDao">
 
     <resultMap id="vo" type="activityDtExcludeVo">
-        <id column="ace_num" property="aceNum" />
-        <result column="acd_num" property="acdNum" />
-        <result column="user_num" property="userNum" />
-        <result column="reason" property="reason" />
+        <id column="ace_num" property="aceNum"/>
+        <result column="acd_num" property="acdNum"/>
+        <result column="user_num" property="userNum"/>
+        <result column="reason" property="reason"/>
     </resultMap>
 
     <sql id="columnsAlias">
-        ${alias}.ace_num                      as ${prefix}ace_num,
-        ${alias}.acd_num                      as ${prefix}acd_num,
-        ${alias}.user_num                     as ${prefix}user_num,
-        ${alias}.reason                       as ${prefix}reason
+        ${alias}.ace_num as ${prefix}ace_num,
+        ${alias}.acd_num as ${prefix}acd_num,
+        ${alias}.user_num as ${prefix}user_num,
+        ${alias}.reason as ${prefix}reason
     </sql>
 
     <select id="query" resultMap="vo">
@@ -58,17 +58,17 @@
     <insert id="insert" useGeneratedKeys="true" keyColumn="ace_num" keyProperty="aceNum">
         insert into activity_dt_exclude (
         <trim prefix="" prefixOverrides=",">
-                <if test="aceNum!=null">, ace_num</if>
-                <if test="acdNum!=null">, acd_num</if>
-                <if test="userNum!=null">, user_num</if>
-                <if test="reason!=null">, reason</if>
+            <if test="aceNum!=null">, ace_num</if>
+            <if test="acdNum!=null">, acd_num</if>
+            <if test="userNum!=null">, user_num</if>
+            <if test="reason!=null">, reason</if>
         </trim>
         ) values (
         <trim prefix="" prefixOverrides=",">
-                <if test="aceNum!=null">, #{aceNum}</if>
-                <if test="acdNum!=null">, #{acdNum}</if>
-                <if test="userNum!=null">, #{userNum}</if>
-                <if test="reason!=null">, #{reason}</if>
+            <if test="aceNum!=null">, #{aceNum}</if>
+            <if test="acdNum!=null">, #{acdNum}</if>
+            <if test="userNum!=null">, #{userNum}</if>
+            <if test="reason!=null">, #{reason}</if>
         </trim>
         )
     </insert>
@@ -92,13 +92,13 @@
         </include>
         from activity_dt_exclude activityDtExclude
         where
-            ace_num=#{aceNum}
+        ace_num=#{aceNum}
     </select>
 
     <delete id="deleteByPk">
         delete from activity_dt_exclude
         where
-            ace_num=#{aceNum}
+        ace_num=#{aceNum}
     </delete>
 
     <update id="update">
@@ -113,22 +113,22 @@
             </if>
         </trim>
         where
-            ace_num=#{aceNum}
+        ace_num=#{aceNum}
     </update>
 
     <update id="forceUpdate">
         update activity_dt_exclude
         <trim prefix="set" prefixOverrides=",">
-                            , acd_num=#{acdNum}
+            , acd_num=#{acdNum}
 
-                            , user_num=#{userNum}
+            , user_num=#{userNum}
 
-        <if test="reason!=''">, reason=#{reason}</if>
-        <if test="reason==''">, reason=null</if>
+            <if test="reason!=''">, reason=#{reason}</if>
+            <if test="reason==''">, reason=null</if>
 
         </trim>
         where
-            ace_num=#{aceNum}
+        ace_num=#{aceNum}
     </update>
 
 </mapper>

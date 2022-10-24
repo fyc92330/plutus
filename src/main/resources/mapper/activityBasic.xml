@@ -27,7 +27,8 @@
         <id property="actNum" column="ACT_NUM"/>
         <result property="actTitle" column="ACT_TITLE"/>
         <result property="hostUserNum" column="HOST_USER_NUM"/>
-        <collection property="activitySetVoList" ofType="org.chun.plutus.common.vo.ActivitySetVo" columnPrefix="S_" javaType="ArrayList"
+        <collection property="activitySetVoList" ofType="org.chun.plutus.common.vo.ActivitySetVo" columnPrefix="S_"
+                    javaType="ArrayList"
                     resultMap="org.chun.plutus.common.dao.ActivitySetDao.vo"/>
     </resultMap>
 
@@ -36,10 +37,11 @@
         <include refid="org.chun.plutus.common.dao.base.ActivityBasicBaseDao.columnsAlias">
             <property name="alias" value="activityBasic"/>
             <property name="prefix" value=""/>
-        </include>,
+        </include>
+        ,
         CASE
-            WHEN AU.USER_NAME IS NULL
-            THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+        WHEN AU.USER_NAME IS NULL
+        THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
         END AS USER_NAME
         FROM ACTIVITY_BASIC activityBasic
         JOIN APP_USER AU ON activityBasic.USER_NUM = AU.USER_NUM
@@ -48,81 +50,81 @@
 
     <select id="getCurrentActivityView" resultMap="activityView">
         WITH ACTIVITY AS (
-            SELECT
-                ACT_NUM,
-                USER_NUM AS HOST_USER_NUM,
-                CASE
-                    WHEN USER_NUM = #{userNum}
-                    THEN true ELSE false
-                END AS IS_HOST
-            FROM ACTIVITY_BASIC
-            WHERE JOIN_CODE = #{joinCode}
-            LIMIT 1
+        SELECT
+        ACT_NUM,
+        USER_NUM AS HOST_USER_NUM,
+        CASE
+        WHEN USER_NUM = #{userNum}
+        THEN true ELSE false
+        END AS IS_HOST
+        FROM ACTIVITY_BASIC
+        WHERE JOIN_CODE = #{joinCode}
+        LIMIT 1
         ), HOST_INFO(NAME) AS (
-            SELECT
-                CASE
-                    WHEN U.USER_NAME IS NULL
-                    THEN U.USER_LINE_NAME ELSE U.USER_NAME
-                END
-            FROM ACTIVITY A
-            JOIN APP_USER U ON A.HOST_USER_NUM = U.USER_NUM
+        SELECT
+        CASE
+        WHEN U.USER_NAME IS NULL
+        THEN U.USER_LINE_NAME ELSE U.USER_NAME
+        END
+        FROM ACTIVITY A
+        JOIN APP_USER U ON A.HOST_USER_NUM = U.USER_NUM
         ), TOTAL_PARTICIPANT(COUNT) AS (
-            SELECT COUNT(USER_SET.USER_NUM)
-            FROM (
-                SELECT DISTINCT USER_NUM
-                FROM ACTIVITY A
-                JOIN ACTIVITY_SET ACS ON A.ACT_NUM = ACS.ACT_NUM
-            ) USER_SET
+        SELECT COUNT(USER_SET.USER_NUM)
+        FROM (
+        SELECT DISTINCT USER_NUM
+        FROM ACTIVITY A
+        JOIN ACTIVITY_SET ACS ON A.ACT_NUM = ACS.ACT_NUM
+        ) USER_SET
         ), SUB_ACTIVITY AS (
-            SELECT
-                AD.ACT_NUM,
-                AD.ACD_TITLE,
-                AD.START_DATE,
-                AD.END_DATE,
-                CASE
-                    WHEN AD.COST IS NULL
-                    THEN 0 ELSE AD.COST
-                END AS COST,
-                AD.PAY_TYPE,
-                AD.PRE_PAID_USER,
-                AU.USER_LINE_NAME
-            FROM ACTIVITY A
-            JOIN ACTIVITY_DT AD ON A.ACT_NUM = AD.ACT_NUM
-            JOIN APP_USER AU ON AD.PRE_PAID_USER = AU.USER_NUM
+        SELECT
+        AD.ACT_NUM,
+        AD.ACD_TITLE,
+        AD.START_DATE,
+        AD.END_DATE,
+        CASE
+        WHEN AD.COST IS NULL
+        THEN 0 ELSE AD.COST
+        END AS COST,
+        AD.PAY_TYPE,
+        AD.PRE_PAID_USER,
+        AU.USER_LINE_NAME
+        FROM ACTIVITY A
+        JOIN ACTIVITY_DT AD ON A.ACT_NUM = AD.ACT_NUM
+        JOIN APP_USER AU ON AD.PRE_PAID_USER = AU.USER_NUM
         ), TOTAL_PAYMENT(TOTAL_COST) AS (
-            SELECT SUM(COST)
-            FROM SUB_ACTIVITY
+        SELECT SUM(COST)
+        FROM SUB_ACTIVITY
         )
         SELECT
-            AB.ACT_NUM,
-            AB.ACT_TITLE,
-            NAME AS HOST_USER_NAME,
-            AB.START_DATE,
-            COUNT AS USER_COUNT,
-            CASE
-                WHEN TOTAL_COST IS NULL
-                THEN 0 ELSE TOTAL_COST
-            END AS CURRENT_COST,
-            CASE
-                WHEN AU.USER_NAME IS NULL
-                THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
-            END AS USER_NAME,
-            SA.ACD_TITLE AS D_ACD_TITLE,
-            d19(SA.START_DATE) AS D_START_DATE,
-            d19(SA.END_DATE) AS D_END_DATE,
-            SA.COST AS D_COST,
-            SA.PAY_TYPE AS D_PAY_TYPE,
-            SA.PRE_PAID_USER AS D_PRE_PAID_USER,
-            SA.USER_LINE_NAME AS D_PAYER_NAME,
-            A.IS_HOST
+        AB.ACT_NUM,
+        AB.ACT_TITLE,
+        NAME AS HOST_USER_NAME,
+        AB.START_DATE,
+        COUNT AS USER_COUNT,
+        CASE
+        WHEN TOTAL_COST IS NULL
+        THEN 0 ELSE TOTAL_COST
+        END AS CURRENT_COST,
+        CASE
+        WHEN AU.USER_NAME IS NULL
+        THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+        END AS USER_NAME,
+        SA.ACD_TITLE AS D_ACD_TITLE,
+        d19(SA.START_DATE) AS D_START_DATE,
+        d19(SA.END_DATE) AS D_END_DATE,
+        SA.COST AS D_COST,
+        SA.PAY_TYPE AS D_PAY_TYPE,
+        SA.PRE_PAID_USER AS D_PRE_PAID_USER,
+        SA.USER_LINE_NAME AS D_PAYER_NAME,
+        A.IS_HOST
         FROM ACTIVITY A
         JOIN ACTIVITY_BASIC AB ON A.ACT_NUM = AB.ACT_NUM
         JOIN ACTIVITY_SET ACS ON AB.ACT_NUM = ACS.ACT_NUM
         JOIN APP_USER AU ON ACS.USER_NUM = AU.USER_NUM
         LEFT JOIN SUB_ACTIVITY SA ON AB.ACT_NUM = SA.ACT_NUM,
-             HOST_INFO,
-             TOTAL_PARTICIPANT,
-             TOTAL_PAYMENT
+        HOST_INFO,
+        TOTAL_PARTICIPANT,
+        TOTAL_PAYMENT
         WHERE ACS.USER_NUM = #{userNum}
     </select>
 
@@ -135,39 +137,39 @@
         FROM ACTIVITY_SET ACS
         JOIN ACTIVITY_BASIC AB ON ACS.ACT_NUM = AB.ACT_NUM
         WHERE ACS.USER_NUM = #{userNum}
-          AND ACS.STATUS = '1' /* 參加中 */
+        AND ACS.STATUS = '1' /* 參加中 */
     </select>
 
     <select id="getOwnerActivityInfo" resultMap="ownerAct">
         SELECT
-            AB.ACT_NUM,
-            AB.USER_NUM,
-            AB.JOIN_CODE,
-            AB.ACT_TITLE,
-            CASE
-                WHEN AU.USER_NAME IS NULL
-                THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
-            END AS USER_NAME
+        AB.ACT_NUM,
+        AB.USER_NUM,
+        AB.JOIN_CODE,
+        AB.ACT_TITLE,
+        CASE
+        WHEN AU.USER_NAME IS NULL
+        THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+        END AS USER_NAME
         FROM ACTIVITY_BASIC AB
         JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
         WHERE AB.USER_NUM = #{userNum}
-          AND AB.END_DATE IS NULL
-          AND AB.ACT_STATUS <![CDATA[<>]]> '9'
+        AND AB.END_DATE IS NULL
+        AND AB.ACT_STATUS <![CDATA[<>]]> '9'
     </select>
 
     <select id="getAndCancelAllActivitySet" resultMap="cancelActivity">
         SELECT
-            AB.ACT_NUM,
-            AB.ACT_TITLE,
-            AB.USER_NUM AS HOST_USER_NUM,
-            ACS.ACS_NUM AS S_ACS_NUM,
-            AU.USER_NUM AS S_USER_NUM,
-            AU.USER_LINE_ID AS S_USER_LINE_ID
+        AB.ACT_NUM,
+        AB.ACT_TITLE,
+        AB.USER_NUM AS HOST_USER_NUM,
+        ACS.ACS_NUM AS S_ACS_NUM,
+        AU.USER_NUM AS S_USER_NUM,
+        AU.USER_LINE_ID AS S_USER_LINE_ID
         FROM ACTIVITY_BASIC AB
         JOIN ACTIVITY_SET ACS ON AB.ACT_NUM = ACS.ACT_NUM
         JOIN APP_USER AU ON ACS.USER_NUM = AU.USER_NUM
         WHERE AB.JOIN_CODE = #{joinCode}
-          AND ACS.STATUS <![CDATA[<>]]> '9'
+        AND ACS.STATUS <![CDATA[<>]]> '9'
     </select>
 
 </mapper>

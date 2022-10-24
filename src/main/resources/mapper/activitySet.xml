@@ -17,19 +17,19 @@
 
     <select id="getInProgressActivity" resultMap="inProgressAct">
         SELECT
-            ACTS.ACS_NUM,
-            AB.ACT_TITLE,
-            CASE
-                WHEN AU.USER_NAME IS NULL
-                THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
-            END AS USER_NAME,
-            AB.JOIN_CODE,
-            AB.USER_NUM AS HOST_USER_NUM
+        ACTS.ACS_NUM,
+        AB.ACT_TITLE,
+        CASE
+        WHEN AU.USER_NAME IS NULL
+        THEN AU.USER_LINE_NAME ELSE AU.USER_NAME
+        END AS USER_NAME,
+        AB.JOIN_CODE,
+        AB.USER_NUM AS HOST_USER_NUM
         FROM ACTIVITY_SET ACTS
         JOIN ACTIVITY_BASIC AB ON ACTS.ACT_NUM = AB.ACT_NUM
         JOIN APP_USER AU ON AB.USER_NUM = AU.USER_NUM
         WHERE ACTS.USER_NUM = #{userNum}
-          AND ACTS.STATUS = #{status}
+        AND ACTS.STATUS = #{status}
     </select>
 
     <select id="getByUserNumAndJoinCode" resultMap="vo">
@@ -41,31 +41,31 @@
         FROM ACTIVITY_SET ACS
         JOIN ACTIVITY_BASIC AB ON ACS.ACT_NUM = AB.ACT_NUM
         WHERE ACS.USER_NUM = #{userNum}
-          AND AB.JOIN_CODE = #{joinCode}
+        AND AB.JOIN_CODE = #{joinCode}
     </select>
 
     <select id="listUserNumByActivityHistory" resultType="java.lang.Long">
         WITH ACT_NUM_LIST AS (
-            SELECT DISTINCT ACT_NUM
-            FROM ACTIVITY_SET
-            WHERE USER_NUM = #{userNum}
+        SELECT DISTINCT ACT_NUM
+        FROM ACTIVITY_SET
+        WHERE USER_NUM = #{userNum}
         )
         SELECT DISTINCT
-            USER_NUM
+        USER_NUM
         FROM ACTIVITY_SET ACS
         JOIN ACT_NUM_LIST ANL ON ACS.ACT_NUM = ANL.ACT_NUM
     </select>
 
     <select id="listUserListByActivityHistory" resultMap="org.chun.plutus.common.dao.AppUserDao.vo">
         WITH ACT_NUM_LIST AS (
-            SELECT DISTINCT ACT_NUM
-            FROM ACTIVITY_SET
-            WHERE USER_NUM = #{userNum}
+        SELECT DISTINCT ACT_NUM
+        FROM ACTIVITY_SET
+        WHERE USER_NUM = #{userNum}
         ), USER_NUM_LIST AS (
-            SELECT DISTINCT
-                USER_NUM
-            FROM ACTIVITY_SET ACS
-            JOIN ACT_NUM_LIST ANL ON ACS.ACT_NUM = ANL.ACT_NUM
+        SELECT DISTINCT
+        USER_NUM
+        FROM ACTIVITY_SET ACS
+        JOIN ACT_NUM_LIST ANL ON ACS.ACT_NUM = ANL.ACT_NUM
         )
         SELECT
         <include refid="org.chun.plutus.common.dao.base.AppUserBaseDao.columnsAlias">

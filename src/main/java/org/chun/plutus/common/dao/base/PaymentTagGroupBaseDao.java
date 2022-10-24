@@ -1,6 +1,7 @@
 package org.chun.plutus.common.dao.base;
 
 import java.util.List;
+
 import org.chun.plutus.common.vo.PaymentTagGroupVo;
 import org.apache.ibatis.annotations.Param;
 
@@ -10,22 +11,22 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface PaymentTagGroupBaseDao {
 
-    List<PaymentTagGroupVo> query( Object params );
+  List<PaymentTagGroupVo> query(Object params);
 
-    int insert( Object params );
+  int insert(Object params);
 
-    List<PaymentTagGroupVo> listAll();
+  List<PaymentTagGroupVo> listAll();
 
-    Integer count( Object params );
+  Integer count(Object params);
 
-    int delete( Object params );
+  int delete(Object params);
 
-    PaymentTagGroupVo getByPk( @Param( "tagGroupNum" ) Long tagGroupNum );
+  PaymentTagGroupVo getByPk(@Param("tagGroupNum") Long tagGroupNum);
 
-    int deleteByPk( @Param( "tagGroupNum" ) Long tagGroupNum );
+  int deleteByPk(@Param("tagGroupNum") Long tagGroupNum);
 
-    int update( Object params );
+  int update(Object params);
 
-    int forceUpdate( Object params );
+  int forceUpdate(Object params);
 
 }

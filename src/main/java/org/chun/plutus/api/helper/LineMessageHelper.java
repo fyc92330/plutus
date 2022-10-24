@@ -239,7 +239,7 @@ public class LineMessageHelper {
    * @param replyToken
    * @param userId
    */
-  private void replyMessage(Message message, String replyToken, String userId) {
+  public void replyMessage(Message message, String replyToken, String userId) {
     lineBotService.reply(new ReplyMessage(replyToken, message), userId);
   }
 
